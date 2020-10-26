@@ -1,0 +1,66 @@
+-*- mode: compilation; default-directory: "~/repos/gob-jba/gencodec/iobenchmarks/" -*-
+Compilation started at Sun Nov 15 10:13:11
+
+go run .
+generating 250000 2-byte numbers.
+generating 125000 3-byte numbers.
+generating 62500 4-byte numbers.
+generating 31250 5-byte numbers.
+generating 15625 6-byte numbers.
+generating 7812 7-byte numbers.
+generating 3906 8-byte numbers.
+ENCODED SIZES:
+gob: 2957025
+std48: 6210930
+std248: 4710930
+std248a: 3714837
+std1248a: 3214837
+-- decreasing random uint64s --
+gob encode: 0.026s/op, 1.00x
+std48 encode: 0.017s/op, 1.54x
+std248 encode: 0.018s/op, 1.45x
+std248a encode: 0.015s/op, 1.76x
+std1248a encode: 0.020s/op, 1.32x
+gob decode: 0.017s/op, 1.00x
+std48 decode: 0.008s/op, 2.09x
+std248 decode: 0.011s/op, 1.56x
+std248a decode: 0.011s/op, 1.56x
+std1248a decode: 0.014s/op, 1.26x
+
+DB BENCHMARKS cloud
+gob insert: 0.697s/op, 1.00x
+std48 insert: 2.238s/op, 0.31x
+std248 insert: 1.466s/op, 0.48x
+std248a insert: 1.016s/op, 0.69x
+std1248a insert: 0.864s/op, 0.81x
+gob select: 0.103s/op, 1.00x
+std48 select: 0.167s/op, 0.62x
+std248 select: 0.142s/op, 0.73x
+std248a select: 0.116s/op, 0.89x
+std1248a select: 0.116s/op, 0.89x
+
+DB BENCHMARKS local
+gob insert: 0.537s/op, 1.00x
+std48 insert: 1.930s/op, 0.28x
+std248 insert: 1.247s/op, 0.43x
+std248a insert: 0.899s/op, 0.60x
+std1248a insert: 0.832s/op, 0.64x
+gob select: 0.033s/op, 1.00x
+std48 select: 0.047s/op, 0.70x
+std248 select: 0.041s/op, 0.80x
+std248a select: 0.022s/op, 1.46x
+std1248a select: 0.023s/op, 1.40x
+
+FILE BENCHMARKS
+gob write: 0.031s/op, 1.00x
+std48 write: 0.047s/op, 0.65x
+std248 write: 0.043s/op, 0.72x
+std248a write: 0.037s/op, 0.82x
+std1248a write: 0.043s/op, 0.72x
+gob read: 0.018s/op, 1.00x
+std48 read: 0.011s/op, 1.63x
+std248 read: 0.013s/op, 1.37x
+std248a read: 0.013s/op, 1.41x
+std1248a read: 0.015s/op, 1.19x
+
+Compilation finished at Sun Nov 15 10:14:21

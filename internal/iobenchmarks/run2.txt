@@ -1,0 +1,78 @@
+-*- mode: compilation; default-directory: "~/repos/gob-jba/gencodec/iobenchmarks/" -*-
+Compilation started at Sun Nov 15 13:15:14
+
+go run .
+generating 250000 2-byte numbers.
+generating 125000 3-byte numbers.
+generating 62500 4-byte numbers.
+generating 31250 5-byte numbers.
+generating 15625 6-byte numbers.
+generating 7812 7-byte numbers.
+generating 3906 8-byte numbers.
+ENCODED SIZES:
+gob: 2707228
+std48: 4961945
+std248: 3961539
+std248a: 3215243
+std1248a: 2965040
+-- decreasing random uint64s --
+gob encode: 0.025s/op, 1.00x
+std48 encode: 0.018s/op, 1.43x
+std248 encode: 0.019s/op, 1.37x
+std248a encode: 0.017s/op, 1.46x
+std1248a encode: 0.019s/op, 1.33x
+gob decode: 0.018s/op, 1.00x
+std48 decode: 0.011s/op, 1.58x
+std248 decode: 0.014s/op, 1.28x
+std248a decode: 0.014s/op, 1.27x
+std1248a decode: 0.017s/op, 1.05x
+
+DB BENCHMARKS cloud
+gob insert: 0.625s/op, 1.00x
+std48 insert: 1.605s/op, 0.39x
+std248 insert: 1.160s/op, 0.54x
+std248a insert: 0.808s/op, 0.77x
+std1248a insert: 0.783s/op, 0.80x
+gob select: 0.112s/op, 1.00x
+std48 select: 0.158s/op, 0.71x
+std248 select: 0.122s/op, 0.92x
+std248a select: 0.119s/op, 0.94x
+std1248a select: 0.115s/op, 0.97x
+
+DB BENCHMARKS local
+gob insert: 0.466s/op, 1.00x
+std48 insert: 1.422s/op, 0.33x
+std248 insert: 0.867s/op, 0.54x
+std248a insert: 0.642s/op, 0.72x
+std1248a insert: 0.564s/op, 0.83x
+gob select: 0.025s/op, 1.00x
+std48 select: 0.043s/op, 0.60x
+std248 select: 0.024s/op, 1.04x
+std248a select: 0.023s/op, 1.10x
+std1248a select: 0.026s/op, 0.99x
+
+FILE BENCHMARKS
+gob write: 0.030s/op, 1.00x
+std48 write: 0.037s/op, 0.82x
+std248 write: 0.032s/op, 0.95x
+std248a write: 0.026s/op, 1.18x
+std1248a write: 0.024s/op, 1.24x
+gob read: 0.019s/op, 1.00x
+std48 read: 0.014s/op, 1.37x
+std248 read: 0.016s/op, 1.21x
+std248a read: 0.015s/op, 1.25x
+std1248a read: 0.019s/op, 0.99x
+
+GCS BENCHMARKS
+gob gcs write: 0.385s/op, 1.00x
+std48 gcs write: 0.371s/op, 1.04x
+std248 gcs write: 0.439s/op, 0.88x
+std248a gcs write: 0.327s/op, 1.18x
+std1248a gcs write: 0.323s/op, 1.19x
+gob gcs read: 0.065s/op, 1.00x
+std48 gcs read: 0.072s/op, 0.90x
+std248 gcs read: 0.076s/op, 0.85x
+std248a gcs read: 0.062s/op, 1.05x
+std1248a gcs read: 0.060s/op, 1.09x
+
+Compilation finished at Sun Nov 15 13:16:46
