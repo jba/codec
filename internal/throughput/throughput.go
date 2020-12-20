@@ -45,7 +45,6 @@ With ioutil.ReadAll:
 package main
 
 import (
-	"bufio"
 	"bytes"
 	"context"
 	"database/sql"
@@ -56,27 +55,25 @@ import (
 	"log"
 	"os"
 	"runtime"
-	"strings"
 	"time"
 
 	"cloud.google.com/go/storage"
-	_ "github.com/GoogleCloudPlatform/cloudsql-proxy/proxy/dialers/postgres"
-	_ "github.com/jackc/pgx/v4/stdlib"
+	"github.com/jba/codec/internal/config"
 )
 
 var initDB = flag.Bool("initdb", false, "init the DB")
 
 func main() {
 	flag.Parse()
-	config, err := readConfig("config.gitignore")
+	cfg, err := config.Read("../../config.json")
 	if err != nil {
 		log.Fatal(err)
 	}
 	memory()
 	file()
-	gcs(config["bucket"])
-	db(*initDB, "local DB", "pgx", config["localDB"])
-	db(*initDB, "cloud DB", "cloudsqlpostgres", config["cloudDB"])
+	gcs(cfg.GCSBucket)
+	db(cfg, "local", *initDB)
+	db(cfg, "cloud", *initDB)
 }
 
 const (
@@ -96,7 +93,7 @@ func readAll(r io.Reader) (int, time.Duration) {
 
 func throughput(msg string, size int, dur time.Duration) {
 	mbsec := float64(size) / (1024 * 1024) / dur.Seconds()
-	fmt.Printf("%6.1f M/sec  %s\n", mbsec, msg)
+	fmt.Printf("%6.2f M/sec  %s\n", mbsec, msg)
 }
 
 func memory() {
@@ -130,8 +127,11 @@ func gcs(bucket string) {
 	throughput("read GCS", size, dur)
 }
 
-func db(init bool, msg, driver, connString string) {
-	db := connect(driver, connString)
+func db(cfg *config.Config, kind string, init bool) {
+	db, err := cfg.Connect(kind)
+	if err != nil {
+		log.Fatal(err)
+	}
 	defer db.Close()
 	if init {
 		initializeDB(db)
@@ -141,7 +141,7 @@ func db(init bool, msg, driver, connString string) {
 	if err := db.QueryRow(`SELECT data FROM throughput WHERE name = $1`, testFileName).Scan(&data); err != nil {
 		log.Fatal(err)
 	}
-	throughput(msg, len(data), time.Since(start))
+	throughput(kind+" DB", len(data), time.Since(start))
 }
 
 func initializeDB(db *sql.DB) {
@@ -153,46 +153,6 @@ func initializeDB(db *sql.DB) {
 	exec(db, `DROP TABLE IF EXISTS throughput`)
 	exec(db, `CREATE TABLE throughput (name TEXT PRIMARY KEY, data BYTEA)`)
 	exec(db, `INSERT INTO throughput (name, data) VALUES($1, $2)`, testFileName, data)
-}
-
-////////////////////////////////////////////////////////////////
-
-func readConfig(filename string) (map[string]string, error) {
-	f, err := os.Open(filename)
-	if err != nil {
-		return nil, err
-	}
-	defer f.Close()
-	m := map[string]string{}
-	scan := bufio.NewScanner(f)
-	for scan.Scan() {
-		line := strings.TrimSpace(scan.Text())
-		if len(line) == 0 || line[0] == '#' {
-			continue
-		}
-		i := strings.IndexAny(line, " \t")
-		if i < 0 {
-			return nil, fmt.Errorf("bad line: %q", line)
-		}
-		m[strings.TrimSpace(line[:i])] = strings.TrimSpace(line[i:])
-	}
-	if err := scan.Err(); err != nil {
-		return nil, err
-	}
-	return m, nil
-}
-
-func connect(driver, connString string) *sql.DB {
-	db, err := sql.Open(driver, connString+" sslmode=disable")
-	if err != nil {
-		log.Fatal(err)
-	}
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-	defer cancel()
-	if err := db.PingContext(ctx); err != nil {
-		log.Fatal(err)
-	}
-	return db
 }
 
 func exec(db *sql.DB, query string, args ...interface{}) {

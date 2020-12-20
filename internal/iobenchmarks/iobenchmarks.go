@@ -31,13 +31,12 @@ import (
 	"math"
 	"math/bits"
 	"math/rand"
-	"os"
 	"testing"
-	"time"
 
 	"cloud.google.com/go/storage"
 	_ "github.com/GoogleCloudPlatform/cloudsql-proxy/proxy/dialers/postgres"
 	"github.com/jba/codec/internal/bench"
+	"github.com/jba/codec/internal/config"
 	_ "github.com/lib/pq"
 )
 
@@ -57,15 +56,19 @@ var codecs = []codec{
 }
 
 func main() {
+	cfg, err := config.Read("../../config.json")
+	if err != nil {
+		log.Fatal(err)
+	}
 	fmt.Println("EXPONENTIALLY DECREASING PROBABILITY")
-	runAllBenchmarks(randomUints(1e6))
+	runAllBenchmarks(cfg, randomUints(1e6))
 
 	fmt.Println()
 	fmt.Println("RANDOM uint16s")
-	runAllBenchmarks(randomUint16s(1e6))
+	runAllBenchmarks(cfg, randomUint16s(1e6))
 }
 
-func runAllBenchmarks(uints []uint64) {
+func runAllBenchmarks(cfg *config.Config, uints []uint64) {
 	fmt.Println("Encoded sizes:")
 	var s0 int
 	for i, c := range codecs {
@@ -78,30 +81,31 @@ func runAllBenchmarks(uints []uint64) {
 
 	benchmarkInMemory(uints)
 
-	fmt.Println()
-	db := connect("cloudsqlpostgres", os.Getenv("DBCONNSTR"))
-	defer db.Close()
-	benchmarkDB("cloud", uints, db)
-
-	fmt.Println()
-	db2 := connect("postgres", "localhost", "db", "postgres", "")
-	defer db2.Close()
-	benchmarkDB("local", uints, db2)
+	for _, kind := range []string{"local", "cloud"} {
+		fmt.Println()
+		db, err := cfg.Connect(kind)
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer db.Close()
+		benchmarkDB(kind, uints, db)
+	}
 
 	fmt.Println()
 	benchmarkFile(uints)
 
 	fmt.Println()
-	benchmarkGCS(uints)
+	benchmarkGCS(cfg.GCSBucket, uints)
 }
 
 func runBenchmark(op string, uints []uint64, runner func(b *testing.B, uints []uint64, cd codec)) {
+	fmt.Println(op)
 	var bms []bench.Benchmark
 	for _, codec := range codecs {
-		cd := codec
+		codec := codec
 		bm := bench.Benchmark{
 			Name: codec.name,
-			Func: func(b *testing.B) { runner(b, uints, cd) },
+			Func: func(b *testing.B) error { runner(b, uints, codec); return nil },
 		}
 		bms = append(bms, bm)
 	}
@@ -125,6 +129,7 @@ func decodeSlice(data []byte, decoder func([]byte) (uint64, []byte)) {
 ////////////////////////////////////////////////////////////////
 
 func benchmarkInMemory(uints []uint64) {
+	fmt.Println("IN MEMORY")
 	runBenchmark("encode", uints, encodeInMemoryBenchmark)
 	runBenchmark("decode", uints, decodeInMemoryBenchmark)
 }
@@ -186,19 +191,6 @@ func makeTable(db *sql.DB) {
 	exec(db, `CREATE TABLE iobench (name TEXT PRIMARY KEY, data BYTEA)`)
 }
 
-func connect(driver, connString string) *sql.DB {
-	db, err := sql.Open(driver, connString)
-	if err != nil {
-		log.Fatal(err)
-	}
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-	defer cancel()
-	if err := db.PingContext(ctx); err != nil {
-		log.Fatal(err)
-	}
-	return db
-}
-
 func exec(db *sql.DB, query string, args ...interface{}) {
 	_, err := db.Exec(query, args...)
 	if err != nil {
@@ -237,27 +229,24 @@ func decodeFromFileBenchmark(b *testing.B, _ []uint64, cd codec) {
 
 ////////////////////////////////////////////////////////////////
 
-const (
-	bucket       = "XXX"
-	objectPrefix = "iobench_"
-)
+const objectPrefix = "iobench_"
 
-func benchmarkGCS(uints []uint64) {
+func benchmarkGCS(bucket string, uints []uint64) {
 	fmt.Println("GCS BENCHMARKS")
 	client, err := storage.NewClient(context.Background())
 	if err != nil {
 		log.Fatal(err)
 	}
 	runBenchmark("gcs write", uints, func(b *testing.B, uints []uint64, cd codec) {
-		encodeToBucketBenchmark(b, client, uints, cd)
+		encodeToBucketBenchmark(b, client, bucket, uints, cd)
 	})
 
 	runBenchmark("gcs read", uints, func(b *testing.B, _ []uint64, cd codec) {
-		decodeFromBucketBenchmark(b, client, cd)
+		decodeFromBucketBenchmark(b, client, bucket, cd)
 	})
 }
 
-func encodeToBucketBenchmark(b *testing.B, client *storage.Client, uints []uint64, cd codec) {
+func encodeToBucketBenchmark(b *testing.B, client *storage.Client, bucket string, uints []uint64, cd codec) {
 	for i := 0; i < b.N; i++ {
 		data := encodeSlice(uints, cd.encoder)
 		w := client.Bucket(bucket).Object(objectPrefix + cd.name).NewWriter(context.Background())
@@ -269,7 +258,7 @@ func encodeToBucketBenchmark(b *testing.B, client *storage.Client, uints []uint6
 	}
 }
 
-func decodeFromBucketBenchmark(b *testing.B, client *storage.Client, cd codec) {
+func decodeFromBucketBenchmark(b *testing.B, client *storage.Client, bucket string, cd codec) {
 	for i := 0; i < b.N; i++ {
 		r, err := client.Bucket(bucket).Object(objectPrefix + cd.name).NewReader(context.Background())
 		if err != nil {
