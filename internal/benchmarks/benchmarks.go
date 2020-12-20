@@ -19,7 +19,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/jba/codec"
+	"github.com/jba/codec/codecapi"
 	"github.com/jba/codec/internal/bench"
 	"github.com/jba/codec/internal/testio"
 	ucodec "github.com/ugorji/go/codec"
@@ -54,11 +54,11 @@ var codecs = []Codec{
 	{
 		"jba/codec",
 		func(w io.Writer, data interface{}) error {
-			e := codec.NewEncoder(w, nil)
+			e := codecapi.NewEncoder(w, nil)
 			return e.Encode(data)
 		},
 		func(r io.Reader, ptr interface{}) error {
-			d := codec.NewDecoder(r)
+			d := codecapi.NewDecoder(r)
 			x, err := d.Decode()
 			if err != nil {
 				return err

@@ -12,7 +12,10 @@ import (
 	"golang.org/x/time/rate"
 )
 
-const meb = 1024 * 1024
+const (
+	meb   = 1024 * 1024
+	burst = 64 * 1024
+)
 
 // A ThroughputReader limits read throughput.
 type ThroughputReader struct {
@@ -27,20 +30,29 @@ func NewThroughputReader(ctx context.Context, r io.Reader, msec int) *Throughput
 	return &ThroughputReader{ctx, r, limiter(msec)}
 }
 
-// Create a limiter that uses bytes/sec, with a burst of 1M.
+// Create a limiter that uses bytes/sec.
 func limiter(msec int) *rate.Limiter {
 	limit := rate.Inf
 	if msec > 0 {
 		limit = rate.Limit(msec * meb)
 	}
-	return rate.NewLimiter(limit, meb)
+	return rate.NewLimiter(limit, burst)
 }
 
 // Read implements io.Reader.
 func (r *ThroughputReader) Read(buf []byte) (int, error) {
 	n, err := r.r.Read(buf)
-	if err := r.lim.WaitN(r.ctx, n); err != nil {
-		return n, err
+	left := n
+	b := r.lim.Burst()
+	for left > 0 {
+		w := left
+		if w > b {
+			w = b
+		}
+		if err := r.lim.WaitN(r.ctx, w); err != nil {
+			return n, err
+		}
+		left -= w
 	}
 	return n, err
 }

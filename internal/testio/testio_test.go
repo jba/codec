@@ -21,6 +21,11 @@ func TestThroughputReader(t *testing.T) {
 	checkThroughput(t, ioutil.Discard, tr, wantTput, nil)
 }
 
+func TestThroughputReaderSmallBurst(t *testing.T) {
+	tr := NewThroughputReader(context.Background(), reader(150*meb), wantTput)
+	checkThroughput(t, ioutil.Discard, tr, wantTput, make([]byte, 2*burst+17))
+}
+
 func TestThroughputWriter(t *testing.T) {
 	tw := NewThroughputWriter(context.Background(), ioutil.Discard, wantTput)
 	checkThroughput(t, tw, reader(150*meb), wantTput, nil)
@@ -28,11 +33,11 @@ func TestThroughputWriter(t *testing.T) {
 
 func TestThroughputWriterSmallBurst(t *testing.T) {
 	tw := NewThroughputWriter(context.Background(), ioutil.Discard, wantTput)
-	checkThroughput(t, tw, reader(150*meb), wantTput, make([]byte, 2*meb+17))
+	checkThroughput(t, tw, reader(150*meb), wantTput, make([]byte, 2*burst+17))
 }
 
 func reader(size int64) io.Reader {
-	return &io.LimitedReader{rand.New(rand.NewSource(0)), size}
+	return &io.LimitedReader{R: rand.New(rand.NewSource(0)), N: size}
 }
 
 func checkThroughput(t *testing.T, w io.Writer, r io.Reader, want int64, buf []byte) {
