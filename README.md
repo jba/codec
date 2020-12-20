@@ -2,6 +2,11 @@ This is a fork of pkgsite/internal/godoc/codec.
 
 NEXT:
 
+1. Use orig uint encoder to enncode initial, so decoder will work.
+2. add bytesnCode optiimizationn to all places that use nBytes
+3. use in benchmarks (new kind of benchmark that computes break-even throughput)
+
+
 - Maybe generate more stuff for the hyperledger benchmark. A lot of types and
   fields are unused?
 

@@ -9,15 +9,15 @@ import (
 	"reflect"
 )
 
-type TypeCodec interface {
+type typeCodec interface {
 	Init()
 	Encode(*Encoder, interface{})
 	Decode(*Decoder) interface{}
 }
 
 var (
-	typeCodecsByName = map[string]TypeCodec{}
-	typeCodecsByType = map[reflect.Type]TypeCodec{}
+	typeCodecsByName = map[string]typeCodec{}
+	typeCodecsByType = map[reflect.Type]typeCodec{}
 )
 
 // typeName returns the full, qualified name for a type.
@@ -31,7 +31,7 @@ func typeName(t reflect.Type) string {
 // Register records the type of x for use by Encoders and Decoders.
 // All types subject to encoding must be registered, even
 // builtin types.
-func Register(x interface{}, tc TypeCodec) {
+func Register(x interface{}, tc typeCodec) {
 	t := reflect.TypeOf(x)
 	tn := typeName(t)
 	if _, ok := typeCodecsByName[tn]; ok {

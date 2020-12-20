@@ -52,20 +52,20 @@ type Codec struct {
 
 var codecs = []Codec{
 	{
-		"jba/codec",
+		"jba/codec orig",
 		func(w io.Writer, data interface{}) error {
-			e := codecapi.NewEncoder(w, nil)
+			e := codecapi.NewEncoder(w, codecapi.EncodeOptions{ShortLengthCodes: false})
 			return e.Encode(data)
 		},
-		func(r io.Reader, ptr interface{}) error {
-			d := codecapi.NewDecoder(r)
-			x, err := d.Decode()
-			if err != nil {
-				return err
-			}
-			reflect.ValueOf(ptr).Elem().Set(reflect.ValueOf(x))
-			return nil
+		jbaCodecDecode,
+	},
+	{
+		"jba/codec shortlen",
+		func(w io.Writer, data interface{}) error {
+			e := codecapi.NewEncoder(w, codecapi.EncodeOptions{ShortLengthCodes: true})
+			return e.Encode(data)
 		},
+		jbaCodecDecode,
 	},
 	{
 		"gob",
@@ -109,6 +109,16 @@ var codecs = []Codec{
 	// 		return ucodec.NewDecoder(r, &ucodec.BincHandle{}).Decode(ptr)
 	// 	},
 	// },
+}
+
+func jbaCodecDecode(r io.Reader, ptr interface{}) error {
+	d := codecapi.NewDecoder(r)
+	x, err := d.Decode()
+	if err != nil {
+		return err
+	}
+	reflect.ValueOf(ptr).Elem().Set(reflect.ValueOf(x))
+	return nil
 }
 
 type benchmarkData struct {
