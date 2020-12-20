@@ -236,6 +236,14 @@ func (d *Decoder) DecodeUint() uint64 {
 	return 0
 }
 
+func (e *Encoder) EncodeByte(b byte) {
+	e.writeByte(b)
+}
+
+func (d *Decoder) DecodeByte() byte {
+	return d.readByte()
+}
+
 // EncodeInt encodes a signed integer.
 func (e *Encoder) EncodeInt(i int64) {
 	// Encode small negative as well as small positive integers efficiently.

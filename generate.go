@@ -474,17 +474,17 @@ func willGenerate(t reflect.Type) bool {
 // method, the suffix is "". The second return value is the "native" type of the
 // method: the argument to the Encoder method, and the return value of the
 // Decoder method.
-//
-// TODO: for int8 and uint8, write a byte instead of encoding as as int/uint.
 func builtinName(t reflect.Type) (suffix string, native reflect.Type) {
 	switch t.Kind() {
 	case reflect.String:
 		return "String", reflect.TypeOf("")
 	case reflect.Bool:
 		return "Bool", reflect.TypeOf(true)
-	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+	case reflect.Int8, reflect.Uint8:
+		return "Byte", reflect.TypeOf(byte(0))
+	case reflect.Int, reflect.Int16, reflect.Int32, reflect.Int64:
 		return "Int", reflect.TypeOf(int64(0))
-	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uintptr:
+	case reflect.Uint, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uintptr:
 		return "Uint", reflect.TypeOf(uint64(0))
 	case reflect.Float32, reflect.Float64:
 		return "Float", reflect.TypeOf(0.0)

@@ -1,8 +1,6 @@
-This is a fork of pkgsite/internal/godoc/codoc.
+This is a fork of pkgsite/internal/godoc/codec.
 
 NEXT:
-
-- generate code for defined types with non-struct underlying types
 
 - Maybe generate more stuff for the hyperledger benchmark. A lot of types and
   fields are unused?
@@ -22,9 +20,6 @@ TODO:
   - I think that only works on types you own, because it adds methods to them?
 - use gob encoding for uints
 
-- Move codec support to a sub-package
-
-- Handle types where MarshalBinary is on the pointer type.
 - Handle MarshalText.
 
 Possible benchmarks:

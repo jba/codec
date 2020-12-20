@@ -7,7 +7,6 @@ package codec
 import (
 	"bytes"
 	"flag"
-	"go/ast"
 	"go/token"
 	"io"
 	"io/ioutil"
@@ -52,10 +51,29 @@ func TestGoName(t *testing.T) {
 	}
 }
 
+type genStruct struct {
+	S string
+	B bool
+
+	I   int
+	I8  int8
+	I16 int16
+	I32 int32
+	I64 int64
+
+	F32 float32
+	F64 float64
+
+	U8  uint8
+	U16 uint16
+	U32 uint32
+	U64 uint64
+}
+
 func TestGenerate(t *testing.T) {
 	testGenerate(t, "slice", [][]int(nil))
 	testGenerate(t, "map", map[string]bool(nil))
-	testGenerate(t, "struct", ast.BasicLit{})
+	testGenerate(t, "struct", genStruct{})
 	testGenerate(t, "binmarsh", time.Time{})
 	testGenerate(t, "defslice", definedSlice{})
 	testGenerate(t, "defarray", definedArray{})
