@@ -16,6 +16,8 @@ import (
 	"sort"
 	"strings"
 	"text/template"
+
+	"github.com/jba/codec/codecapi"
 )
 
 // GenerateFile writes encoders and decoders to filename.
@@ -103,7 +105,7 @@ func generate(w io.Writer, packageName string, fieldNames map[string][]string, v
 	}
 
 	// Mark the built-in types as done.
-	for _, t := range builtinTypes {
+	for _, t := range codecapi.BuiltinTypes {
 		g.done[t] = true
 		if t.Kind() == reflect.Ptr && t.Elem().Kind() == reflect.Struct {
 			g.done[t.Elem()] = true
@@ -141,7 +143,7 @@ type generator struct {
 }
 
 func (g *generator) generate() ([]byte, error) {
-	g.importMap = map[string]bool{"github.com/jba/codec": true}
+	g.importMap = map[string]bool{"github.com/jba/codec/codecapi": true}
 	var code []byte
 	for len(g.todo) > 0 {
 		t := g.todo[0]
@@ -220,10 +222,6 @@ func (g *generator) genArray(t reflect.Type) ([]byte, error) {
 	et := t.Elem()
 	st := reflect.SliceOf(et)
 	g.todo = append(g.todo, et, st)
-	isBytes := et == reflect.TypeOf(byte(0))
-	if !isBytes {
-		g.importMap["fmt"] = true
-	}
 	return execute(g.arrayTemplate, struct {
 		Type, ElType, SliceType reflect.Type
 		IsBytes                 bool
@@ -231,7 +229,7 @@ func (g *generator) genArray(t reflect.Type) ([]byte, error) {
 		Type:      t,
 		ElType:    et,
 		SliceType: st,
-		IsBytes:   isBytes,
+		IsBytes:   et == reflect.TypeOf(byte(0)),
 	})
 }
 
@@ -416,7 +414,7 @@ func (g *generator) encodeFunc(t reflect.Type) string {
 	bn, native := builtinName(t)
 	if bn != "" {
 		_ = native // TODO: ???
-		typeName = "codec." + bn
+		typeName = "codecapi." + bn
 	} else {
 		typeName = g.typeIdentifier(t)
 	}
@@ -428,7 +426,7 @@ func (g *generator) decodeFunc(t reflect.Type) string {
 	bn, native := builtinName(t)
 	if bn != "" {
 		_ = native // TODO: ???
-		typeName = "codec." + bn
+		typeName = "codecapi." + bn
 	} else {
 		typeName = g.typeIdentifier(t)
 	}
@@ -559,9 +557,9 @@ type «$typeName» struct {}
 
 func («$typeName») Init() {}
 
-func (c «$typeName») Encode(e *codec.Encoder, x interface{}) { c.encode(e, x.(«$goName»)) }
+func (c «$typeName») Encode(e *codecapi.Encoder, x interface{}) { c.encode(e, x.(«$goName»)) }
 
-func (c «$typeName») encode(e *codec.Encoder, s «$goName») {
+func (c «$typeName») encode(e *codecapi.Encoder, s «$goName») {
 	if s == nil {
 		e.EncodeNil()
 		return
@@ -572,13 +570,13 @@ func (c «$typeName») encode(e *codec.Encoder, s «$goName») {
 	}
 }
 
-func (c «$typeName») Decode(d *codec.Decoder) interface{} {
+func (c «$typeName») Decode(d *codecapi.Decoder) interface{} {
 	var x «$goName»
 	c.decode(d, &x)
 	return x
 }
 
-func (c «$typeName») decode(d *codec.Decoder, p *«$goName») {
+func (c «$typeName») decode(d *codecapi.Decoder, p *«$goName») {
 	n := d.StartList()
 	if n < 0 { return }
 	s := make([]«goName .ElType», n)
@@ -589,7 +587,7 @@ func (c «$typeName») decode(d *codec.Decoder, p *«$goName») {
 }
 
 func init() {
-  codec.Register(«$goName»(nil), «$typeName»{})
+  codecapi.Register(«$goName»(nil), «$typeName»{})
 }
 `
 
@@ -602,22 +600,22 @@ type «$typeName» struct {}
 
 func («$typeName») Init() {}
 
-func (c «$typeName») Encode(e *codec.Encoder, x interface{}) {
+func (c «$typeName») Encode(e *codecapi.Encoder, x interface{}) {
 	a := x.(«$goName»)
 	c.encode(e, &a)
 }
 
-func (c «$typeName») encode(e *codec.Encoder, s *«$goName») {
+func (c «$typeName») encode(e *codecapi.Encoder, s *«$goName») {
 	«encodeStmt .SliceType "(*s)[:]"»
 }
 
-func (c «$typeName») Decode(d *codec.Decoder) interface{} {
+func (c «$typeName») Decode(d *codecapi.Decoder) interface{} {
 	var x «$goName»
 	c.decode(d, &x)
 	return x
 }
 
-func (c «$typeName») decode(d *codec.Decoder, p *«$goName») {
+func (c «$typeName») decode(d *codecapi.Decoder, p *«$goName») {
 	«if .IsBytes -»
 		b := d.DecodeBytes()
 		copy((*p)[:], b)
@@ -625,7 +623,7 @@ func (c «$typeName») decode(d *codec.Decoder, p *«$goName») {
 		n := d.StartList()
 		if n < 0 { return }
 	    if n != «.Type.Len» {
-			d.Fail(fmt.Errorf("array size mismatch: got %d, want «.Type.Len»", n))
+			codecapi.Failf("array size mismatch: got %d, want «.Type.Len»", n)
 		}
 		for i := 0; i < n; i++ {
 			«decodeStmt .ElType "(*p)[i]"»
@@ -634,7 +632,7 @@ func (c «$typeName») decode(d *codec.Decoder, p *«$goName») {
 }
 
 func init() {
-  codec.Register(«$goName»{}, «$typeName»{})
+  codecapi.Register(«$goName»{}, «$typeName»{})
 }
 `
 
@@ -654,9 +652,9 @@ type «$typeName» struct{}
 
 func (c «$typeName») Init() {}
 
-func (c «$typeName») Encode(e *codec.Encoder, x interface{}) { c.encode(e, x.(«$goName»)) }
+func (c «$typeName») Encode(e *codecapi.Encoder, x interface{}) { c.encode(e, x.(«$goName»)) }
 
-func (c «$typeName») encode(e *codec.Encoder, m «$goName») {
+func (c «$typeName») encode(e *codecapi.Encoder, m «$goName») {
 	if m == nil {
 		e.EncodeNil()
 		return
@@ -668,13 +666,13 @@ func (c «$typeName») encode(e *codec.Encoder, m «$goName») {
 	}
 }
 
-func (c «$typeName») Decode(d *codec.Decoder) interface{} {
+func (c «$typeName») Decode(d *codecapi.Decoder) interface{} {
 	var x «$goName»
 	c.decode(d, &x)
 	return x
 }
 
-func (c «$typeName») decode(d *codec.Decoder, p *«$goName») {
+func (c «$typeName») decode(d *codecapi.Decoder, p *«$goName») {
 	n2 := d.StartList()
 	if n2 < 0 { return }
 	n := n2/2
@@ -689,7 +687,7 @@ func (c «$typeName») decode(d *codec.Decoder, p *«$goName») {
 	*p = m
 }
 
-func init() { codec.Register(«$goName»(nil), «$typeName»{}) }
+func init() { codecapi.Register(«$goName»(nil), «$typeName»{}) }
 `
 
 // Template body for a type that implements encoding.BinaryMarshaller.
@@ -701,30 +699,30 @@ type «$typeName» struct{}
 
 func (c «$typeName») Init() {}
 
-func (c «$typeName») Encode(e *codec.Encoder, x interface{}) { c.encode(e, x.(«$goName»)) }
+func (c «$typeName») Encode(e *codecapi.Encoder, x interface{}) { c.encode(e, x.(«$goName»)) }
 
-func (c «$typeName») encode(e *codec.Encoder, m «$goName») {
+func (c «$typeName») encode(e *codecapi.Encoder, m «$goName») {
 	data, err := m.MarshalBinary()
 	if err != nil {
-		e.Fail(err)
+		codecapi.Fail(err)
 	}
 	e.EncodeBytes(data)
 }
 
-func (c «$typeName») Decode(d *codec.Decoder) interface{} {
+func (c «$typeName») Decode(d *codecapi.Decoder) interface{} {
 	var x «$goName»
 	c.decode(d, &x)
 	return x
 }
 
-func (c «$typeName») decode(d *codec.Decoder, p *«$goName») {
+func (c «$typeName») decode(d *codecapi.Decoder, p *«$goName») {
 	data := d.DecodeBytes()
 	if err := p.UnmarshalBinary(data); err != nil {
-		d.Fail(err)
+		codecapi.Fail(err)
 	}
 }
 
-func init() { codec.Register(*new(«$goName»), «$typeName»{}) }
+func init() { codecapi.Register(*new(«$goName»), «$typeName»{}) }
 `
 
 // Template body for a (pointer to a) struct type.
@@ -747,20 +745,20 @@ type «$ptrTypeName» struct{}
 
 func («$ptrTypeName») Init() {}
 
-func (c «$ptrTypeName») Encode(e *codec.Encoder, x interface{}) { c.encode(e, x.(*«$goName»)) }
+func (c «$ptrTypeName») Encode(e *codecapi.Encoder, x interface{}) { c.encode(e, x.(*«$goName»)) }
 
-func (c «$ptrTypeName») encode(e *codec.Encoder, x *«$goName») {
+func (c «$ptrTypeName») encode(e *codecapi.Encoder, x *«$goName») {
 	if !e.StartPtr(x==nil, x) { return }
 	(«$typeName»{}).encode(e, x)
 }
 
-func (c «$ptrTypeName») Decode(d *codec.Decoder) interface{} {
+func (c «$ptrTypeName») Decode(d *codecapi.Decoder) interface{} {
 	var x *«$goName»
 	c.decode(d, &x)
 	return x
 }
 
-func (c «$ptrTypeName») decode(d *codec.Decoder, p **«$goName») {
+func (c «$ptrTypeName») decode(d *codecapi.Decoder, p **«$goName») {
 	proceed, ref := d.StartPtr()
 	if !proceed { return }
 	if ref != nil {
@@ -777,12 +775,12 @@ type «$typeName» struct{}
 
 func («$typeName») Init() {}
 
-func (c «$typeName») Encode(e *codec.Encoder, x interface{}) {
+func (c «$typeName») Encode(e *codecapi.Encoder, x interface{}) {
 	s := x.(«$goName»)
 	c.encode(e, &s)
  }
 
-func (c «$typeName») encode(e *codec.Encoder, x *«$goName») {
+func (c «$typeName») encode(e *codecapi.Encoder, x *«$goName») {
 	e.StartStruct()
 	«range $i, $f := .Fields»
 		«- if $f.Type -»
@@ -799,13 +797,13 @@ func (c «$typeName») encode(e *codec.Encoder, x *«$goName») {
 	e.EndStruct()
 }
 
-func (c «$typeName») Decode(d *codec.Decoder) interface{} {
+func (c «$typeName») Decode(d *codecapi.Decoder) interface{} {
 	var x «$goName»
 	c.decode(d, &x)
 	return x
 }
 
-func (c «$typeName») decode(d *codec.Decoder, x *«$goName») {
+func (c «$typeName») decode(d *codecapi.Decoder, x *«$goName») {
 	d.StartStruct()
 	for {
 		n := d.NextStructField()
@@ -826,7 +824,7 @@ func (c «$typeName») decode(d *codec.Decoder, x *«$goName») {
 
 
 func init() {
-	codec.Register(«$goName»{}, «$typeName»{})
-	codec.Register(&«$goName»{}, «$ptrTypeName»{})
+	codecapi.Register(«$goName»{}, «$typeName»{})
+	codecapi.Register(&«$goName»{}, «$ptrTypeName»{})
 }
 `

@@ -4,17 +4,18 @@ package somepkg
 
 import (
 	"github.com/jba/codec"
+	"github.com/jba/codec/codecapi"
 )
 
 type codec_definedSlice_codec struct{}
 
 func (codec_definedSlice_codec) Init() {}
 
-func (c codec_definedSlice_codec) Encode(e *codec.Encoder, x interface{}) {
+func (c codec_definedSlice_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	c.encode(e, x.(codec.definedSlice))
 }
 
-func (c codec_definedSlice_codec) encode(e *codec.Encoder, s codec.definedSlice) {
+func (c codec_definedSlice_codec) encode(e *codecapi.Encoder, s codec.definedSlice) {
 	if s == nil {
 		e.EncodeNil()
 		return
@@ -25,13 +26,13 @@ func (c codec_definedSlice_codec) encode(e *codec.Encoder, s codec.definedSlice)
 	}
 }
 
-func (c codec_definedSlice_codec) Decode(d *codec.Decoder) interface{} {
+func (c codec_definedSlice_codec) Decode(d *codecapi.Decoder) interface{} {
 	var x codec.definedSlice
 	c.decode(d, &x)
 	return x
 }
 
-func (c codec_definedSlice_codec) decode(d *codec.Decoder, p *codec.definedSlice) {
+func (c codec_definedSlice_codec) decode(d *codecapi.Decoder, p *codec.definedSlice) {
 	n := d.StartList()
 	if n < 0 {
 		return
@@ -44,5 +45,5 @@ func (c codec_definedSlice_codec) decode(d *codec.Decoder, p *codec.definedSlice
 }
 
 func init() {
-	codec.Register(codec.definedSlice(nil), codec_definedSlice_codec{})
+	codecapi.Register(codec.definedSlice(nil), codec_definedSlice_codec{})
 }

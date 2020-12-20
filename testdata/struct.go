@@ -3,7 +3,7 @@
 package somepkg
 
 import (
-	"github.com/jba/codec"
+	"github.com/jba/codec/codecapi"
 	"go/ast"
 	"go/token"
 )
@@ -14,24 +14,24 @@ type ptr_ast_BasicLit_codec struct{}
 
 func (ptr_ast_BasicLit_codec) Init() {}
 
-func (c ptr_ast_BasicLit_codec) Encode(e *codec.Encoder, x interface{}) {
+func (c ptr_ast_BasicLit_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	c.encode(e, x.(*ast.BasicLit))
 }
 
-func (c ptr_ast_BasicLit_codec) encode(e *codec.Encoder, x *ast.BasicLit) {
+func (c ptr_ast_BasicLit_codec) encode(e *codecapi.Encoder, x *ast.BasicLit) {
 	if !e.StartPtr(x == nil, x) {
 		return
 	}
 	(ast_BasicLit_codec{}).encode(e, x)
 }
 
-func (c ptr_ast_BasicLit_codec) Decode(d *codec.Decoder) interface{} {
+func (c ptr_ast_BasicLit_codec) Decode(d *codecapi.Decoder) interface{} {
 	var x *ast.BasicLit
 	c.decode(d, &x)
 	return x
 }
 
-func (c ptr_ast_BasicLit_codec) decode(d *codec.Decoder, p **ast.BasicLit) {
+func (c ptr_ast_BasicLit_codec) decode(d *codecapi.Decoder, p **ast.BasicLit) {
 	proceed, ref := d.StartPtr()
 	if !proceed {
 		return
@@ -50,12 +50,12 @@ type ast_BasicLit_codec struct{}
 
 func (ast_BasicLit_codec) Init() {}
 
-func (c ast_BasicLit_codec) Encode(e *codec.Encoder, x interface{}) {
+func (c ast_BasicLit_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	s := x.(ast.BasicLit)
 	c.encode(e, &s)
 }
 
-func (c ast_BasicLit_codec) encode(e *codec.Encoder, x *ast.BasicLit) {
+func (c ast_BasicLit_codec) encode(e *codecapi.Encoder, x *ast.BasicLit) {
 	e.StartStruct()
 	if x.ValuePos != 0 {
 		e.EncodeUint(0)
@@ -72,13 +72,13 @@ func (c ast_BasicLit_codec) encode(e *codec.Encoder, x *ast.BasicLit) {
 	e.EndStruct()
 }
 
-func (c ast_BasicLit_codec) Decode(d *codec.Decoder) interface{} {
+func (c ast_BasicLit_codec) Decode(d *codecapi.Decoder) interface{} {
 	var x ast.BasicLit
 	c.decode(d, &x)
 	return x
 }
 
-func (c ast_BasicLit_codec) decode(d *codec.Decoder, x *ast.BasicLit) {
+func (c ast_BasicLit_codec) decode(d *codecapi.Decoder, x *ast.BasicLit) {
 	d.StartStruct()
 	for {
 		n := d.NextStructField()
@@ -99,6 +99,6 @@ func (c ast_BasicLit_codec) decode(d *codec.Decoder, x *ast.BasicLit) {
 }
 
 func init() {
-	codec.Register(ast.BasicLit{}, ast_BasicLit_codec{})
-	codec.Register(&ast.BasicLit{}, ptr_ast_BasicLit_codec{})
+	codecapi.Register(ast.BasicLit{}, ast_BasicLit_codec{})
+	codecapi.Register(&ast.BasicLit{}, ptr_ast_BasicLit_codec{})
 }

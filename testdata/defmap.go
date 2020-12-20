@@ -4,17 +4,18 @@ package somepkg
 
 import (
 	"github.com/jba/codec"
+	"github.com/jba/codec/codecapi"
 )
 
 type codec_definedMap_codec struct{}
 
 func (c codec_definedMap_codec) Init() {}
 
-func (c codec_definedMap_codec) Encode(e *codec.Encoder, x interface{}) {
+func (c codec_definedMap_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	c.encode(e, x.(codec.definedMap))
 }
 
-func (c codec_definedMap_codec) encode(e *codec.Encoder, m codec.definedMap) {
+func (c codec_definedMap_codec) encode(e *codecapi.Encoder, m codec.definedMap) {
 	if m == nil {
 		e.EncodeNil()
 		return
@@ -26,13 +27,13 @@ func (c codec_definedMap_codec) encode(e *codec.Encoder, m codec.definedMap) {
 	}
 }
 
-func (c codec_definedMap_codec) Decode(d *codec.Decoder) interface{} {
+func (c codec_definedMap_codec) Decode(d *codecapi.Decoder) interface{} {
 	var x codec.definedMap
 	c.decode(d, &x)
 	return x
 }
 
-func (c codec_definedMap_codec) decode(d *codec.Decoder, p *codec.definedMap) {
+func (c codec_definedMap_codec) decode(d *codecapi.Decoder, p *codec.definedMap) {
 	n2 := d.StartList()
 	if n2 < 0 {
 		return
@@ -49,4 +50,4 @@ func (c codec_definedMap_codec) decode(d *codec.Decoder, p *codec.definedMap) {
 	*p = m
 }
 
-func init() { codec.Register(codec.definedMap(nil), codec_definedMap_codec{}) }
+func init() { codecapi.Register(codec.definedMap(nil), codec_definedMap_codec{}) }

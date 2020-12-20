@@ -3,11 +3,10 @@
 // license that can be found in the LICENSE file.
 
 /*
-Package codec implements the general-purpose part of an encoder for Go
-values. It relies on code generation rather than reflection, so it is
-significantly faster than reflection-based encoders like gob. It can
-also preserve sharing among pointers (but not other forms of sharing, like
-sub-slices).
+Package codec implements an encoder for Go values. It relies on code generation
+rather than reflection, so it is significantly faster than reflection-based
+encoders like gob. It can also preserve sharing among pointers (but not other
+forms of sharing, like sub-slices).
 
 Encoding Scheme
 

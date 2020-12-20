@@ -11,6 +11,6 @@ require (
 	github.com/lib/pq v1.8.0
 	github.com/ugorji/go/codec v1.2.0
 	github.com/ugorji/go/codec/bench v1.2.0 // indirect
-	golang.org/x/pkgsite v0.0.0-20201120215659-fd89b15b0860
+	golang.org/x/pkgsite v0.0.0-20201120215659-fd89b15b0860 // indirect
 	golang.org/x/time v0.0.0-20191024005414-555d28b269f0
 )

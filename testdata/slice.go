@@ -3,16 +3,16 @@
 package somepkg
 
 import (
-	"github.com/jba/codec"
+	"github.com/jba/codec/codecapi"
 )
 
 type slice_slice_int_codec struct{}
 
 func (slice_slice_int_codec) Init() {}
 
-func (c slice_slice_int_codec) Encode(e *codec.Encoder, x interface{}) { c.encode(e, x.([][]int)) }
+func (c slice_slice_int_codec) Encode(e *codecapi.Encoder, x interface{}) { c.encode(e, x.([][]int)) }
 
-func (c slice_slice_int_codec) encode(e *codec.Encoder, s [][]int) {
+func (c slice_slice_int_codec) encode(e *codecapi.Encoder, s [][]int) {
 	if s == nil {
 		e.EncodeNil()
 		return
@@ -23,13 +23,13 @@ func (c slice_slice_int_codec) encode(e *codec.Encoder, s [][]int) {
 	}
 }
 
-func (c slice_slice_int_codec) Decode(d *codec.Decoder) interface{} {
+func (c slice_slice_int_codec) Decode(d *codecapi.Decoder) interface{} {
 	var x [][]int
 	c.decode(d, &x)
 	return x
 }
 
-func (c slice_slice_int_codec) decode(d *codec.Decoder, p *[][]int) {
+func (c slice_slice_int_codec) decode(d *codecapi.Decoder, p *[][]int) {
 	n := d.StartList()
 	if n < 0 {
 		return
@@ -42,16 +42,16 @@ func (c slice_slice_int_codec) decode(d *codec.Decoder, p *[][]int) {
 }
 
 func init() {
-	codec.Register([][]int(nil), slice_slice_int_codec{})
+	codecapi.Register([][]int(nil), slice_slice_int_codec{})
 }
 
 type slice_int_codec struct{}
 
 func (slice_int_codec) Init() {}
 
-func (c slice_int_codec) Encode(e *codec.Encoder, x interface{}) { c.encode(e, x.([]int)) }
+func (c slice_int_codec) Encode(e *codecapi.Encoder, x interface{}) { c.encode(e, x.([]int)) }
 
-func (c slice_int_codec) encode(e *codec.Encoder, s []int) {
+func (c slice_int_codec) encode(e *codecapi.Encoder, s []int) {
 	if s == nil {
 		e.EncodeNil()
 		return
@@ -62,13 +62,13 @@ func (c slice_int_codec) encode(e *codec.Encoder, s []int) {
 	}
 }
 
-func (c slice_int_codec) Decode(d *codec.Decoder) interface{} {
+func (c slice_int_codec) Decode(d *codecapi.Decoder) interface{} {
 	var x []int
 	c.decode(d, &x)
 	return x
 }
 
-func (c slice_int_codec) decode(d *codec.Decoder, p *[]int) {
+func (c slice_int_codec) decode(d *codecapi.Decoder, p *[]int) {
 	n := d.StartList()
 	if n < 0 {
 		return
@@ -81,5 +81,5 @@ func (c slice_int_codec) decode(d *codec.Decoder, p *[]int) {
 }
 
 func init() {
-	codec.Register([]int(nil), slice_int_codec{})
+	codecapi.Register([]int(nil), slice_int_codec{})
 }

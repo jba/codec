@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package codec
+package codecapi
 
 import (
 	"fmt"
@@ -114,10 +114,10 @@ func init() {
 	Register([]byte(nil), bytesCodec{})
 }
 
-var builtinTypes []reflect.Type
+var BuiltinTypes []reflect.Type
 
 func init() {
 	for t := range typeCodecsByType {
-		builtinTypes = append(builtinTypes, t)
+		BuiltinTypes = append(BuiltinTypes, t)
 	}
 }
