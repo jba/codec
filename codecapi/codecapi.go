@@ -18,7 +18,12 @@ import (
 
 const uint64Size = 8
 
+// Header for an encoded stream.
+// A 3-byte identifier and a version number.
+var header = []byte("GJC0")
+
 type Encoder struct {
+	opts     EncodeOptions
 	w        io.Writer
 	buf      []byte
 	typeNums map[reflect.Type]int
@@ -26,9 +31,15 @@ type Encoder struct {
 	gobBuf   [1 + uint64Size]byte
 }
 
-func NewEncoder(w io.Writer, trackPointers bool) *Encoder {
-	e := &Encoder{w: w}
-	if trackPointers {
+type EncodeOptions struct {
+	TrackPointers    bool
+	ShortLengthCodes bool
+	GobEncodedUnits  bool
+}
+
+func NewEncoder(w io.Writer, opts EncodeOptions) *Encoder {
+	e := &Encoder{w: w, opts: opts}
+	if e.opts.TrackPointers {
 		e.seen = map[uintptr]uint64{}
 	}
 	return e
@@ -81,10 +92,6 @@ type Decoder struct {
 func NewDecoder(r io.Reader) *Decoder {
 	return &Decoder{r: r}
 }
-
-// Header for an encoded stream.
-// A 3-byte identifier and a version number.
-var header = []byte("GJC1")
 
 // Decode decodes a value encoded with Encoder.Encode.
 // It returns (nil, io.EOF) if there are no more values.
@@ -570,8 +577,8 @@ func (e *Encoder) encodeInitial() {
 	for _, n := range names {
 		e.EncodeString(n)
 	}
-	// Encode whether we tracked pointers.
-	e.EncodeBool(e.seen != nil)
+	e.EncodeBool(e.opts.TrackPointers)
+	e.EncodeBool(e.opts.GobEncodedUnits)
 }
 
 // decodeInitial decodes metadata that appears at the start of the
@@ -590,6 +597,7 @@ func (d *Decoder) decodeInitial() {
 		d.typeCodecs[num] = tc
 	}
 	d.storeRefs = d.DecodeBool()
+	_ = d.DecodeBool()
 }
 
 //////////////// Errors

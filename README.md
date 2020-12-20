@@ -20,11 +20,17 @@ TODO:
   - I think that only works on types you own, because it adds methods to them?
 - use gob encoding for uints
 
-- Handle MarshalText.
 
 Possible benchmarks:
 - https://github.com/robertkrimen/otto/blob/15f95af6e78dcd2030d8195a138bd88d4f403546/script.go
 - https://github.com/gocolly/colly/blob/1cd684083cf9bf9a8e33b5dfd6414d8516ae63af/http_backend.go#L161
+
+# Features
+
+- Add support for `foo:"name"`.
+
+- Handle MarshalText.
+
 
 # TypeCodec state
 
@@ -62,14 +68,33 @@ and created all the types' TypeCodecs.
 
 # Performance
 
-iobenchmarks contains benchmarkings for:
-1. memory
-2. local disk
-3. local DB
-4. DB in cloud
-5. GCS
+Let
+    p = throughput
+    n = size
+Then
+    I/O time = n / p
 
-Should I also do a redis server?
+Say variant 1 produces n1 bytes and takes t1 time with infinite throughput.
+Variant 2 produces n2 < n1 bytes and takes t2 > t1 time.
+
+Total time Ti = ti + ni / p
+
+When T1 = T2,
+    t1 + n1/p = t2 + n2/p
+    (n1 - n2)/p = t2 - t1
+Break-even throughput p = (n1 - n2) / (t2 - t1).
+
+Example: a more compact encoding saves 30K but takes 100ms longer.
+Break-even throughput is 30K/.1s = 300 K/s.
+
+Faster than that and the more compact encoding isn't worth the extra time.
+For example, at 1 M/s, those 30K take ~30ms, much less than the 100ms extra
+compute time.
+
+Slower than that and it's worth it. For example, at 100 K/s, the 30K take
+300ms.
+
+
 
 ## Micro-Benchmarks
 
@@ -113,15 +138,6 @@ and a fixed N? Compare with decoder-specific state that
 pre-allocates the entire data's worth of Foos, passed
 in the encoded header.
 
-# Other
-
-Add support for `foo:"name"`.
-
-Find a better name:
-    gencode
-    genencode
-
-"GEncode: a code-generating, generics-using Go encoder"
 
 # Generics
 
