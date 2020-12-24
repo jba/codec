@@ -16,7 +16,6 @@ import (
 	"reflect"
 	"runtime"
 	"runtime/pprof"
-	"strings"
 	"testing"
 
 	"github.com/jba/codec/codecapi"
@@ -26,12 +25,11 @@ import (
 )
 
 //go:generate rm -f types.gen.go
-//go:generate go run . -gen code
+//go:generate go run . gen code
 
 var _ ucodec.CborHandle
 
 var (
-	gen          = flag.String("gen", "", "generate code and/or data")
 	cpuprofile   = flag.String("cpuprofile", "", "write cpu profile to `file`")
 	allocprofile = flag.Bool("allocprofile", false, "write alloc profile")
 )
@@ -50,23 +48,28 @@ type Codec struct {
 	decode func(io.Reader, interface{}) error
 }
 
-var codecs = []Codec{
-	{
+var (
+	jbaCodecOrig = Codec{
 		"jba/codec orig",
 		func(w io.Writer, data interface{}) error {
 			e := codecapi.NewEncoder(w, codecapi.EncodeOptions{ShortLengthCodes: false})
 			return e.Encode(data)
 		},
 		jbaCodecDecode,
-	},
-	{
+	}
+	jbaCodecShortlen = Codec{
 		"jba/codec shortlen",
 		func(w io.Writer, data interface{}) error {
 			e := codecapi.NewEncoder(w, codecapi.EncodeOptions{ShortLengthCodes: true})
 			return e.Encode(data)
 		},
 		jbaCodecDecode,
-	},
+	}
+)
+
+var codecs = []Codec{
+	jbaCodecOrig,
+	jbaCodecShortlen,
 	{
 		"gob",
 		func(w io.Writer, data interface{}) error {
@@ -154,20 +157,46 @@ var datas = []benchmarkData{
 		},
 		func() interface{} { var sds []*StockData; return &sds },
 	},
+	{
+		"scores",
+		func() (interface{}, error) {
+			var sds []Score
+			if _, err := gobDecodeFile("scores.gob", &sds); err != nil {
+				return nil, err
+			}
+			return sds, nil
+		},
+		func() interface{} { return new([]Score) },
+	},
 }
 
 var cpuProfileFile *os.File
 
 func main() {
 	flag.Parse()
-	if *gen != "" {
-		if err := generate(strings.Split(*gen, ",")); err != nil {
+	switch flag.Arg(0) {
+	case "gen":
+		things := flag.Args()[1:]
+		if len(things) == 0 {
+			log.Fatal("need things to generate")
+		}
+		if err := generate(things); err != nil {
 			log.Fatal(err)
 		}
 		fmt.Println("Generated files, exiting.")
-		return
-	}
 
+	case "bet":
+		runBreakEvenThroughput()
+
+	case "bm":
+		runBenchmarks()
+
+	default:
+		log.Fatalf("unknown command %q", flag.Arg(0))
+	}
+}
+
+func runBenchmarks() {
 	if *cpuprofile != "" {
 		var err error
 		cpuProfileFile, err = os.Create(*cpuprofile)
@@ -240,7 +269,6 @@ func newEncodeBenchmark(data interface{}, c Codec, tput int, out *[]byte) bench.
 					return err
 				}
 			}
-			//fmt.Printf("%s encoder: %d bytes\n", c.name, buf.Len())
 			*out = buf.Bytes()
 			return nil
 		},

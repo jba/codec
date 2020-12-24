@@ -27,9 +27,15 @@ type EncodeOptions struct {
 	TrackPointers bool
 }
 
+var apiOpts api.EncodeOptions
+
 // NewEncoder returns an Encoder that writes to w.
 func NewEncoder(w io.Writer, opts *EncodeOptions) *Encoder {
-	return &Encoder{state: api.NewEncoder(w, api.EncodeOptions{TrackPointers: opts != nil && opts.TrackPointers})}
+	aopts := apiOpts
+	if opts != nil {
+		aopts.TrackPointers = opts.TrackPointers
+	}
+	return &Encoder{state: api.NewEncoder(w, aopts)}
 }
 
 // Encode encodes x.

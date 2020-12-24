@@ -15,9 +15,12 @@ func generate(words []string) error {
 		var err error
 		switch w {
 		case "code":
-			err = codec.GenerateFile("types.gen.go", "main", LicenseData{}, submittedData{}, []*StockData(nil))
+			err = codec.GenerateFile("types.gen.go", "main",
+				LicenseData{}, submittedData{}, []*StockData(nil), []Score(nil))
 		case "stocks":
 			err = generateStockDataToFile("stocks.gob")
+		case "scores":
+			err = generateScoreDataToFile("scores.gob")
 		case "licenses":
 			err = writeSmallLicenseFile()
 		default:

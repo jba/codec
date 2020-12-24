@@ -16,6 +16,7 @@ import (
 	"time"
 
 	"github.com/google/go-cmp/cmp"
+	api "github.com/jba/codec/codecapi"
 )
 
 // After a change that affects generated code, run "go generate".
@@ -38,6 +39,17 @@ type generatedTestTypes struct {
 	DefArray definedArray
 	DefMap   definedMap
 	Pos      token.Pos
+
+	Stocks []StockData
+}
+type StockData struct {
+	Symbol    string
+	Intervals []Interval
+}
+
+type Interval struct {
+	Start, End                     time.Time
+	Open, Close, Low, High, Volume float64
 }
 
 type node struct {
@@ -62,12 +74,29 @@ func TestMain(m *testing.M) {
 }
 
 func TestEncodeDecode(t *testing.T) {
+	for _, opts := range []api.EncodeOptions{
+		{TrackPointers: false, ShortLengthCodes: false},
+		{TrackPointers: true, ShortLengthCodes: false},
+		{TrackPointers: false, ShortLengthCodes: true},
+	} {
+		t.Run(fmt.Sprintf("%+v", opts), func(t *testing.T) {
+			testEncodeDecode(t, opts)
+		})
+	}
+}
+
+func testEncodeDecode(t *testing.T, aopts api.EncodeOptions) {
 	want := []interface{}{
 		nil, 1, -5, 98.6, uint64(1 << 63), "Luke Luck likes lakes", true,
 		time.Date(2020, time.January, 26, 0, 0, 0, 0, time.UTC),
 		&node{1, &node{2, &node{3, nil}}},
 		(*node)(nil),
+		[]int{},
+		[]int{1},
+		[]int{1, 2},
+		[]int{1, 2, -3},
 		[]int{1, 2, -3, -4},
+		[]int{1, 2, -3, -4, 5, 6},
 		[]int(nil),
 		map[string]bool{"a": true, "b": false},
 		map[string]bool(nil),
@@ -75,8 +104,41 @@ func TestEncodeDecode(t *testing.T) {
 		definedSlice{1, 2, 3},
 		definedArray{-7},
 		definedMap{"true": true},
+		[]StockData{{Symbol: "XVLD", Intervals: []Interval{
+			{
+				time.Date(2000, time.January, 1, 9, 0, 0, 0, time.UTC),
+				time.Date(2000, time.January, 1, 17, 0, 0, 0, time.UTC),
+				426.91, 430.06, 424.64, 459.29, 9.696951891448457,
+			},
+			{
+				time.Date(2000, time.January, 1, 9, 0, 0, 0, time.UTC),
+				time.Date(2000, time.January, 1, 17, 0, 0, 0, time.UTC),
+				426.91, 430.06, 424.64, 459.29, 9.696951891448457,
+			},
+			{
+				time.Date(2000, time.January, 1, 9, 0, 0, 0, time.UTC),
+				time.Date(2000, time.January, 1, 17, 0, 0, 0, time.UTC),
+				426.91, 430.06, 424.64, 459.29, 9.696951891448457,
+			},
+			{
+				time.Date(2000, time.January, 1, 9, 0, 0, 0, time.UTC),
+				time.Date(2000, time.January, 1, 17, 0, 0, 0, time.UTC),
+				426.91, 430.06, 424.64, 459.29, 9.696951891448457,
+			},
+			{
+				time.Date(2000, time.January, 1, 9, 0, 0, 0, time.UTC),
+				time.Date(2000, time.January, 1, 17, 0, 0, 0, time.UTC),
+				426.91, 430.06, 424.64, 459.29, 9.696951891448457,
+			},
+			{
+				time.Date(2000, time.January, 1, 9, 0, 0, 0, time.UTC),
+				time.Date(2000, time.January, 1, 17, 0, 0, 0, time.UTC),
+				426.91, 430.06, 424.64, 459.29, 9.696951891448457,
+			},
+		}}},
 	}
 	var buf bytes.Buffer
+	apiOpts = aopts
 	e := NewEncoder(&buf, nil)
 	for _, w := range want {
 		if err := e.Encode(w); err != nil {

@@ -30,6 +30,7 @@ type Encoder struct {
 	seen       map[uintptr]uint64 // for references; see StartStruct
 	gobBuf     [1 + uint64Size]byte
 	encodeUint func(uint64)
+	encodeLen  func(int)
 }
 
 type EncodeOptions struct {
@@ -48,8 +49,10 @@ func NewEncoder(w io.Writer, opts EncodeOptions) *Encoder {
 	}
 	if e.opts.ShortLengthCodes {
 		e.encodeUint = e.encodeUintShortCodes
+		e.encodeLen = e.encodeLenShortCodes
 	} else {
 		e.encodeUint = e.encodeUintOrig
+		e.encodeLen = e.encodeLenOrig
 	}
 
 	return e
@@ -72,8 +75,10 @@ func (e *Encoder) Encode(x interface{}) (err error) {
 	defer handlePanic(&err)
 
 	e.EncodeAny(x)
-	data := e.buf     // remember the data
-	e.buf = nil       // start with a fresh buffer
+	data := e.buf // remember the data
+	e.buf = nil   // start with a fresh buffer
+	e.encodeUint = e.encodeUintOrig
+	e.encodeLen = e.encodeLenOrig
 	e.encodeInitial() // encode metadata
 	initial := e.buf  // remember that
 
@@ -98,10 +103,14 @@ type Decoder struct {
 	typeCodecs []typeCodec
 	refs       []interface{} // list of struct pointers, in the order seen
 	decodeUint func() uint64
+	decodeLen  func() int
 }
 
 func NewDecoder(r io.Reader) *Decoder {
-	return &Decoder{r: r}
+	d := &Decoder{r: r}
+	d.decodeUint = d.decodeUintOrig
+	d.decodeLen = d.decodeLenOrig
+	return d
 }
 
 // Decode decodes a value encoded with Encoder.Encode.
@@ -274,7 +283,7 @@ func (d *Decoder) decodeUintOrig() uint64 {
 			Failf("DecodeUint: bad length %d", n)
 		}
 	default:
-		badcode(b)
+		d.badcode(b)
 	}
 	return 0
 }
@@ -294,7 +303,7 @@ func (d *Decoder) decodeUintShortCodes() uint64 {
 			Failf("DecodeUint: bad length %d", n)
 		}
 	default:
-		badcode(b)
+		d.badcode(b)
 	}
 	return 0
 }
@@ -330,17 +339,47 @@ func (d *Decoder) DecodeInt() int64 {
 }
 
 // encodeLen encodes the length of a byte sequence.
-func (e *Encoder) encodeLen(n int) {
+func (e *Encoder) encodeLenOrig(n int) {
 	e.writeByte(nBytesCode)
 	e.EncodeUint(uint64(n))
 }
 
 // decodeLen decodes the length of a byte sequence.
-func (d *Decoder) decodeLen() int {
+func (d *Decoder) decodeLenOrig() int {
 	if b := d.readByte(); b != nBytesCode {
-		badcode(b)
+		d.badcode(b)
 	}
 	return int(d.DecodeUint())
+}
+
+func (e *Encoder) encodeLenShortCodes(n int) {
+	if n <= 4 {
+		e.writeByte(byte(bytes0Code - n))
+	} else {
+		e.writeByte(nBytesCode)
+		e.EncodeUint(uint64(n))
+	}
+}
+
+func (d *Decoder) decodeLenShortCodes() int {
+	b := d.readByte()
+	switch b {
+	case nBytesCode:
+		return int(d.DecodeUint())
+	case bytes0Code:
+		return 0
+	case bytes1Code:
+		return 1
+	case bytes2Code:
+		return 2
+	case bytes3Code:
+		return 3
+	case bytes4Code:
+		return 4
+	default:
+		d.badcode(b)
+		panic("unreachable")
+	}
 }
 
 // EncodeBytes encodes a byte slice.
@@ -435,7 +474,7 @@ func (d *Decoder) StartList() int {
 	case nValuesCode:
 		return int(d.DecodeUint())
 	default:
-		badcode(b)
+		d.badcode(b)
 		return 0
 	}
 }
@@ -482,7 +521,7 @@ func (d *Decoder) StartPtr() (bool, interface{}) {
 	case ptrCode:
 		return true, nil
 	default:
-		badcode(b)
+		d.badcode(b)
 		return false, nil // unreached, needed for compiler
 	}
 }
@@ -504,7 +543,7 @@ func (e *Encoder) StartStruct() {
 // instead of proceeding with decoding.
 func (d *Decoder) StartStruct() {
 	if b := d.readByte(); b != startCode {
-		badcode(b)
+		d.badcode(b)
 	}
 }
 
@@ -545,8 +584,12 @@ func (d *Decoder) skip() {
 		// Small integers represent themselves in a single byte.
 		return
 	}
+	if b > bytes0Code && b <= bytes4Code {
+		d.readBytes(int(b - bytes0Code))
+		return
+	}
 	switch b {
-	case nilCode:
+	case nilCode, bytes0Code:
 		// Nothing follows.
 	case nBytesCode:
 		// A uint n and n bytes follow. It is efficient to call readBytes here
@@ -568,7 +611,7 @@ func (d *Decoder) skip() {
 		}
 		d.readByte() // consume the endCode byte
 	default:
-		badcode(b)
+		d.badcode(b)
 	}
 }
 
@@ -658,8 +701,10 @@ func (d *Decoder) decodeInitial() {
 	d.opts.GobEncodedUints = d.DecodeBool()
 	if d.opts.ShortLengthCodes {
 		d.decodeUint = d.decodeUintShortCodes
+		d.decodeLen = d.decodeLenShortCodes
 	} else {
 		d.decodeUint = d.decodeUintOrig
+		d.decodeLen = d.decodeLenOrig
 	}
 }
 
@@ -692,8 +737,8 @@ func Fail(err error) {
 	panic(codecError{err})
 }
 
-func badcode(c byte) {
-	Failf("bad code: %d", c)
+func (d *Decoder) badcode(c byte) {
+	panic(fmt.Sprintf("bad code %d at %d", c, d.i-1))
 }
 
 // codecError wraps errors from Fail so a recover

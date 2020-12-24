@@ -28,24 +28,31 @@ func Run(bms []Benchmark) {
 	w := tabwriter.NewWriter(os.Stdout, 6, 8, 2, ' ', tabwriter.AlignRight)
 	for i, bm := range bms {
 		runtime.GC()
-		ok := true
-		r := testing.Benchmark(func(b *testing.B) {
-			b.ReportAllocs()
-			if err := bm.Func(b); err != nil {
-				fmt.Fprintf(os.Stderr, "%s: %v\n", bm.Name, err)
-				ok = false
-				b.Fatal(err)
-
-			}
-		})
+		r, err := Run1(bm)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "%s: %v\n", bm.Name, err)
+		}
 		if i == 0 {
 			r0 = r
 		}
-		if ok {
+		if err == nil {
 			d := time.Duration(r.NsPerOp())
 			fmt.Fprintf(w, "%s\t%d\t%dK/op\t%.1fs/op\t %.2fx\n",
 				bm.Name, r.N, r.AllocedBytesPerOp()/1024, d.Seconds(), float64(r0.NsPerOp())/float64(r.NsPerOp()))
 		}
 	}
 	w.Flush()
+}
+
+// Run1 runs bm.
+func Run1(bm Benchmark) (testing.BenchmarkResult, error) {
+	var err error
+	r := testing.Benchmark(func(b *testing.B) {
+		b.ReportAllocs()
+		err = bm.Func(b)
+		if err != nil {
+			b.Fatal(err)
+		}
+	})
+	return r, err
 }

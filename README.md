@@ -2,8 +2,6 @@ This is a fork of pkgsite/internal/godoc/codec.
 
 NEXT:
 
-1. Use orig uint encoder to enncode initial, so decoder will work.
-2. add bytesnCode optiimizationn to all places that use nBytes
 3. use in benchmarks (new kind of benchmark that computes break-even throughput)
 
 
@@ -73,31 +71,6 @@ and created all the types' TypeCodecs.
 
 # Performance
 
-Let
-    p = throughput
-    n = size
-Then
-    I/O time = n / p
-
-Say variant 1 produces n1 bytes and takes t1 time with infinite throughput.
-Variant 2 produces n2 < n1 bytes and takes t2 > t1 time.
-
-Total time Ti = ti + ni / p
-
-When T1 = T2,
-    t1 + n1/p = t2 + n2/p
-    (n1 - n2)/p = t2 - t1
-Break-even throughput p = (n1 - n2) / (t2 - t1).
-
-Example: a more compact encoding saves 30K but takes 100ms longer.
-Break-even throughput is 30K/.1s = 300 K/s.
-
-Faster than that and the more compact encoding isn't worth the extra time.
-For example, at 1 M/s, those 30K take ~30ms, much less than the 100ms extra
-compute time.
-
-Slower than that and it's worth it. For example, at 100 K/s, the 30K take
-300ms.
 
 
 
