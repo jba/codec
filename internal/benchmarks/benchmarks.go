@@ -38,8 +38,8 @@ var (
 var throughputs = []int{
 	0,    // unlimited throughput; speed of memory
 	3000, // reading from local disk
-	250,  // reading from a GCS bucket
-	100,  // reading from a cloud DB
+	//	250,  // reading from a GCS bucket
+	100, // reading from a cloud DB
 }
 
 type Codec struct {
@@ -57,10 +57,19 @@ var (
 		},
 		jbaCodecDecode,
 	}
+	jbaCodec1248 = Codec{
+		"jba/codec 1248",
+		func(w io.Writer, data interface{}) error {
+			e := codecapi.NewEncoder(w, codecapi.EncodeOptions{AltEncodedUints: true})
+			return e.Encode(data)
+		},
+		jbaCodecDecode,
+	}
 )
 
 var codecs = []Codec{
 	jbaCodec,
+	jbaCodec1248,
 	{
 		"gob",
 		func(w io.Writer, data interface{}) error {

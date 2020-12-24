@@ -79,6 +79,9 @@ and created all the types' TypeCodecs.
 
 # Performance
 
+Run
+    go build -gcflags -S ./codecapi >& /tmp/asm
+periodically and look for runtime.newobject to see what's escaping to the heap.
 
 ## Micro-Benchmarks
 

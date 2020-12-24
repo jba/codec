@@ -75,9 +75,9 @@ func TestMain(m *testing.M) {
 
 func TestEncodeDecode(t *testing.T) {
 	for _, opts := range []api.EncodeOptions{
-		{TrackPointers: false, ShortLengthCodes: false},
-		{TrackPointers: true, ShortLengthCodes: false},
-		{TrackPointers: false, ShortLengthCodes: true},
+		{TrackPointers: false},
+		{TrackPointers: true},
+		{TrackPointers: false, AltEncodedUints: true},
 	} {
 		t.Run(fmt.Sprintf("%+v", opts), func(t *testing.T) {
 			testEncodeDecode(t, opts)
