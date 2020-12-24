@@ -15,6 +15,18 @@ import (
 // This is not the most efficient representation, but it does demonstrate
 // numbers-heavy data.
 
+var stocks = benchmarkData{
+	"stocks",
+	func() (interface{}, error) {
+		var sds []*StockData
+		if _, err := gobDecodeFile("stocks.gob", &sds); err != nil {
+			return nil, err
+		}
+		return sds, nil
+	},
+	func() interface{} { return new([]*StockData) },
+}
+
 type StockData struct {
 	Symbol    string
 	Intervals []Interval

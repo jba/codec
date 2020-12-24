@@ -8,6 +8,12 @@ import (
 	"os"
 )
 
+var hyperledger = benchmarkData{
+	"hyperledger",
+	func() (interface{}, error) { return hlDecodeJSON("ledgerAPIs.json") },
+	func() interface{} { return new(submittedData) },
+}
+
 type submittedData map[string]*submittedLedgerData
 
 type submittedLedgerData struct {
@@ -28,7 +34,7 @@ type TxPvtData struct {
 
 type TxPvtReadWriteSet struct {
 	DataModel  int32
-	NsPvtRwset []*NsPvtReadWriteSet `protobuf:"bytes,2,rep,name=ns_pvt_rwset,json=nsPvtRwset,proto3" json:"ns_pvt_rwset,omitempty"`
+	NsPvtRwset []*NsPvtReadWriteSet
 }
 
 type NsPvtReadWriteSet struct {

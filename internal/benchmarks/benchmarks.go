@@ -131,43 +131,11 @@ type benchmarkData struct {
 }
 
 var datas = []benchmarkData{
-	{
-		"hyperledger",
-		func() (interface{}, error) { return hlDecodeJSON("ledgerAPIs.json") },
-		func() interface{} { var sb submittedData; return &sb },
-	},
-	{
-		"licenses",
-		func() (interface{}, error) { var ld LicenseData; return gobDecodeFile("licenses.gob", &ld) },
-		func() interface{} { var ld *LicenseData; return &ld },
-	},
-	{
-		"licenses-small",
-		func() (interface{}, error) { var ld LicenseData; return gobDecodeFile("licenses-small.gob", &ld) },
-		func() interface{} { var ld *LicenseData; return &ld },
-	},
-	{
-		"stocks",
-		func() (interface{}, error) {
-			var sds []*StockData
-			if _, err := gobDecodeFile("stocks.gob", &sds); err != nil {
-				return nil, err
-			}
-			return sds, nil
-		},
-		func() interface{} { var sds []*StockData; return &sds },
-	},
-	{
-		"scores",
-		func() (interface{}, error) {
-			var sds []Score
-			if _, err := gobDecodeFile("scores.gob", &sds); err != nil {
-				return nil, err
-			}
-			return sds, nil
-		},
-		func() interface{} { return new([]Score) },
-	},
+	hyperledger,
+	licenses,
+	licensesSmall,
+	stocks,
+	scores,
 }
 
 var cpuProfileFile *os.File
@@ -229,7 +197,7 @@ func runBenchmarks() {
 func runBenchmark(bd benchmarkData) {
 	data, err := bd.read()
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("%s: %v", bd.name, err)
 	}
 	for _, tput := range throughputs {
 		s := "max"
@@ -270,6 +238,7 @@ func newEncodeBenchmark(data interface{}, c Codec, tput int, out *[]byte) bench.
 				}
 			}
 			*out = buf.Bytes()
+			fmt.Printf("encode len=%d\n", buf.Len())
 			return nil
 		},
 	}

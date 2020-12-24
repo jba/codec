@@ -8,6 +8,19 @@ import (
 	"github.com/google/licensecheck"
 )
 
+var (
+	licenses = benchmarkData{
+		"licenses",
+		func() (interface{}, error) { var ld LicenseData; return gobDecodeFile("licenses.gob", &ld) },
+		func() interface{} { return new(*LicenseData) },
+	}
+	licensesSmall = benchmarkData{
+		"licenses-small",
+		func() (interface{}, error) { var ld LicenseData; return gobDecodeFile("licenses-small.gob", &ld) },
+		func() interface{} { return new(*LicenseData) },
+	}
+)
+
 type LicenseData struct {
 	Files    []*LicenseFile
 	Contents []*LicenseContents
