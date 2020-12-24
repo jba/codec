@@ -50,7 +50,7 @@ type Codec struct {
 
 var (
 	jbaCodec = Codec{
-		"jba/codec orig",
+		"jba/codec 48",
 		func(w io.Writer, data interface{}) error {
 			e := codecapi.NewEncoder(w, codecapi.EncodeOptions{})
 			return e.Encode(data)
@@ -65,11 +65,20 @@ var (
 		},
 		jbaCodecDecode,
 	}
+	jbaCodecGob = Codec{
+		"jba/codec 1248",
+		func(w io.Writer, data interface{}) error {
+			e := codecapi.NewEncoder(w, codecapi.EncodeOptions{GobEncodedUints: true})
+			return e.Encode(data)
+		},
+		jbaCodecDecode,
+	}
 )
 
 var codecs = []Codec{
 	jbaCodec,
 	jbaCodec1248,
+	jbaCodecGob,
 	{
 		"gob",
 		func(w io.Writer, data interface{}) error {
@@ -130,7 +139,22 @@ type benchmarkData struct {
 	newptr func() interface{}
 }
 
+func gobBenchmarkData(name string, newptr func() interface{}) benchmarkData {
+	return benchmarkData{
+		name:   name,
+		newptr: newptr,
+		read: func() (interface{}, error) {
+			ptr := newptr()
+			if _, err := gobDecodeFile(name+".gob", ptr); err != nil {
+				return nil, err
+			}
+			return reflect.ValueOf(ptr).Elem().Interface(), nil
+		},
+	}
+}
+
 var datas = []benchmarkData{
+	astData,
 	hyperledger,
 	licenses,
 	licensesSmall,
@@ -157,14 +181,14 @@ func main() {
 		runBreakEvenThroughput()
 
 	case "bm":
-		runBenchmarks()
+		runBenchmarks(flag.Args()[1:])
 
 	default:
 		log.Fatalf("unknown command %q", flag.Arg(0))
 	}
 }
 
-func runBenchmarks() {
+func runBenchmarks(dataNames []string) {
 	if *cpuprofile != "" {
 		var err error
 		cpuProfileFile, err = os.Create(*cpuprofile)
@@ -178,8 +202,14 @@ func runBenchmarks() {
 		}()
 	}
 
+	runName := map[string]bool{}
+	for _, n := range dataNames {
+		runName[n] = true
+	}
 	for _, bd := range datas {
-		runBenchmark(bd)
+		if len(runName) == 0 || runName[bd.name] {
+			runBenchmark(bd)
+		}
 	}
 
 	if *allocprofile {
@@ -238,7 +268,6 @@ func newEncodeBenchmark(data interface{}, c Codec, tput int, out *[]byte) bench.
 				}
 			}
 			*out = buf.Bytes()
-			fmt.Printf("encode len=%d\n", buf.Len())
 			return nil
 		},
 	}

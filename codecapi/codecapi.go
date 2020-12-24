@@ -34,6 +34,7 @@ type Encoder struct {
 type EncodeOptions struct {
 	TrackPointers   bool
 	AltEncodedUints bool
+	GobEncodedUints bool
 }
 
 func NewEncoder(w io.Writer, opts EncodeOptions) *Encoder {
@@ -43,6 +44,8 @@ func NewEncoder(w io.Writer, opts EncodeOptions) *Encoder {
 	}
 	if e.opts.AltEncodedUints {
 		e.encodeUint = e.encodeUint1248
+	} else if e.opts.GobEncodedUints {
+		e.encodeUint = e.encodeUintGob
 	} else {
 		e.encodeUint = e.encodeUint48
 	}
@@ -265,6 +268,14 @@ func (e *Encoder) encodeUint1248(u uint64) {
 		e.writeByte(8)
 		e.writeUint64(u)
 	}
+}
+
+func (e *Encoder) encodeUintGob(u uint64) {
+	panic("unimp")
+}
+
+func (d *Decoder) decodeUintGob() uint64 {
+	panic("unimp")
 }
 
 // DecodeUint decodes a uint64.
@@ -661,6 +672,7 @@ func (e *Encoder) encodeInitial() {
 	}
 	e.EncodeBool(e.opts.TrackPointers)
 	e.EncodeBool(e.opts.AltEncodedUints)
+	e.EncodeBool(e.opts.GobEncodedUints)
 }
 
 // decodeInitial decodes metadata that appears at the start of the
@@ -680,8 +692,11 @@ func (d *Decoder) decodeInitial() {
 	}
 	d.opts.TrackPointers = d.DecodeBool()
 	d.opts.AltEncodedUints = d.DecodeBool()
+	d.opts.GobEncodedUints = d.DecodeBool()
 	if d.opts.AltEncodedUints {
 		d.decodeUint = d.decodeUint1248
+	} else if d.opts.GobEncodedUints {
+		d.decodeUint = d.decodeUintGob
 	} else {
 		d.decodeUint = d.decodeUint48
 	}

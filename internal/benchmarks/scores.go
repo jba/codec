@@ -9,17 +9,7 @@ import (
 
 // Synthetic, integer-heavy benchmark.
 
-var scores = benchmarkData{
-	"scores",
-	func() (interface{}, error) {
-		var sds []Score
-		if _, err := gobDecodeFile("scores.gob", &sds); err != nil {
-			return nil, err
-		}
-		return sds, nil
-	},
-	func() interface{} { return new([]Score) },
-}
+var scores = gobBenchmarkData("scores", func() interface{} { return new([]Score) })
 
 type Score struct {
 	GameID   int

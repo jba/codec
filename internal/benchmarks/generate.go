@@ -6,6 +6,7 @@ package main
 
 import (
 	"fmt"
+	"go/ast"
 
 	"github.com/jba/codec"
 )
@@ -17,6 +18,11 @@ func generate(words []string) error {
 		case "code":
 			err = codec.GenerateFile("types.gen.go", "main",
 				LicenseData{}, submittedData{}, []*StockData(nil), []Score(nil))
+			if err == nil {
+				err = codec.GenerateFile("ast_types.gen.go", "main", append(astTypes, map[string]*ast.File{})...)
+			}
+		case "ast":
+			err = generateASTToFile("ast.gob")
 		case "stocks":
 			err = generateStockDataToFile("stocks.gob")
 		case "scores":
