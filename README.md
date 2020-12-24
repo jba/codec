@@ -2,8 +2,7 @@ This is a fork of pkgsite/internal/godoc/codec.
 
 NEXT:
 
-3. use in benchmarks (new kind of benchmark that computes break-even throughput)
-
+- Understand why gob allocates much less in the license benchmark.
 
 - Maybe generate more stuff for the hyperledger benchmark. A lot of types and
   fields are unused?
@@ -11,6 +10,8 @@ NEXT:
 - see if someone can slice a []byte field past the end to access the underlying
   buffer; and if so, use the 3-part slice operator.
 - see if gob-encoded ints or floats helps in throughput-limited cases
+
+
 
 TODO:
 - put benchmarks in separate module to avoid dependencies on GCS, GCP, etc.
@@ -23,6 +24,11 @@ TODO:
   - I think that only works on types you own, because it adds methods to them?
 - use gob encoding for uints
 
+-  Test floats reversed vs. not, but only after we pick a uint encoding.
+   Reversing only saves space for integer-valued floats, those whose fractional
+   part is a power of two, perhaps others
+   (https://play.golang.org/p/pYNbvRq1N2S). But your average float will not get
+   shorter. It's not clear if it's worth it.
 
 Possible benchmarks:
 - https://github.com/robertkrimen/otto/blob/15f95af6e78dcd2030d8195a138bd88d4f403546/script.go
@@ -33,6 +39,8 @@ Possible benchmarks:
 - Add support for `foo:"name"`.
 
 - Handle MarshalText.
+
+
 
 
 # TypeCodec state
@@ -72,16 +80,10 @@ and created all the types' TypeCodecs.
 # Performance
 
 
-
-
 ## Micro-Benchmarks
 
 - Time the explicit x==nil arg to StartStruct against using reflection.
 
-- Compare gob float byte reversal with not. Note that it only saves space
-for integer-valued floats, those whose fractional part is a power of two,
-perhaps others (https://play.golang.org/p/pYNbvRq1N2S). But your average float
-will not get shorter. It's not clear if it's worth it.
 
 
 - Compare gob length-prefixed values with nValues and start/end.

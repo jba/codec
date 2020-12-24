@@ -49,18 +49,10 @@ type Codec struct {
 }
 
 var (
-	jbaCodecOrig = Codec{
+	jbaCodec = Codec{
 		"jba/codec orig",
 		func(w io.Writer, data interface{}) error {
-			e := codecapi.NewEncoder(w, codecapi.EncodeOptions{ShortLengthCodes: false})
-			return e.Encode(data)
-		},
-		jbaCodecDecode,
-	}
-	jbaCodecShortlen = Codec{
-		"jba/codec shortlen",
-		func(w io.Writer, data interface{}) error {
-			e := codecapi.NewEncoder(w, codecapi.EncodeOptions{ShortLengthCodes: true})
+			e := codecapi.NewEncoder(w, codecapi.EncodeOptions{})
 			return e.Encode(data)
 		},
 		jbaCodecDecode,
@@ -68,8 +60,7 @@ var (
 )
 
 var codecs = []Codec{
-	jbaCodecOrig,
-	jbaCodecShortlen,
+	jbaCodec,
 	{
 		"gob",
 		func(w io.Writer, data interface{}) error {

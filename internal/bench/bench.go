@@ -37,7 +37,7 @@ func Run(bms []Benchmark) {
 		}
 		if err == nil {
 			d := time.Duration(r.NsPerOp())
-			fmt.Fprintf(w, "%s\t%d\t%dK/op\t%.1fs/op\t %.2fx\n",
+			fmt.Fprintf(w, "%s\t%d\t%dK/op\t%.2fs/op\t %.2fx\n",
 				bm.Name, r.N, r.AllocedBytesPerOp()/1024, d.Seconds(), float64(r0.NsPerOp())/float64(r.NsPerOp()))
 		}
 	}

@@ -6,7 +6,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"time"
 
 	"github.com/jba/codec/internal/bench"
@@ -79,12 +78,13 @@ Decoding was not slower (20ms vs. 20ms)
 const throughputThreshold = 60
 
 func runBreakEvenThroughput() {
-	for _, bd := range datas {
-		if err := breakEvenThroughput(jbaCodecOrig, jbaCodecShortlen, bd); err != nil {
-			log.Fatal(err)
-		}
-		fmt.Println()
-	}
+	fmt.Println("not currently active")
+	// for _, bd := range datas {
+	// 	if err := breakEvenThroughput(jbaCodecOrig, jbaCodecShortlen, bd); err != nil {
+	// 		log.Fatal(err)
+	// 	}
+	// 	fmt.Println()
+	// }
 }
 
 func breakEvenThroughput(origCodec, spaceOptCodec Codec, bd benchmarkData) error {

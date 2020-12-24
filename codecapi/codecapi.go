@@ -12,7 +12,6 @@ import (
 	"fmt"
 	"io"
 	"math"
-	"math/bits"
 	"reflect"
 )
 
@@ -34,9 +33,8 @@ type Encoder struct {
 }
 
 type EncodeOptions struct {
-	TrackPointers    bool
-	ShortLengthCodes bool
-	GobEncodedUints  bool
+	TrackPointers   bool
+	GobEncodedUints bool
 }
 
 func NewEncoder(w io.Writer, opts EncodeOptions) *Encoder {
@@ -47,14 +45,8 @@ func NewEncoder(w io.Writer, opts EncodeOptions) *Encoder {
 	if e.opts.GobEncodedUints {
 		panic("unimp")
 	}
-	if e.opts.ShortLengthCodes {
-		e.encodeUint = e.encodeUintShortCodes
-		e.encodeLen = e.encodeLenShortCodes
-	} else {
-		e.encodeUint = e.encodeUintOrig
-		e.encodeLen = e.encodeLenOrig
-	}
-
+	e.encodeUint = e.encodeUintShortCodes
+	e.encodeLen = e.encodeLenShortCodes
 	return e
 }
 
@@ -75,10 +67,8 @@ func (e *Encoder) Encode(x interface{}) (err error) {
 	defer handlePanic(&err)
 
 	e.EncodeAny(x)
-	data := e.buf // remember the data
-	e.buf = nil   // start with a fresh buffer
-	e.encodeUint = e.encodeUintOrig
-	e.encodeLen = e.encodeLenOrig
+	data := e.buf     // remember the data
+	e.buf = nil       // start with a fresh buffer
 	e.encodeInitial() // encode metadata
 	initial := e.buf  // remember that
 
@@ -108,8 +98,8 @@ type Decoder struct {
 
 func NewDecoder(r io.Reader) *Decoder {
 	d := &Decoder{r: r}
-	d.decodeUint = d.decodeUintOrig
-	d.decodeLen = d.decodeLenOrig
+	d.decodeUint = d.decodeUintShortCodes
+	d.decodeLen = d.decodeLenShortCodes
 	return d
 }
 
@@ -226,26 +216,6 @@ const (
 // EncodeUint encodes a uint64.
 func (e *Encoder) EncodeUint(u uint64) { e.encodeUint(u) }
 
-func (e *Encoder) encodeUintOrig(u uint64) {
-	switch {
-	case u < endCode:
-		// u fits into the initial byte.
-		e.writeByte(byte(u))
-	case u <= math.MaxUint32:
-		// Encode as a sequence of 4 bytes, the little-endian representation of
-		// a uint32.
-		e.writeByte(nBytesCode)
-		e.writeByte(4)
-		e.writeUint32(uint32(u))
-	default:
-		// Encode as a sequence of 8 bytes, the little-endian representation of
-		// a uint64.
-		e.writeByte(nBytesCode)
-		e.writeByte(8)
-		e.writeUint64(u)
-	}
-}
-
 func (e *Encoder) encodeUintShortCodes(u uint64) {
 	switch {
 	case u < endCode:
@@ -267,26 +237,6 @@ func (e *Encoder) encodeUintShortCodes(u uint64) {
 
 // DecodeUint decodes a uint64.
 func (d *Decoder) DecodeUint() uint64 { return d.decodeUint() }
-
-func (d *Decoder) decodeUintOrig() uint64 {
-	b := d.readByte()
-	switch {
-	case b < endCode:
-		return uint64(b)
-	case b == nBytesCode:
-		switch n := d.readByte(); n {
-		case 4:
-			return uint64(d.readUint32())
-		case 8:
-			return d.readUint64()
-		default:
-			Failf("DecodeUint: bad length %d", n)
-		}
-	default:
-		d.badcode(b)
-	}
-	return 0
-}
 
 func (d *Decoder) decodeUintShortCodes() uint64 {
 	b := d.readByte()
@@ -339,19 +289,6 @@ func (d *Decoder) DecodeInt() int64 {
 }
 
 // encodeLen encodes the length of a byte sequence.
-func (e *Encoder) encodeLenOrig(n int) {
-	e.writeByte(nBytesCode)
-	e.EncodeUint(uint64(n))
-}
-
-// decodeLen decodes the length of a byte sequence.
-func (d *Decoder) decodeLenOrig() int {
-	if b := d.readByte(); b != nBytesCode {
-		d.badcode(b)
-	}
-	return int(d.DecodeUint())
-}
-
 func (e *Encoder) encodeLenShortCodes(n int) {
 	if n <= 4 {
 		e.writeByte(byte(bytes0Code - n))
@@ -361,6 +298,7 @@ func (e *Encoder) encodeLenShortCodes(n int) {
 	}
 }
 
+// decodeLen decodes the length of a byte sequence.
 func (d *Decoder) decodeLenShortCodes() int {
 	b := d.readByte()
 	switch b {
@@ -435,17 +373,6 @@ func (d *Decoder) DecodeBool() bool {
 // EncodeFloat encodes a float64.
 func (e *Encoder) EncodeFloat(f float64) {
 	e.EncodeUint(math.Float64bits(f))
-}
-
-// floatBits returns a uint64 holding the bits of a floating-point number.
-// Floating-point numbers are transmitted as uint64s holding the bits
-// of the underlying representation. They are sent byte-reversed, with
-// the exponent end coming out first, so integer floating point numbers
-// (for example) transmit more compactly. This routine does the
-// swizzling.
-func floatBits(f float64) uint64 {
-	u := math.Float64bits(f)
-	return bits.ReverseBytes64(u)
 }
 
 // DecodeFloat decodes a float64.
@@ -677,7 +604,6 @@ func (e *Encoder) encodeInitial() {
 		e.EncodeString(n)
 	}
 	e.EncodeBool(e.opts.TrackPointers)
-	e.EncodeBool(e.opts.ShortLengthCodes)
 	e.EncodeBool(e.opts.GobEncodedUints)
 }
 
@@ -697,15 +623,9 @@ func (d *Decoder) decodeInitial() {
 		d.typeCodecs[num] = tc
 	}
 	d.opts.TrackPointers = d.DecodeBool()
-	d.opts.ShortLengthCodes = d.DecodeBool()
 	d.opts.GobEncodedUints = d.DecodeBool()
-	if d.opts.ShortLengthCodes {
-		d.decodeUint = d.decodeUintShortCodes
-		d.decodeLen = d.decodeLenShortCodes
-	} else {
-		d.decodeUint = d.decodeUintOrig
-		d.decodeLen = d.decodeLenOrig
-	}
+	d.decodeUint = d.decodeUintShortCodes
+	d.decodeLen = d.decodeLenShortCodes
 }
 
 //////////////// Errors
