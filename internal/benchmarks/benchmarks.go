@@ -50,30 +50,14 @@ type Codec struct {
 
 var (
 	jbaCodec = Codec{
-		"jba/codec 48",
+		"jba/codec",
 		func(w io.Writer, data interface{}) error {
 			e := codecapi.NewEncoder(w, codecapi.EncodeOptions{})
 			return e.Encode(data)
 		},
 		jbaCodecDecode,
 	}
-	jbaCodec1248 = Codec{
-		"jba/codec 1248",
-		func(w io.Writer, data interface{}) error {
-			e := codecapi.NewEncoder(w, codecapi.EncodeOptions{AltEncodedUints: true})
-			return e.Encode(data)
-		},
-		jbaCodecDecode,
-	}
-	jbaCodecGob = Codec{
-		"jba/codec gob",
-		func(w io.Writer, data interface{}) error {
-			e := codecapi.NewEncoder(w, codecapi.EncodeOptions{GobEncodedUints: true})
-			return e.Encode(data)
-		},
-		jbaCodecDecode,
-	}
-	codecGob = Codec{
+	gobCodec = Codec{
 		"gob",
 		func(w io.Writer, data interface{}) error {
 			e := gob.NewEncoder(w)
@@ -87,10 +71,8 @@ var (
 )
 
 var codecs = []Codec{
-	jbaCodec1248,
 	jbaCodec,
-	jbaCodecGob,
-	codecGob,
+	gobCodec,
 	{
 		"ugorji-cbor",
 		func(w io.Writer, data interface{}) error {

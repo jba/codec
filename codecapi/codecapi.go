@@ -12,7 +12,6 @@ import (
 	"fmt"
 	"io"
 	"math"
-	"math/bits"
 	"reflect"
 )
 
@@ -23,32 +22,21 @@ const uint64Size = 8
 var header = []byte("GJC0")
 
 type Encoder struct {
-	opts       EncodeOptions
-	w          io.Writer
-	buf        []byte
-	typeNums   map[reflect.Type]int
-	seen       map[uintptr]uint64   // for references; see StartStruct
-	scratch    [1 + uint64Size]byte // for small encoding jobs
-	encodeUint func(uint64)
+	opts     EncodeOptions
+	w        io.Writer
+	buf      []byte
+	typeNums map[reflect.Type]int
+	seen     map[uintptr]uint64 // for references; see StartStruct
 }
 
 type EncodeOptions struct {
-	TrackPointers   bool
-	AltEncodedUints bool
-	GobEncodedUints bool
+	TrackPointers bool
 }
 
 func NewEncoder(w io.Writer, opts EncodeOptions) *Encoder {
 	e := &Encoder{w: w, opts: opts}
 	if e.opts.TrackPointers {
 		e.seen = map[uintptr]uint64{}
-	}
-	if e.opts.AltEncodedUints {
-		e.encodeUint = e.encodeUint1248
-	} else if e.opts.GobEncodedUints {
-		e.encodeUint = e.encodeUintGob
-	} else {
-		e.encodeUint = e.encodeUint48
 	}
 	return e
 }
@@ -76,8 +64,9 @@ func (e *Encoder) Encode(x interface{}) (err error) {
 	initial := e.buf  // remember that
 
 	// Encode total size in 8 bytes.
-	binary.LittleEndian.PutUint64(e.scratch[:8], uint64(len(initial)+len(data)))
-	if _, err := e.w.Write(e.scratch[:8]); err != nil {
+	var buf [8]byte
+	binary.LittleEndian.PutUint64(buf[:], uint64(len(initial)+len(data)))
+	if _, err := e.w.Write(buf[:]); err != nil {
 		return err
 	}
 	if _, err := e.w.Write(initial); err != nil {
@@ -94,12 +83,10 @@ type Decoder struct {
 	i          int // offset
 	typeCodecs []typeCodec
 	refs       []interface{} // list of struct pointers, in the order seen
-	decodeUint func() uint64
 }
 
 func NewDecoder(r io.Reader) *Decoder {
 	d := &Decoder{r: r}
-	d.decodeUint = d.decodeUint48
 	return d
 }
 
@@ -169,28 +156,10 @@ func (d *Decoder) readString(len int) string {
 	return string(d.readBytes(len))
 }
 
-func (d *Decoder) readUint16() uint16 {
-	return binary.LittleEndian.Uint16(d.readBytes(2))
-}
-
-func (e *Encoder) writeUint32(u uint32) {
-	var buf [4]byte
-	binary.LittleEndian.PutUint32(buf[:], u)
-	e.writeBytes(buf[:])
-}
-
-func (d *Decoder) readUint32() uint32 {
-	return binary.LittleEndian.Uint32(d.readBytes(4))
-}
-
 func (e *Encoder) writeUint64(u uint64) {
 	var buf [8]byte
 	binary.LittleEndian.PutUint64(buf[:], u)
 	e.writeBytes(buf[:])
-}
-
-func (d *Decoder) readUint64() uint64 {
-	return binary.LittleEndian.Uint64(d.readBytes(8))
 }
 
 //////////////// Encoding Scheme
@@ -218,45 +187,31 @@ const (
 )
 
 // EncodeUint encodes a uint64.
-func (e *Encoder) EncodeUint(u uint64) { e.encodeUint(u) }
-
-func (e *Encoder) encodeUint48(u uint64) {
-	switch {
-	case u < endCode:
-		// u fits into the initial byte.
-		e.writeByte(byte(u))
-	case u <= math.MaxUint32:
-		// Encode as a sequence of 4 bytes, the little-endian representation of
-		// a uint32.
-		e.writeByte(bytes4Code)
-		e.writeUint32(uint32(u))
-	default:
-		// Encode as a sequence of 8 bytes, the little-endian representation of
-		// a uint64.
-		e.writeByte(nBytesCode)
-		e.writeByte(8)
-		e.writeUint64(u)
-	}
-}
-
-func (e *Encoder) encodeUint1248(u uint64) {
+func (e *Encoder) EncodeUint(u uint64) {
 	var buf [4]byte
 	switch {
 	case u < endCode:
 		// u fits into the initial byte.
 		e.writeByte(byte(u))
+
 	case u <= math.MaxUint8:
 		e.writeByte(bytes1Code)
 		e.writeByte(byte(u))
+
 	case u <= math.MaxUint16:
+		// Encode as a sequence of 2 bytes, the little-endian representation of
+		// a uint16.
 		e.writeByte(bytes2Code)
 		binary.LittleEndian.PutUint16(buf[:2], uint16(u))
 		e.writeBytes(buf[:2])
+
 	case u <= math.MaxUint32:
 		// Encode as a sequence of 4 bytes, the little-endian representation of
 		// a uint32.
 		e.writeByte(bytes4Code)
-		e.writeUint32(uint32(u))
+		binary.LittleEndian.PutUint32(buf[:], uint32(u))
+		e.writeBytes(buf[:])
+
 	default:
 		// Encode as a sequence of 8 bytes, the little-endian representation of
 		// a uint64.
@@ -266,55 +221,8 @@ func (e *Encoder) encodeUint1248(u uint64) {
 	}
 }
 
-func (e *Encoder) encodeUintGob(u uint64) {
-	if u < endCode {
-		e.writeByte(byte(u))
-	} else {
-		var buf [uint64Size]byte
-		binary.BigEndian.PutUint64(buf[:], u)
-		bc := bits.LeadingZeros64(u) >> 3 // uint64Size - bytelen(x)
-		e.encodeLen(uint64Size - bc)
-		e.writeBytes(buf[bc:])
-	}
-}
-
-func (d *Decoder) decodeUintGob() uint64 {
-	b := d.readByte()
-	if b < endCode {
-		return uint64(b)
-	}
-	n := d.resolveLen(b)
-	var u uint64
-	for _, b := range d.readBytes(n) {
-		u = u<<8 | uint64(b)
-	}
-	return u
-}
-
 // DecodeUint decodes a uint64.
-func (d *Decoder) DecodeUint() uint64 { return d.decodeUint() }
-
-func (d *Decoder) decodeUint48() uint64 {
-	b := d.readByte()
-	switch {
-	case b < endCode:
-		return uint64(b)
-	case b == bytes4Code:
-		return uint64(d.readUint32())
-	case b == nBytesCode:
-		switch n := d.readByte(); n {
-		case 8:
-			return d.readUint64()
-		default:
-			Failf("DecodeUint: bad length %d", n)
-		}
-	default:
-		d.badcode(b)
-	}
-	return 0
-}
-
-func (d *Decoder) decodeUint1248() uint64 {
+func (d *Decoder) DecodeUint() uint64 {
 	b := d.readByte()
 	switch {
 	case b < endCode:
@@ -322,16 +230,14 @@ func (d *Decoder) decodeUint1248() uint64 {
 	case b == bytes1Code:
 		return uint64(d.readByte())
 	case b == bytes2Code:
-		return uint64(d.readUint16())
+		return uint64(binary.LittleEndian.Uint16(d.readBytes(2)))
 	case b == bytes4Code:
-		return uint64(d.readUint32())
+		return uint64(binary.LittleEndian.Uint32(d.readBytes(4)))
 	case b == nBytesCode:
-		switch n := d.readByte(); n {
-		case 8:
-			return d.readUint64()
-		default:
-			Failf("DecodeUint: bad length %d", n)
+		if d.readByte() == uint64Size {
+			return binary.LittleEndian.Uint64(d.readBytes(uint64Size))
 		}
+		Failf("DecodeUint: bad length")
 	default:
 		d.badcode(b)
 	}
@@ -688,8 +594,6 @@ func (e *Encoder) encodeInitial() {
 		e.EncodeString(n)
 	}
 	e.EncodeBool(e.opts.TrackPointers)
-	e.EncodeBool(e.opts.AltEncodedUints)
-	e.EncodeBool(e.opts.GobEncodedUints)
 }
 
 // decodeInitial decodes metadata that appears at the start of the
@@ -708,15 +612,6 @@ func (d *Decoder) decodeInitial() {
 		d.typeCodecs[num] = tc
 	}
 	d.opts.TrackPointers = d.DecodeBool()
-	d.opts.AltEncodedUints = d.DecodeBool()
-	d.opts.GobEncodedUints = d.DecodeBool()
-	if d.opts.AltEncodedUints {
-		d.decodeUint = d.decodeUint1248
-	} else if d.opts.GobEncodedUints {
-		d.decodeUint = d.decodeUintGob
-	} else {
-		d.decodeUint = d.decodeUint48
-	}
 }
 
 //////////////// Errors
