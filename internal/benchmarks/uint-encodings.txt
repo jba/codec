@@ -1,0 +1,424 @@
+Comparison of three uint encodings, along with gob and ugorji.
+
+48: encode a uint as 4- or 8-byte value.
+1248: encode a uint as a 1-, 2-, 4-, or 8-byte value.
+gob: use gob encoding (length followed by non-zero bytes)
+
+Gob encoding is mostly only better at low bandwidth. An exception to that is
+licenses, where it is 1.45x to encode at max throughput (but not better at
+constrained throughput).
+
+48 encoding is mostly around the same as 1248. It is only significantly faster
+on licenses at max throughput (like gob). At low throughput it is almost always
+slower. When there are a lot of integers that aren't large, like the scores
+benchmark, and throughput is low, then 1248 is clearly better.
+
+go run . bm
+---- ast at max Mi/sec ----
+encode
+  jba/codec 1248    55  13164K/op  0.02s/op 1.00x
+    jba/codec 48    56  13161K/op  0.02s/op 1.02x
+   jba/codec gob    51  13175K/op  0.02s/op 0.97x
+             gob    18  18395K/op  0.06s/op 0.34x
+     ugorji-cbor    27    346K/op  0.04s/op 0.53x
+
+decode
+ugorji-cbor: cbor decode error [pos 239]: reflect.Set: value of type map[interface {}]interface {} is not assignable to type ast.Decl
+  jba/codec 1248    46   8968K/op  0.03s/op 1.00x
+    jba/codec 48    46   8976K/op  0.03s/op 1.02x
+   jba/codec gob    42   8856K/op  0.03s/op 1.00x
+             gob    10  12934K/op  0.11s/op 0.24x
+
+---- ast at 3000 Mi/sec ----
+encode
+  jba/codec 1248    44  13203K/op  0.03s/op 1.00x
+    jba/codec 48    43  13208K/op  0.03s/op 1.00x
+   jba/codec gob    44  13203K/op  0.03s/op 0.94x
+             gob    16  18445K/op  0.07s/op 0.38x
+     ugorji-cbor    27    346K/op  0.04s/op 0.64x
+
+decode
+ugorji-cbor: cbor decode error [pos 668]: reflect.Set: value of type map[interface {}]interface {} is not assignable to type ast.Decl
+  jba/codec 1248    36   8972K/op  0.03s/op 1.00x
+    jba/codec 48    34   8980K/op  0.03s/op 0.98x
+   jba/codec gob    38   8860K/op  0.03s/op 1.00x
+             gob     9  12938K/op  0.12s/op 0.27x
+
+---- ast at 250 Mi/sec ----
+encode
+  jba/codec 1248    32  13273K/op  0.03s/op 1.00x
+    jba/codec 48    31  13281K/op  0.03s/op 0.98x
+   jba/codec gob    33  13265K/op  0.03s/op 0.98x
+             gob    14  18640K/op  0.08s/op 0.42x
+     ugorji-cbor    26    358K/op  0.04s/op 0.82x
+
+decode
+ugorji-cbor: cbor decode error [pos 1333]: reflect.Set: value of type map[interface {}]interface {} is not assignable to type ast.Decl
+  jba/codec 1248    28   8975K/op  0.04s/op 1.00x
+    jba/codec 48    31   8983K/op  0.04s/op 1.00x
+   jba/codec gob    30   8862K/op  0.04s/op 1.00x
+             gob     8  12940K/op  0.13s/op 0.29x
+
+---- ast at 100 Mi/sec ----
+encode
+  jba/codec 1248    25  13342K/op  0.05s/op 1.00x
+    jba/codec 48    26  13330K/op  0.05s/op 1.00x
+   jba/codec gob    25  13341K/op  0.05s/op 1.03x
+             gob    12  18475K/op  0.10s/op 0.49x
+     ugorji-cbor    27    347K/op  0.04s/op 1.13x
+
+decode
+ugorji-cbor: cbor decode error [pos 7479]: reflect.Set: value of type map[interface {}]interface {} is not assignable to type ast.Decl
+  jba/codec 1248    21   8975K/op  0.05s/op 1.00x
+    jba/codec 48    22   8983K/op  0.05s/op 1.00x
+   jba/codec gob    22   8863K/op  0.05s/op 1.01x
+             gob     8  12940K/op  0.14s/op 0.36x
+
+---- hyperledger at max Mi/sec ----
+encode
+  jba/codec 1248  23534   64K/op  0.00s/op 1.00x
+    jba/codec 48  24403   64K/op  0.00s/op 1.02x
+   jba/codec gob  24492   64K/op  0.00s/op 1.02x
+             gob   5175  231K/op  0.00s/op 0.22x
+     ugorji-cbor  12435    9K/op  0.00s/op 0.51x
+
+decode
+  jba/codec 1248  10000  131K/op  0.00s/op 1.00x
+    jba/codec 48  10000  131K/op  0.00s/op 0.97x
+   jba/codec gob  10000  131K/op  0.00s/op 0.98x
+             gob   3483  184K/op  0.00s/op 0.33x
+     ugorji-cbor   1587   81K/op  0.00s/op 0.16x
+
+---- hyperledger at 3000 Mi/sec ----
+encode
+  jba/codec 1248  24812   64K/op  0.00s/op 1.00x
+    jba/codec 48  23961   64K/op  0.00s/op 1.02x
+   jba/codec gob  24120   64K/op  0.00s/op 1.05x
+             gob   5110  231K/op  0.00s/op 0.22x
+     ugorji-cbor  12074    9K/op  0.00s/op 0.50x
+
+decode
+  jba/codec 1248  10000  131K/op  0.00s/op 1.00x
+    jba/codec 48  10000  131K/op  0.00s/op 0.99x
+   jba/codec gob  10000  131K/op  0.00s/op 0.95x
+             gob   3362  184K/op  0.00s/op 0.33x
+     ugorji-cbor   1347   81K/op  0.00s/op 0.14x
+
+---- hyperledger at 250 Mi/sec ----
+encode
+  jba/codec 1248  4702   64K/op  0.00s/op 1.00x
+    jba/codec 48  5442   64K/op  0.00s/op 1.00x
+   jba/codec gob  5486   64K/op  0.00s/op 1.00x
+             gob  4329  231K/op  0.00s/op 0.72x
+     ugorji-cbor  5310    9K/op  0.00s/op 0.96x
+
+decode
+  jba/codec 1248  5463  131K/op  0.00s/op 1.00x
+    jba/codec 48  5194  131K/op  0.00s/op 1.01x
+   jba/codec gob  5382  131K/op  0.00s/op 1.01x
+             gob  3501  184K/op  0.00s/op 0.67x
+     ugorji-cbor  1353   81K/op  0.00s/op 0.27x
+
+---- hyperledger at 100 Mi/sec ----
+encode
+  jba/codec 1248  2343   64K/op  0.00s/op 1.00x
+    jba/codec 48  2296   64K/op  0.00s/op 0.99x
+   jba/codec gob  2328   64K/op  0.00s/op 1.00x
+             gob  2205  231K/op  0.00s/op 0.95x
+     ugorji-cbor  2149   10K/op  0.00s/op 0.92x
+
+decode
+  jba/codec 1248  2292  131K/op  0.00s/op 1.00x
+    jba/codec 48  2250  131K/op  0.00s/op 1.00x
+   jba/codec gob  2287  131K/op  0.00s/op 1.00x
+             gob  2199  184K/op  0.00s/op 0.92x
+     ugorji-cbor  1329   81K/op  0.00s/op 0.59x
+
+---- licenses at max Mi/sec ----
+encode
+  jba/codec 1248     1  2516760K/op  2.76s/op 1.00x
+    jba/codec 48     1  2516760K/op  2.27s/op 1.21x
+   jba/codec gob     1  2516760K/op  1.90s/op 1.45x
+             gob     1  2110613K/op  1.49s/op 1.85x
+     ugorji-cbor     1  1048600K/op  1.31s/op 2.10x
+
+decode
+  jba/codec 1248     2  682516K/op  0.74s/op 1.00x
+    jba/codec 48     2  685204K/op  0.74s/op 1.00x
+   jba/codec gob     2  682492K/op  0.75s/op 0.99x
+             gob     1  683895K/op  1.04s/op 0.71x
+     ugorji-cbor     1  488567K/op  7.88s/op 0.09x
+
+---- licenses at 3000 Mi/sec ----
+encode
+  jba/codec 1248     1  2517202K/op  1.75s/op 1.00x
+    jba/codec 48     1  2517200K/op  2.15s/op 0.81x
+   jba/codec gob     1  2517175K/op  1.80s/op 0.97x
+             gob     1  2110933K/op  1.33s/op 1.32x
+     ugorji-cbor     1  1048572K/op  1.10s/op 1.59x
+
+decode
+  jba/codec 1248     2  682951K/op  0.92s/op 1.00x
+    jba/codec 48     2  685642K/op  0.89s/op 1.03x
+   jba/codec gob     2  682930K/op  0.91s/op 1.01x
+             gob     1  684321K/op  1.23s/op 0.75x
+     ugorji-cbor     1  488588K/op  9.74s/op 0.09x
+
+---- licenses at 250 Mi/sec ----
+encode
+  jba/codec 1248     1  2517580K/op  2.13s/op 1.00x
+    jba/codec 48     1  2517585K/op  2.17s/op 0.98x
+   jba/codec gob     1  2517581K/op  2.09s/op 1.02x
+             gob     1  2111315K/op  2.20s/op 0.97x
+     ugorji-cbor     1  1049961K/op  2.09s/op 1.02x
+
+decode
+  jba/codec 1248     1  683355K/op  1.75s/op 1.00x
+    jba/codec 48     1  686047K/op  1.76s/op 0.99x
+   jba/codec gob     1  683328K/op  1.81s/op 0.97x
+             gob     1  684695K/op  2.02s/op 0.86x
+     ugorji-cbor     1  488593K/op  9.51s/op 0.18x
+
+---- licenses at 100 Mi/sec ----
+encode
+  jba/codec 1248     1  2517598K/op  3.81s/op 1.00x
+    jba/codec 48     1  2517609K/op  3.75s/op 1.02x
+   jba/codec gob     1  2517601K/op  3.68s/op 1.04x
+             gob     1  2111333K/op  3.72s/op 1.03x
+     ugorji-cbor     1  1055921K/op  3.40s/op 1.12x
+
+decode
+  jba/codec 1248     1  683361K/op  3.34s/op 1.00x
+    jba/codec 48     1  686057K/op  3.36s/op 1.00x
+   jba/codec gob     1  683337K/op  3.33s/op 1.01x
+             gob     1  684710K/op  3.51s/op 0.95x
+     ugorji-cbor     1  488652K/op  9.72s/op 0.34x
+
+---- licenses-small at max Mi/sec ----
+encode
+  jba/codec 1248     2  1201300K/op  0.69s/op 1.00x
+    jba/codec 48     2  1436300K/op  0.73s/op 0.94x
+   jba/codec gob     2  1201300K/op  0.71s/op 0.97x
+             gob     1  1541959K/op  1.05s/op 0.66x
+     ugorji-cbor     2   262145K/op  0.90s/op 0.77x
+
+decode
+  jba/codec 1248     2  516939K/op  0.66s/op 1.00x
+    jba/codec 48     2  519635K/op  0.66s/op 1.00x
+   jba/codec gob     2  516923K/op  0.66s/op 1.00x
+             gob     2  518325K/op  0.97s/op 0.68x
+     ugorji-cbor     1  391005K/op  7.74s/op 0.09x
+
+---- licenses-small at 3000 Mi/sec ----
+encode
+  jba/codec 1248     2  1201595K/op  0.77s/op 1.00x
+    jba/codec 48     1  1698583K/op  1.03s/op 0.74x
+   jba/codec gob     2  1201595K/op  0.81s/op 0.95x
+             gob     1  1542237K/op  1.14s/op 0.67x
+     ugorji-cbor     1   524284K/op  1.03s/op 0.74x
+
+decode
+  jba/codec 1248     2  517249K/op  0.82s/op 1.00x
+    jba/codec 48     2  519950K/op  0.82s/op 1.01x
+   jba/codec gob     2  517232K/op  0.82s/op 1.00x
+             gob     1  518618K/op  1.10s/op 0.75x
+     ugorji-cbor     1  391005K/op  9.35s/op 0.09x
+
+---- licenses-small at 250 Mi/sec ----
+encode
+  jba/codec 1248     1  1463844K/op  1.61s/op 1.00x
+    jba/codec 48     1  1698844K/op  1.65s/op 0.98x
+   jba/codec gob     1  1463852K/op  1.46s/op 1.10x
+             gob     1  1542507K/op  1.83s/op 0.88x
+     ugorji-cbor     1   524593K/op  1.09s/op 1.48x
+
+decode
+  jba/codec 1248     1  517521K/op  1.43s/op 1.00x
+    jba/codec 48     1  520229K/op  1.43s/op 1.00x
+   jba/codec gob     1  517508K/op  1.44s/op 1.00x
+             gob     1  518882K/op  1.66s/op 0.86x
+     ugorji-cbor     1  391005K/op  9.28s/op 0.15x
+
+---- licenses-small at 100 Mi/sec ----
+encode
+  jba/codec 1248     1  1463857K/op  2.70s/op 1.00x
+    jba/codec 48     1  1698868K/op  2.67s/op 1.01x
+   jba/codec gob     1  1463861K/op  2.55s/op 1.06x
+             gob     1  1542518K/op  2.76s/op 0.98x
+     ugorji-cbor     1   529663K/op  2.47s/op 1.10x
+
+decode
+  jba/codec 1248     1  517531K/op  2.49s/op 1.00x
+    jba/codec 48     1  520235K/op  2.50s/op 1.00x
+   jba/codec gob     1  517515K/op  2.48s/op 1.00x
+             gob     1  518887K/op  2.72s/op 0.92x
+     ugorji-cbor     1  391005K/op  9.43s/op 0.26x
+
+---- stocks at max Mi/sec ----
+encode
+  jba/codec 1248     2  1058925K/op  0.73s/op 1.00x
+    jba/codec 48     2  1058925K/op  0.67s/op 1.09x
+   jba/codec gob     2  1058925K/op  0.75s/op 0.97x
+             gob     1  1046453K/op  1.30s/op 0.56x
+     ugorji-cbor     1   523854K/op  1.21s/op 0.60x
+
+decode
+  jba/codec 1248     3  304645K/op  0.43s/op 1.00x
+    jba/codec 48     3  304645K/op  0.43s/op 1.00x
+   jba/codec gob     3  304645K/op  0.49s/op 0.87x
+             gob     2  246484K/op  0.72s/op 0.59x
+     ugorji-cbor     1  406077K/op  9.52s/op 0.04x
+
+---- stocks at 3000 Mi/sec ----
+encode
+  jba/codec 1248     2  1059137K/op  0.73s/op 1.00x
+    jba/codec 48     2  1059133K/op  0.75s/op 0.97x
+   jba/codec gob     2  1059135K/op  0.82s/op 0.89x
+             gob     1  1046511K/op  1.92s/op 0.38x
+     ugorji-cbor     1   523841K/op  2.51s/op 0.29x
+
+decode
+  jba/codec 1248     2  304864K/op   0.53s/op 1.00x
+    jba/codec 48     2  304866K/op   0.54s/op 0.98x
+   jba/codec gob     2  304865K/op   0.60s/op 0.87x
+             gob     2  246684K/op   0.83s/op 0.64x
+     ugorji-cbor     1  406077K/op  11.15s/op 0.05x
+
+---- stocks at 250 Mi/sec ----
+encode
+  jba/codec 1248     1  1321305K/op  1.31s/op 1.00x
+    jba/codec 48     1  1321306K/op  1.26s/op 1.04x
+   jba/codec gob     1  1321308K/op  1.32s/op 0.99x
+             gob     1  1046738K/op  1.79s/op 0.73x
+     ugorji-cbor     1   523841K/op  1.26s/op 1.04x
+
+decode
+  jba/codec 1248     2  305061K/op   0.96s/op 1.00x
+    jba/codec 48     2  305025K/op   0.99s/op 0.97x
+   jba/codec gob     1  305045K/op   1.06s/op 0.91x
+             gob     1  246839K/op   1.25s/op 0.77x
+     ugorji-cbor     1  406077K/op  11.34s/op 0.08x
+
+---- stocks at 100 Mi/sec ----
+encode
+  jba/codec 1248     1  1321315K/op  2.07s/op 1.00x
+    jba/codec 48     1  1321314K/op  2.04s/op 1.02x
+   jba/codec gob     1  1321315K/op  2.08s/op 1.00x
+             gob     1  1046755K/op  2.46s/op 0.84x
+     ugorji-cbor     1   524746K/op  1.50s/op 1.38x
+
+decode
+  jba/codec 1248     1  305065K/op   1.75s/op 1.00x
+    jba/codec 48     1  305065K/op   1.75s/op 1.00x
+   jba/codec gob     1  305066K/op   1.82s/op 0.96x
+             gob     1  246865K/op   1.91s/op 0.92x
+     ugorji-cbor     1  406077K/op  11.46s/op 0.15x
+
+---- scores at max Mi/sec ----
+encode
+  jba/codec 1248    63  10378K/op  0.02s/op 1.00x
+    jba/codec 48    54  13159K/op  0.02s/op 0.99x
+   jba/codec gob    51  10392K/op  0.02s/op 0.88x
+             gob    46   9455K/op  0.02s/op 0.79x
+     ugorji-cbor    39    212K/op  0.03s/op 0.71x
+
+decode
+  jba/codec 1248    62  10950K/op  0.02s/op 1.00x
+    jba/codec 48    61  11470K/op  0.02s/op 1.02x
+   jba/codec gob    54  10894K/op  0.02s/op 0.93x
+             gob    50  11554K/op  0.02s/op 0.84x
+     ugorji-cbor     4  10625K/op  0.31s/op 0.07x
+
+---- scores at 3000 Mi/sec ----
+encode
+  jba/codec 1248    52  10394K/op  0.02s/op 1.00x
+    jba/codec 48    54  13163K/op  0.02s/op 0.96x
+   jba/codec gob    54  10391K/op  0.02s/op 0.92x
+             gob    44   9461K/op  0.03s/op 0.80x
+     ugorji-cbor    42    197K/op  0.03s/op 0.85x
+
+decode
+  jba/codec 1248    49  10953K/op  0.03s/op 1.00x
+    jba/codec 48    42  11474K/op  0.03s/op 0.97x
+   jba/codec gob    43  10897K/op  0.03s/op 0.98x
+             gob    46  11557K/op  0.03s/op 0.88x
+     ugorji-cbor     3  10625K/op  0.39s/op 0.07x
+
+---- scores at 250 Mi/sec ----
+encode
+  jba/codec 1248    44  10408K/op  0.03s/op 1.00x
+    jba/codec 48    37  13231K/op  0.03s/op 0.93x
+   jba/codec gob    42  10412K/op  0.03s/op 0.97x
+             gob    33   9491K/op  0.03s/op 0.89x
+     ugorji-cbor    42    197K/op  0.03s/op 1.13x
+
+decode
+  jba/codec 1248    36  10954K/op  0.03s/op 1.00x
+    jba/codec 48    37  11476K/op  0.03s/op 0.92x
+   jba/codec gob    39  10898K/op  0.03s/op 0.96x
+             gob    38  11559K/op  0.03s/op 0.91x
+     ugorji-cbor     3  10625K/op  0.38s/op 0.08x
+
+---- scores at 100 Mi/sec ----
+encode
+  jba/codec 1248    32  10440K/op  0.04s/op 1.00x
+    jba/codec 48    25  13332K/op  0.05s/op 0.82x
+   jba/codec gob    30  10448K/op  0.04s/op 0.95x
+             gob    27   9517K/op  0.04s/op 0.90x
+     ugorji-cbor    42    197K/op  0.03s/op 1.42x
+
+decode
+  jba/codec 1248    31  10955K/op  0.04s/op 1.00x
+    jba/codec 48    27  11477K/op  0.04s/op 0.90x
+   jba/codec gob    31  10899K/op  0.04s/op 0.98x
+             gob    27  11560K/op  0.04s/op 0.91x
+     ugorji-cbor     3  10625K/op  0.38s/op 0.10x
+
+----------------------------------------------------------------
+
+go run . bet
+jba/codec 48 vs. jba/codec 1248 on ast
+encoding:
+saved bytes: 6533, extra time: 1036µs
+Encoding break-even throughput: 6.0 M/s
+Space savings not worth it for encoding.
+decoding:
+Decoding break-even throughput: 6.3 M/s
+Space savings not worth it for decoding.
+
+jba/codec 48 vs. jba/codec 1248 on hyperledger
+encoding:
+saved bytes: 224, extra time: 0µs
+Encoding break-even throughput: 408.5 M/s
+decoding:
+Decoding was not slower (0ms vs. 0ms)
+
+jba/codec 48 vs. jba/codec 1248 on licenses
+encoding:
+saved bytes: 2759078, extra time: 631436µs
+Encoding break-even throughput: 4.2 M/s
+Space savings not worth it for encoding.
+decoding:
+Decoding break-even throughput: 149.6 M/s
+
+jba/codec 48 vs. jba/codec 1248 on licenses-small
+encoding:
+Space-optimized codec took less space (191224536 vs. 193983702) and was not slower (671ms vs. 958ms)
+decoding:
+Decoding was not slower (683ms vs. 705ms)
+
+jba/codec 48 vs. jba/codec 1248 on stocks
+encoding:
+saved bytes: 400, extra time: 5929µs
+Encoding break-even throughput: 0.1 M/s
+Space savings not worth it for encoding.
+decoding:
+Decoding break-even throughput: 0.0 M/s
+Space savings not worth it for decoding.
+
+jba/codec 48 vs. jba/codec 1248 on scores
+encoding:
+saved bytes: 529858, extra time: 166µs
+Encoding break-even throughput: 3034.5 M/s
+decoding:
+Decoding break-even throughput: 554.2 M/s

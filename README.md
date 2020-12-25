@@ -2,8 +2,6 @@ This is a fork of pkgsite/internal/godoc/codec.
 
 NEXT:
 
-- Understand why gob allocates much less in the license benchmark.
-
 - Maybe generate more stuff for the hyperledger benchmark. A lot of types and
   fields are unused?
 
@@ -79,6 +77,14 @@ and created all the types' TypeCodecs.
 
 # Performance
 
+## uint encodings
+
+See internal/benchmarks/uint-encodings.txt for data supporting the choice of
+1248 encoding.
+
+
+
+
 Run
     go build -gcflags -S ./codecapi >& /tmp/asm
 periodically and look for runtime.newobject to see what's escaping to the heap.
@@ -87,13 +93,9 @@ periodically and look for runtime.newobject to see what's escaping to the heap.
 
 - Time the explicit x==nil arg to StartStruct against using reflection.
 
-
-
 - Compare gob length-prefixed values with nValues and start/end.
 
 - Compare the redundant (ptrCode; startCode) sequence with just startCode.
-
-Add nBytes0Code ... nBytes4Code.
 
 Add extCode: followed by uint, denotes an extension?
 
@@ -132,6 +134,7 @@ out tag "uses-generics" and:
 
 # Notes
 
+## ugorji allocation
 How does ugorji encoding allocate like one tenth of what we and gob do? See
 the license benchmark.
 
@@ -143,3 +146,16 @@ buffer, we have 258950K/op; but ugorji, with no previous knowledge, gets
 The answer is that ugorji has a fixed-size buffer that is flushed when full to
 the io.Writer. See bufioEncWriter in ugorji/go/codec/writer.go. We can't do that
 because we need to write initial metadata.
+
+## gob allocation
+
+Gob allocates less than jba/codec when encoding the licenses benchmark:
+```
+---- licenses at max Mi/sec ----
+encode
+  jba/codec 48     1  2516760K/op  2.67s/op 1.00x
+           gob     1  2110611K/op  2.01s/op 1.33x
+```
+
+I'm not sure why, but since on most other benchmarks it allocates more and isn't
+faster anyway, I don't think it's worth more investigation.

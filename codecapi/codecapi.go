@@ -64,7 +64,7 @@ func (e *Encoder) Encode(x interface{}) (err error) {
 	if e.buf != nil {
 		e.buf = e.buf[0:0]
 	} else {
-		e.buf = make([]byte, 0, 128*1024)
+		e.buf = make([]byte, 0, 64*1024)
 	}
 	e.typeNums = map[reflect.Type]int{}
 	defer handlePanic(&err)
@@ -169,12 +169,6 @@ func (d *Decoder) readString(len int) string {
 	return string(d.readBytes(len))
 }
 
-func (e *Encoder) writeUint16(u uint16) {
-	var buf [2]byte
-	binary.LittleEndian.PutUint16(buf[:], u)
-	e.writeBytes(buf[:])
-}
-
 func (d *Decoder) readUint16() uint16 {
 	return binary.LittleEndian.Uint16(d.readBytes(2))
 }
@@ -246,6 +240,7 @@ func (e *Encoder) encodeUint48(u uint64) {
 }
 
 func (e *Encoder) encodeUint1248(u uint64) {
+	var buf [4]byte
 	switch {
 	case u < endCode:
 		// u fits into the initial byte.
@@ -255,7 +250,8 @@ func (e *Encoder) encodeUint1248(u uint64) {
 		e.writeByte(byte(u))
 	case u <= math.MaxUint16:
 		e.writeByte(bytes2Code)
-		e.writeUint16(uint16(u))
+		binary.LittleEndian.PutUint16(buf[:2], uint16(u))
+		e.writeBytes(buf[:2])
 	case u <= math.MaxUint32:
 		// Encode as a sequence of 4 bytes, the little-endian representation of
 		// a uint32.
@@ -265,7 +261,7 @@ func (e *Encoder) encodeUint1248(u uint64) {
 		// Encode as a sequence of 8 bytes, the little-endian representation of
 		// a uint64.
 		e.writeByte(nBytesCode)
-		e.writeByte(8)
+		e.writeByte(uint64Size)
 		e.writeUint64(u)
 	}
 }

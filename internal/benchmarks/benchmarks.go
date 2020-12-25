@@ -73,13 +73,7 @@ var (
 		},
 		jbaCodecDecode,
 	}
-)
-
-var codecs = []Codec{
-	jbaCodec,
-	jbaCodec1248,
-	jbaCodecGob,
-	{
+	codecGob = Codec{
 		"gob",
 		func(w io.Writer, data interface{}) error {
 			e := gob.NewEncoder(w)
@@ -89,7 +83,14 @@ var codecs = []Codec{
 			d := gob.NewDecoder(r)
 			return d.Decode(ptr)
 		},
-	},
+	}
+)
+
+var codecs = []Codec{
+	jbaCodec1248,
+	jbaCodec,
+	jbaCodecGob,
+	codecGob,
 	{
 		"ugorji-cbor",
 		func(w io.Writer, data interface{}) error {
@@ -100,27 +101,7 @@ var codecs = []Codec{
 			return ucodec.NewDecoder(r, &ucodec.CborHandle{}).Decode(ptr)
 		},
 	},
-	// ugorji with msgpack and binc have almost identical performance to ugorji with cbor
-	// {
-	// 	"ugorji-msgpack",
-	// 	func(w io.Writer, data interface{}) error {
-	// 		e := ucodec.NewEncoder(w, &ucodec.MsgpackHandle{})
-	// 		return e.Encode(data)
-	// 	},
-	// 	func(r io.Reader, ptr interface{}) error {
-	// 		return ucodec.NewDecoder(r, &ucodec.MsgpackHandle{}).Decode(ptr)
-	// 	},
-	// },
-	// {
-	// 	"ugorji-binc",
-	// 	func(w io.Writer, data interface{}) error {
-	// 		e := ucodec.NewEncoder(w, &ucodec.BincHandle{})
-	// 		return e.Encode(data)
-	// 	},
-	// 	func(r io.Reader, ptr interface{}) error {
-	// 		return ucodec.NewDecoder(r, &ucodec.BincHandle{}).Decode(ptr)
-	// 	},
-	// },
+	// ugorji with msgpack and binc have almost identical performance to ugorji with cbor.
 }
 
 func jbaCodecDecode(r io.Reader, ptr interface{}) error {
