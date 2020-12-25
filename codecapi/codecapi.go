@@ -50,7 +50,7 @@ func (e *Encoder) Encode(x interface{}) (err error) {
 		}
 	}
 	if e.buf != nil {
-		e.buf = e.buf[0:0]
+		e.buf = e.buf[:0]
 	} else {
 		e.buf = make([]byte, 0, 64*1024)
 	}
@@ -64,7 +64,7 @@ func (e *Encoder) Encode(x interface{}) (err error) {
 	initial := e.buf  // remember that
 
 	// Encode total size in 8 bytes.
-	var buf [8]byte
+	var buf [uint64Size]byte
 	binary.LittleEndian.PutUint64(buf[:], uint64(len(initial)+len(data)))
 	if _, err := e.w.Write(buf[:]); err != nil {
 		return err
@@ -86,8 +86,7 @@ type Decoder struct {
 }
 
 func NewDecoder(r io.Reader) *Decoder {
-	d := &Decoder{r: r}
-	return d
+	return &Decoder{r: r}
 }
 
 // Decode decodes a value encoded with Encoder.Encode.
@@ -317,8 +316,8 @@ func (e *Encoder) EncodeBytes(b []byte) {
 }
 
 // DecodeBytes decodes a byte slice.
-// It DOES copy.
-// TODO: It does no copying.
+// It makes a copy of a portion of the underlying buffer.
+// TODO: Make a zero-copy version?
 func (d *Decoder) DecodeBytes() []byte {
 	n := d.decodeLen()
 	b := make([]byte, n)

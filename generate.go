@@ -98,7 +98,7 @@ func generate(w io.Writer, packageName string, fieldNames map[string][]string, v
 	g.arrayTemplate = newTemplate("array", arrayBody)
 	g.mapTemplate = newTemplate("map", mapBody)
 	g.structTemplate = newTemplate("struct", structBody)
-	g.binMarshTemplate = newTemplate("binaryMarshaller", binMarshBody)
+	g.marshalTemplate = newTemplate("marshaller", marshalBody)
 
 	for _, v := range vs {
 		g.todo = append(g.todo, reflect.TypeOf(v))
@@ -129,17 +129,17 @@ func generate(w io.Writer, packageName string, fieldNames map[string][]string, v
 }
 
 type generator struct {
-	pkg              string
-	todo             []reflect.Type
-	done             map[reflect.Type]bool
-	fieldNames       map[string][]string
-	importMap        map[string]bool
-	initialTemplate  *template.Template
-	sliceTemplate    *template.Template
-	arrayTemplate    *template.Template
-	mapTemplate      *template.Template
-	structTemplate   *template.Template
-	binMarshTemplate *template.Template
+	pkg             string
+	todo            []reflect.Type
+	done            map[reflect.Type]bool
+	fieldNames      map[string][]string
+	importMap       map[string]bool
+	initialTemplate *template.Template
+	sliceTemplate   *template.Template
+	arrayTemplate   *template.Template
+	mapTemplate     *template.Template
+	structTemplate  *template.Template
+	marshalTemplate *template.Template
 }
 
 func (g *generator) generate() ([]byte, error) {
@@ -184,14 +184,20 @@ func (g *generator) generate() ([]byte, error) {
 }
 
 var (
-	binaryMarshallerType   = reflect.TypeOf(new(encoding.BinaryMarshaler)).Elem()
-	binaryUnmarshallerType = reflect.TypeOf(new(encoding.BinaryUnmarshaler)).Elem()
+	binaryMarshalerType   = reflect.TypeOf(new(encoding.BinaryMarshaler)).Elem()
+	binaryUnmarshalerType = reflect.TypeOf(new(encoding.BinaryUnmarshaler)).Elem()
+	textMarshalerType     = reflect.TypeOf(new(encoding.TextMarshaler)).Elem()
+	textUnmarshalerType   = reflect.TypeOf(new(encoding.TextUnmarshaler)).Elem()
 )
 
 func (g *generator) gen(t reflect.Type) ([]byte, error) {
-	if t.Implements(binaryMarshallerType) && reflect.PtrTo(t).Implements(binaryUnmarshallerType) {
-		return g.genBinaryMarshaller(t)
+	if t.Implements(binaryMarshalerType) && reflect.PtrTo(t).Implements(binaryUnmarshalerType) {
+		return g.genMarshaler(t, "Binary")
 	}
+	if t.Implements(textMarshalerType) && reflect.PtrTo(t).Implements(textUnmarshalerType) {
+		return g.genMarshaler(t, "Text")
+	}
+
 	switch t.Kind() {
 	case reflect.Slice:
 		return g.genSlice(t)
@@ -246,14 +252,16 @@ func (g *generator) genMap(t reflect.Type) ([]byte, error) {
 	})
 }
 
-func (g *generator) genBinaryMarshaller(t reflect.Type) ([]byte, error) {
-	return execute(g.binMarshTemplate, struct {
+func (g *generator) genMarshaler(t reflect.Type, kind string) ([]byte, error) {
+
+	return execute(g.marshalTemplate, struct {
 		Type reflect.Type
+		Kind string
 	}{
 		Type: t,
+		Kind: kind,
 	})
 }
-
 func (g *generator) genStruct(t reflect.Type) ([]byte, error) {
 	fn := g.typeIdentifier(t)
 	var fields []field
@@ -403,7 +411,7 @@ func (g *generator) encodeStatement(t reflect.Type, arg string) string {
 }
 
 func encodePtrArg(t reflect.Type) bool {
-	if t.Implements(binaryMarshallerType) {
+	if t.Implements(binaryMarshalerType) || t.Implements(textMarshalerType) {
 		return false
 	}
 	return t.Kind() == reflect.Struct || t.Kind() == reflect.Array
@@ -690,8 +698,8 @@ func (c «$typeName») decode(d *codecapi.Decoder, p *«$goName») {
 func init() { codecapi.Register(«$goName»(nil), «$typeName»{}) }
 `
 
-// Template body for a type that implements encoding.BinaryMarshaller.
-const binMarshBody = `
+// Template body for a type that implements encoding.BinaryMarshaler or encoding.TextMarshaler.
+const marshalBody = `
 « $typeID := typeID .Type »
 « $typeName := print $typeID "_codec" »
 « $goName := goName .Type »
@@ -702,7 +710,7 @@ func (c «$typeName») Init() {}
 func (c «$typeName») Encode(e *codecapi.Encoder, x interface{}) { c.encode(e, x.(«$goName»)) }
 
 func (c «$typeName») encode(e *codecapi.Encoder, m «$goName») {
-	data, err := m.MarshalBinary()
+	data, err := m.Marshal«.Kind»()
 	if err != nil {
 		codecapi.Fail(err)
 	}
@@ -717,7 +725,7 @@ func (c «$typeName») Decode(d *codecapi.Decoder) interface{} {
 
 func (c «$typeName») decode(d *codecapi.Decoder, p *«$goName») {
 	data := d.DecodeBytes()
-	if err := p.UnmarshalBinary(data); err != nil {
+	if err := p.Unmarshal«.Kind»(data); err != nil {
 		codecapi.Fail(err)
 	}
 }

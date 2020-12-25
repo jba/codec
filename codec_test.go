@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"go/token"
 	"log"
+	"net"
 	"os"
 	"strings"
 	"testing"
@@ -35,12 +36,14 @@ type generatedTestTypes struct {
 	Map      map[string]bool
 	Struct   structType
 	Time     time.Time
+	IP       net.IP
 	DefSlice definedSlice
 	DefArray definedArray
 	DefMap   definedMap
 	Pos      token.Pos
 }
 
+// for testing sharing and cycles
 type node struct {
 	Value int
 	Next  *node
@@ -48,6 +51,7 @@ type node struct {
 
 type structType struct {
 	N node
+	B byte
 }
 
 func TestMain(m *testing.M) {
@@ -76,8 +80,9 @@ func TestEncodeDecode(t *testing.T) {
 func testEncodeDecode(t *testing.T, aopts api.EncodeOptions) {
 	want := []interface{}{
 		nil, "Luke Luck likes lakes", true,
-		1, -5, 98.6, 65000, uint64(65000), uint64(1 << 63),
+		1, -5, 98.6, 255, 65000, uint64(65000), uint64(1 << 63),
 		time.Date(2020, time.January, 26, 0, 0, 0, 0, time.UTC),
+		net.IPv4(10, 128, 2, 18),
 		&node{1, &node{2, &node{3, nil}}},
 		(*node)(nil),
 		[]int{},
@@ -89,7 +94,7 @@ func testEncodeDecode(t *testing.T, aopts api.EncodeOptions) {
 		[]int(nil),
 		map[string]bool{"a": true, "b": false},
 		map[string]bool(nil),
-		structType{N: node{1, nil}},
+		structType{B: 129, N: node{1, nil}},
 		definedSlice{1, 2, 3},
 		definedArray{-7},
 		definedMap{"true": true},

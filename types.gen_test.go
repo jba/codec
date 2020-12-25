@@ -6,10 +6,11 @@ import (
 	
 	"github.com/jba/codec/codecapi"
 	"go/token"
+	"net"
 	"time"
 )
 
-// Fields of generatedTestTypes: Node Slice Array Map Struct Time DefSlice DefArray DefMap Pos
+// Fields of generatedTestTypes: Node Slice Array Map Struct Time IP DefSlice DefArray DefMap Pos
 
 type ptr_generatedTestTypes_codec struct{}
 
@@ -79,19 +80,23 @@ func (c generatedTestTypes_codec) encode(e *codecapi.Encoder, x *generatedTestTy
 
 	e.EncodeUint(5)
 	(time_Time_codec{}).encode(e, x.Time)
-	if x.DefSlice != nil {
+	if x.IP != nil {
 		e.EncodeUint(6)
+		e.EncodeBytes([]uint8(x.IP))
+	}
+	if x.DefSlice != nil {
+		e.EncodeUint(7)
 		(definedSlice_codec{}).encode(e, definedSlice(x.DefSlice))
 	}
 
-	e.EncodeUint(7)
+	e.EncodeUint(8)
 	(definedArray_codec{}).encode(e, &x.DefArray)
 	if x.DefMap != nil {
-		e.EncodeUint(8)
+		e.EncodeUint(9)
 		(definedMap_codec{}).encode(e, definedMap(x.DefMap))
 	}
 	if x.Pos != 0 {
-		e.EncodeUint(9)
+		e.EncodeUint(10)
 		e.EncodeInt(int64(x.Pos))
 	}
 	e.EndStruct()
@@ -124,12 +129,14 @@ func (c generatedTestTypes_codec) decode(d *codecapi.Decoder, x *generatedTestTy
 		case 5:
 			(time_Time_codec{}).decode(d, &x.Time)
 		case 6:
-			(definedSlice_codec{}).decode(d, &x.DefSlice)
+			x.IP = net.IP(d.DecodeBytes())
 		case 7:
-			(definedArray_codec{}).decode(d, &x.DefArray)
+			(definedSlice_codec{}).decode(d, &x.DefSlice)
 		case 8:
-			(definedMap_codec{}).decode(d, &x.DefMap)
+			(definedArray_codec{}).decode(d, &x.DefArray)
 		case 9:
+			(definedMap_codec{}).decode(d, &x.DefMap)
+		case 10:
 			x.Pos = token.Pos(d.DecodeInt())
 		default:
 			d.UnknownField("generatedTestTypes", n)
@@ -349,7 +356,7 @@ func (c map_string_bool_codec) decode(d *codecapi.Decoder, p *map[string]bool) {
 
 func init() { codecapi.Register(map[string]bool(nil), map_string_bool_codec{}) }
 
-// Fields of structType: N
+// Fields of structType: N B
 
 type ptr_structType_codec struct{}
 
@@ -401,6 +408,10 @@ func (c structType_codec) encode(e *codecapi.Encoder, x *structType) {
 
 	e.EncodeUint(0)
 	(node_codec{}).encode(e, &x.N)
+	if x.B != 0 {
+		e.EncodeUint(1)
+		e.EncodeByte(x.B)
+	}
 	e.EndStruct()
 }
 
@@ -420,6 +431,8 @@ func (c structType_codec) decode(d *codecapi.Decoder, x *structType) {
 		switch n {
 		case 0:
 			(node_codec{}).decode(d, &x.N)
+		case 1:
+			x.B = d.DecodeByte()
 		default:
 			d.UnknownField("structType", n)
 		}
@@ -459,6 +472,35 @@ func (c time_Time_codec) decode(d *codecapi.Decoder, p *time.Time) {
 }
 
 func init() { codecapi.Register(*new(time.Time), time_Time_codec{}) }
+
+type net_IP_codec struct{}
+
+func (c net_IP_codec) Init() {}
+
+func (c net_IP_codec) Encode(e *codecapi.Encoder, x interface{}) { c.encode(e, x.(net.IP)) }
+
+func (c net_IP_codec) encode(e *codecapi.Encoder, m net.IP) {
+	data, err := m.MarshalText()
+	if err != nil {
+		codecapi.Fail(err)
+	}
+	e.EncodeBytes(data)
+}
+
+func (c net_IP_codec) Decode(d *codecapi.Decoder) interface{} {
+	var x net.IP
+	c.decode(d, &x)
+	return x
+}
+
+func (c net_IP_codec) decode(d *codecapi.Decoder, p *net.IP) {
+	data := d.DecodeBytes()
+	if err := p.UnmarshalText(data); err != nil {
+		codecapi.Fail(err)
+	}
+}
+
+func init() { codecapi.Register(*new(net.IP), net_IP_codec{}) }
 
 type definedSlice_codec struct{}
 

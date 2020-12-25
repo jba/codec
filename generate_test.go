@@ -10,6 +10,7 @@ import (
 	"go/token"
 	"io"
 	"io/ioutil"
+	"net"
 	"path/filepath"
 	"reflect"
 	"testing"
@@ -75,6 +76,7 @@ func TestGenerate(t *testing.T) {
 	testGenerate(t, "map", map[string]bool(nil))
 	testGenerate(t, "struct", genStruct{})
 	testGenerate(t, "binmarsh", time.Time{})
+	testGenerate(t, "textmarsh", net.IP{})
 	testGenerate(t, "defslice", definedSlice{})
 	testGenerate(t, "defarray", definedArray{})
 	testGenerate(t, "defmap", definedMap{})

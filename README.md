@@ -1,45 +1,24 @@
+# Fast Encoding of Go Values
+
 This is a fork of pkgsite/internal/godoc/codec.
 
-NEXT:
-
-- Maybe generate more stuff for the hyperledger benchmark. A lot of types and
-  fields are unused?
-
-- see if someone can slice a []byte field past the end to access the underlying
-  buffer; and if so, use the 3-part slice operator.
-- see if gob-encoded ints or floats helps in throughput-limited cases
-
-
-
 TODO:
-- put benchmarks in separate module to avoid dependencies on GCS, GCP, etc.
 
-- create real-world-ish benchmarks:
-  - go/ast.File for net/http (except no one else can do that due to cycles)
+- Improve test coverage.
+
+- Test float byte reversal. See "float encodings" below.
+
+- Put benchmarks in separate module to avoid dependencies on GCS, GCP, etc.
 
 - ugorji/go/codec:
   - see codegen option at http://ugorji.net/blog/go-codecgen
   - I think that only works on types you own, because it adds methods to them?
-- use gob encoding for uints
-
--  Test floats reversed vs. not, but only after we pick a uint encoding.
-   Reversing only saves space for integer-valued floats, those whose fractional
-   part is a power of two, perhaps others
-   (https://play.golang.org/p/pYNbvRq1N2S). But your average float will not get
-   shorter. It's not clear if it's worth it.
-
-Possible benchmarks:
-- https://github.com/robertkrimen/otto/blob/15f95af6e78dcd2030d8195a138bd88d4f403546/script.go
-- https://github.com/gocolly/colly/blob/1cd684083cf9bf9a8e33b5dfd6414d8516ae63af/http_backend.go#L161
 
 # Features
 
 - Add support for `foo:"name"`.
 
-- Handle MarshalText.
-
-
-
+- Add extCode: followed by uint, denotes an extension?
 
 # TypeCodec state
 
@@ -77,17 +56,45 @@ and created all the types' TypeCodecs.
 
 # Performance
 
+## Benchmarks
+
+- Maybe generate more stuff for the hyperledger benchmark. A lot of types and
+  fields are unused?
+
+
+Possible benchmarks:
+- https://github.com/robertkrimen/otto/blob/15f95af6e78dcd2030d8195a138bd88d4f403546/script.go
+- https://github.com/gocolly/colly/blob/1cd684083cf9bf9a8e33b5dfd6414d8516ae63af/http_backend.go#L161
+
+
+
 ## uint encodings
 
 See internal/benchmarks/uint-encodings.txt for data supporting the choice of
 1248 encoding.
 
+## float encodings
+
+-  Test floats reversed vs. not, but only after we pick a uint encoding.
+   Reversing only saves space for integer-valued floats, those whose fractional
+   part is a power of two, perhaps others
+   (https://play.golang.org/p/pYNbvRq1N2S). But your average float will not get
+   shorter. It's not clear if it's worth it.
 
 
+
+## Zero-copy DecodeBytes
+
+For DecodeBytes to avoid a copy, we would have to be sure that the underlying
+buffer isn't shared. Doing so would also pin the entire buffer, so it wouldn't
+be a good idea unless a significant amount of the buffer were encoded as byte
+slices.
+
+## Allocations
 
 Run
     go build -gcflags -S ./codecapi >& /tmp/asm
-periodically and look for runtime.newobject to see what's escaping to the heap.
+after changes and look for runtime.newobject to see what's escaping to the heap.
 
 ## Micro-Benchmarks
 
@@ -96,8 +103,6 @@ periodically and look for runtime.newobject to see what's escaping to the heap.
 - Compare gob length-prefixed values with nValues and start/end.
 
 - Compare the redundant (ptrCode; startCode) sequence with just startCode.
-
-Add extCode: followed by uint, denotes an extension?
 
 Faster []bool codec.
 
@@ -126,11 +131,16 @@ in the encoded header.
 
 # Generics
 
+Generics doesn't really buy you much. The type codecs for slices, maps and pointers no
+longer need to be generated, but those for structs still do.
+
 This package no longer uses generics, but it used to. To see that version, check
 out tag "uses-generics" and:
 
 - Make sure ~/repos/go is at the dev.go2go branch.
 - Use the `go2` alias, already defined in ~/.bash_aliases.
+
+
 
 # Notes
 
