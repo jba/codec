@@ -12,6 +12,7 @@ import (
 	"fmt"
 	"io"
 	"math"
+	"math/bits"
 	"reflect"
 )
 
@@ -26,8 +27,8 @@ type Encoder struct {
 	w          io.Writer
 	buf        []byte
 	typeNums   map[reflect.Type]int
-	seen       map[uintptr]uint64 // for references; see StartStruct
-	gobBuf     [1 + uint64Size]byte
+	seen       map[uintptr]uint64   // for references; see StartStruct
+	scratch    [1 + uint64Size]byte // for small encoding jobs
 	encodeUint func(uint64)
 }
 
@@ -75,9 +76,8 @@ func (e *Encoder) Encode(x interface{}) (err error) {
 	initial := e.buf  // remember that
 
 	// Encode total size in 8 bytes.
-	var szbuf [8]byte
-	binary.LittleEndian.PutUint64(szbuf[:], uint64(len(initial)+len(data)))
-	if _, err := e.w.Write(szbuf[:]); err != nil {
+	binary.LittleEndian.PutUint64(e.scratch[:8], uint64(len(initial)+len(data)))
+	if _, err := e.w.Write(e.scratch[:8]); err != nil {
 		return err
 	}
 	if _, err := e.w.Write(initial); err != nil {
@@ -271,11 +271,28 @@ func (e *Encoder) encodeUint1248(u uint64) {
 }
 
 func (e *Encoder) encodeUintGob(u uint64) {
-	panic("unimp")
+	if u < endCode {
+		e.writeByte(byte(u))
+	} else {
+		var buf [uint64Size]byte
+		binary.BigEndian.PutUint64(buf[:], u)
+		bc := bits.LeadingZeros64(u) >> 3 // uint64Size - bytelen(x)
+		e.encodeLen(uint64Size - bc)
+		e.writeBytes(buf[bc:])
+	}
 }
 
 func (d *Decoder) decodeUintGob() uint64 {
-	panic("unimp")
+	b := d.readByte()
+	if b < endCode {
+		return uint64(b)
+	}
+	n := d.resolveLen(b)
+	var u uint64
+	for _, b := range d.readBytes(n) {
+		u = u<<8 | uint64(b)
+	}
+	return u
 }
 
 // DecodeUint decodes a uint64.
@@ -368,6 +385,10 @@ func (e *Encoder) encodeLen(n int) {
 // decodeLen decodes the length of a byte sequence.
 func (d *Decoder) decodeLen() int {
 	b := d.readByte()
+	return d.resolveLen(b)
+}
+
+func (d *Decoder) resolveLen(b byte) int {
 	switch b {
 	case nBytesCode:
 		return int(d.DecodeUint())

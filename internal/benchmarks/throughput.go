@@ -78,9 +78,9 @@ Decoding was not slower (20ms vs. 20ms)
 // is about 60 M/s).
 const throughputThreshold = 60
 
-func runBreakEvenThroughput() {
-	for _, bd := range datas {
-		if err := breakEvenThroughput(jbaCodec, jbaCodec1248, bd); err != nil {
+func runBreakEvenThroughput(dataNames []string) {
+	for _, bd := range datasToRun(dataNames) {
+		if err := breakEvenThroughput(jbaCodec1248, jbaCodecGob, bd); err != nil {
 			log.Fatal(err)
 		}
 		fmt.Println()

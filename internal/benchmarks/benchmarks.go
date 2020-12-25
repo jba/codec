@@ -38,8 +38,8 @@ var (
 var throughputs = []int{
 	0,    // unlimited throughput; speed of memory
 	3000, // reading from local disk
-	//	250,  // reading from a GCS bucket
-	100, // reading from a cloud DB
+	250,  // reading from a GCS bucket
+	100,  // reading from a cloud DB
 }
 
 type Codec struct {
@@ -66,7 +66,7 @@ var (
 		jbaCodecDecode,
 	}
 	jbaCodecGob = Codec{
-		"jba/codec 1248",
+		"jba/codec gob",
 		func(w io.Writer, data interface{}) error {
 			e := codecapi.NewEncoder(w, codecapi.EncodeOptions{GobEncodedUints: true})
 			return e.Encode(data)
@@ -178,7 +178,7 @@ func main() {
 		fmt.Println("Generated files, exiting.")
 
 	case "bet":
-		runBreakEvenThroughput()
+		runBreakEvenThroughput(flag.Args()[1:])
 
 	case "bm":
 		runBenchmarks(flag.Args()[1:])
@@ -202,14 +202,8 @@ func runBenchmarks(dataNames []string) {
 		}()
 	}
 
-	runName := map[string]bool{}
-	for _, n := range dataNames {
-		runName[n] = true
-	}
-	for _, bd := range datas {
-		if len(runName) == 0 || runName[bd.name] {
-			runBenchmark(bd)
-		}
+	for _, bd := range datasToRun(dataNames) {
+		runBenchmark(bd)
 	}
 
 	if *allocprofile {
@@ -220,6 +214,23 @@ func runBenchmarks(dataNames []string) {
 			log.Fatal(err)
 		}
 	}
+}
+
+func datasToRun(dataNames []string) []benchmarkData {
+	if len(dataNames) == 0 {
+		return datas
+	}
+	runName := map[string]bool{}
+	for _, n := range dataNames {
+		runName[n] = true
+	}
+	var ds []benchmarkData
+	for _, bd := range datas {
+		if runName[bd.name] {
+			ds = append(ds, bd)
+		}
+	}
+	return ds
 }
 
 // runBenchmark uses bd to read data to be used for benchmarks.

@@ -39,17 +39,6 @@ type generatedTestTypes struct {
 	DefArray definedArray
 	DefMap   definedMap
 	Pos      token.Pos
-
-	Stocks []StockData
-}
-type StockData struct {
-	Symbol    string
-	Intervals []Interval
-}
-
-type Interval struct {
-	Start, End                     time.Time
-	Open, Close, Low, High, Volume float64
 }
 
 type node struct {
@@ -88,7 +77,8 @@ func TestEncodeDecode(t *testing.T) {
 
 func testEncodeDecode(t *testing.T, aopts api.EncodeOptions) {
 	want := []interface{}{
-		nil, 1, -5, 98.6, uint64(1 << 63), "Luke Luck likes lakes", true,
+		nil, "Luke Luck likes lakes", true,
+		1, -5, 98.6, 65000, uint64(65000), uint64(1 << 63),
 		time.Date(2020, time.January, 26, 0, 0, 0, 0, time.UTC),
 		&node{1, &node{2, &node{3, nil}}},
 		(*node)(nil),
@@ -105,38 +95,6 @@ func testEncodeDecode(t *testing.T, aopts api.EncodeOptions) {
 		definedSlice{1, 2, 3},
 		definedArray{-7},
 		definedMap{"true": true},
-		[]StockData{{Symbol: "XVLD", Intervals: []Interval{
-			{
-				time.Date(2000, time.January, 1, 9, 0, 0, 0, time.UTC),
-				time.Date(2000, time.January, 1, 17, 0, 0, 0, time.UTC),
-				426.91, 430.06, 424.64, 459.29, 9.696951891448457,
-			},
-			{
-				time.Date(2000, time.January, 1, 9, 0, 0, 0, time.UTC),
-				time.Date(2000, time.January, 1, 17, 0, 0, 0, time.UTC),
-				426.91, 430.06, 424.64, 459.29, 9.696951891448457,
-			},
-			{
-				time.Date(2000, time.January, 1, 9, 0, 0, 0, time.UTC),
-				time.Date(2000, time.January, 1, 17, 0, 0, 0, time.UTC),
-				426.91, 430.06, 424.64, 459.29, 9.696951891448457,
-			},
-			{
-				time.Date(2000, time.January, 1, 9, 0, 0, 0, time.UTC),
-				time.Date(2000, time.January, 1, 17, 0, 0, 0, time.UTC),
-				426.91, 430.06, 424.64, 459.29, 9.696951891448457,
-			},
-			{
-				time.Date(2000, time.January, 1, 9, 0, 0, 0, time.UTC),
-				time.Date(2000, time.January, 1, 17, 0, 0, 0, time.UTC),
-				426.91, 430.06, 424.64, 459.29, 9.696951891448457,
-			},
-			{
-				time.Date(2000, time.January, 1, 9, 0, 0, 0, time.UTC),
-				time.Date(2000, time.January, 1, 17, 0, 0, 0, time.UTC),
-				426.91, 430.06, 424.64, 459.29, 9.696951891448457,
-			},
-		}}},
 	}
 	var buf bytes.Buffer
 	apiOpts = aopts
