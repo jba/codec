@@ -4,8 +4,6 @@ This is a fork of pkgsite/internal/godoc/codec.
 
 TODO:
 
-- Improve test coverage.
-
 - Test float byte reversal. See "float encodings" below.
 
 - Put benchmarks in separate module to avoid dependencies on GCS, GCP, etc.
@@ -17,8 +15,6 @@ TODO:
 # Features
 
 - Add support for `foo:"name"`.
-
-- Add extCode: followed by uint, denotes an extension?
 
 # TypeCodec state
 

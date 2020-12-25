@@ -41,6 +41,7 @@ type generatedTestTypes struct {
 	DefArray definedArray
 	DefMap   definedMap
 	Pos      token.Pos
+	//Skip     Skip // add this to re-generate code for TestSkip; see skip_code_test.go
 }
 
 // for testing sharing and cycles
@@ -120,6 +121,20 @@ func testEncodeDecode(t *testing.T, aopts api.EncodeOptions) {
 	}
 }
 
+func TestSharing(t *testing.T) {
+	n := &node{Value: 1, Next: &node{Value: 2}}
+	n.Next.Next = n // create a cycle
+	d := NewDecoder(bytes.NewReader(mustEncode(t, n)))
+	g, err := d.Decode()
+	if err != nil {
+		t.Fatal(err)
+	}
+	got := g.(*node)
+	if !cmp.Equal(got, n) {
+		t.Error("did not preserve cycle")
+	}
+}
+
 func TestEncodeErrors(t *testing.T) {
 	// The only encoding error is an unregistered type.
 	e := NewEncoder(&bytes.Buffer{}, nil)
@@ -171,51 +186,41 @@ func checkMessage(t *testing.T, err error, target string) {
 	}
 }
 
-// TODO: figure out how to test skipping. We need two versions of the same struct.
+type Skip struct {
+	U  uint64
+	S1 string
+	S2 string
+	L  []*Skip
+}
 
-// func TestSkip(t *testing.T) {
-// 	var buf bytes.Buffer
-// 	e := NewEncoder(&buf, nil)
-// 	values := []interface{}{
-// 		1,
-// 		false,
-// 		"yes",
-// 		"no",
-// 		65000,
-// 	}
-// 	for _, v := range values {
-// 		if err := e.Encode(v); err != nil {
-// 			t.Fatal(err)
-// 		}
-// 	}
+// Test Skip by calling Decoder.Unknown repeatedly.
+func TestSkip(t *testing.T) {
+	s := &Skip{
+		U:  1,     // < endCode
+		S1: "ab",  // bytes2
+		S2: "abc", // bytes3
+	}
+	v := Skip{
+		U:  255,                // bytes1
+		S1: "abcd",             //bytes4
+		S2: "elephantine",      // nBytes
+		L:  []*Skip{s, s, nil}, // nValues, ptrCode, startCode, refCode, nilCode
+	}
 
-// 	d := NewDecoder(bytes.NewReader(buf.Bytes()))
-// 	// Skip odd indexes.
-// 	for i, want := range values {
-// 		if i%2 == 0 {
-// 			got, err := d.Decode()
-// 			if err != nil {
-// 				t.Fatal(err)
-// 			}
-// 			if !reflect.DeepEqual(got, want) {
-// 				t.Errorf("got %v, want %v", got, want)
-// 			}
-// 		} else {
-// 			d.skip()
-// 		}
-// 	}
-// }
+	var buf bytes.Buffer
+	e := NewEncoder(&buf, &EncodeOptions{TrackPointers: true})
+	if err := e.Encode(v); err != nil {
+		t.Fatal(err)
+	}
 
-func TestSharing(t *testing.T) {
-	n := &node{Value: 1, Next: &node{Value: 2}}
-	n.Next.Next = n // create a cycle
-	d := NewDecoder(bytes.NewReader(mustEncode(t, n)))
-	g, err := d.Decode()
+	d := NewDecoder(bytes.NewReader(buf.Bytes()))
+
+	got, err := d.Decode()
 	if err != nil {
 		t.Fatal(err)
 	}
-	got := g.(*node)
-	if !cmp.Equal(got, n) {
-		t.Error("did not preserve cycle")
+	var want Skip
+	if !cmp.Equal(got, want) {
+		t.Errorf("got %+v, want %+v", got, want)
 	}
 }

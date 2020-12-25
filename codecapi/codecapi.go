@@ -500,8 +500,8 @@ func (d *Decoder) skip() {
 		// Small integers represent themselves in a single byte.
 		return
 	}
-	if b > bytes0Code && b <= bytes4Code {
-		d.readBytes(int(b - bytes0Code))
+	if b >= bytes4Code && b < bytes0Code {
+		d.readBytes(int(bytes0Code - b))
 		return
 	}
 	switch b {
@@ -520,6 +520,9 @@ func (d *Decoder) skip() {
 	case refCode:
 		// A uint follows.
 		d.DecodeUint()
+	case ptrCode:
+		// One value follows.
+		d.skip()
 	case startCode:
 		// Skip until we see endCode.
 		for d.curByte() != endCode {
@@ -643,7 +646,7 @@ func Fail(err error) {
 }
 
 func (d *Decoder) badcode(c byte) {
-	panic(fmt.Sprintf("bad code %d at %d", c, d.i-1))
+	Failf("bad code %d at %d", c, d.i-1)
 }
 
 // codecError wraps errors from Fail so a recover
