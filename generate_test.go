@@ -17,6 +17,7 @@ import (
 	"time"
 
 	"github.com/google/go-cmp/cmp"
+	foo "github.com/jba/codec/internal/testpkg"
 )
 
 var update = flag.Bool("update", false, "update goldens instead of checking against them")
@@ -29,7 +30,7 @@ type (
 
 func TestGoName(t *testing.T) {
 	var r io.Reader
-	g := &generator{pkg: "codec"}
+	g := &generator{pkg: "github.com/jba/codec"}
 	for _, test := range []struct {
 		v    interface{}
 		want string
@@ -69,6 +70,8 @@ type genStruct struct {
 	U16 uint16
 	U32 uint32
 	U64 uint64
+
+	T foo.T
 }
 
 func TestGenerate(t *testing.T) {

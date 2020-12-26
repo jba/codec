@@ -1,4 +1,4 @@
-package main
+package data
 
 import (
 	"encoding/gob"
@@ -15,7 +15,7 @@ import (
 // This is not the most efficient representation, but it does demonstrate
 // numbers-heavy data.
 
-var stocks = gobBenchmarkData("stocks", func() interface{} { return new([]*StockData) })
+var Stocks = gobBenchmarkData("stocks", func() interface{} { return new([]*StockData) })
 
 type StockData struct {
 	Symbol    string
@@ -29,7 +29,7 @@ type Interval struct {
 
 func generateStockDataToFile(filename string) error {
 	sds := generateStockData(200, 365*20)
-	return writeNewFile(filename, func(f *os.File) error {
+	return WriteNewFile(filename, func(f *os.File) error {
 		return gob.NewEncoder(f).Encode(sds)
 	})
 }

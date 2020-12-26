@@ -20,12 +20,14 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	api "github.com/jba/codec/codecapi"
+	foo "github.com/jba/codec/internal/testpkg"
 )
 
 // After a change that affects generated code, run "go generate".
 // Also run it if a test fails with 'unregistered type "*codec.node"'.
 
-//go:generate ./generate_for_tests.sh
+//go:generate rm -f types.gen_test.go
+//go:generate go test -generate types.gen_test.go
 
 var generateTestCodeFilename = flag.String("generate", "", "generate code for tests to filename")
 
@@ -36,13 +38,14 @@ type generatedTestTypes struct {
 	Slice    []int
 	Array    [1]int
 	Map      map[string]bool
-	Struct   structType
+	Struct   StructType
 	Time     time.Time
 	IP       net.IP
 	DefSlice definedSlice
 	DefArray definedArray
 	DefMap   definedMap
 	Pos      token.Pos
+	T        foo.T
 	//Skip     Skip // add this to re-generate code for TestSkip; see skip_code_test.go
 }
 
@@ -52,7 +55,7 @@ type node struct {
 	Next  *node
 }
 
-type structType struct {
+type StructType struct {
 	N node
 	B byte
 }
@@ -60,7 +63,7 @@ type structType struct {
 func TestMain(m *testing.M) {
 	flag.Parse()
 	if *generateTestCodeFilename != "" {
-		if err := GenerateFile(*generateTestCodeFilename, "codec", generatedTestTypes{}); err != nil {
+		if err := GenerateFile(*generateTestCodeFilename, "github.com/jba/codec", generatedTestTypes{}); err != nil {
 			log.Fatal(err)
 		}
 		fmt.Println("generated file, now run tests again")
@@ -73,7 +76,6 @@ func TestEncodeDecode(t *testing.T) {
 	for _, opts := range []api.EncodeOptions{
 		{TrackPointers: false},
 		{TrackPointers: true},
-		{GobEncodedUints: true},
 	} {
 		t.Run(fmt.Sprintf("%+v", opts), func(t *testing.T) {
 			testEncodeDecode(t, opts)
@@ -99,7 +101,7 @@ func testEncodeDecode(t *testing.T, aopts api.EncodeOptions) {
 		[]int(nil),
 		map[string]bool{"a": true, "b": false},
 		map[string]bool(nil),
-		structType{B: 129, N: node{1, nil}},
+		StructType{B: 129, N: node{1, nil}},
 		definedSlice{1, 2, 3},
 		definedArray{-7},
 		definedMap{"true": true},

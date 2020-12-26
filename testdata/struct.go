@@ -5,9 +5,10 @@ package somepkg
 import (
 	"github.com/jba/codec"
 	"github.com/jba/codec/codecapi"
+	"github.com/jba/codec/internal/testpkg"
 )
 
-// Fields of codec_genStruct: S B I I8 I16 I32 I64 F32 F64 U8 U16 U32 U64
+// Fields of codec_genStruct: S B I I8 I16 I32 I64 F32 F64 U8 U16 U32 U64 T
 
 type ptr_codec_genStruct_codec struct{}
 
@@ -108,6 +109,10 @@ func (c codec_genStruct_codec) encode(e *codecapi.Encoder, x *codec.genStruct) {
 		e.EncodeUint(12)
 		e.EncodeUint(x.U64)
 	}
+	if x.T != nil {
+		e.EncodeUint(13)
+		(foo_T_codec{}).encode(e, foo.T(x.T))
+	}
 	e.EndStruct()
 }
 
@@ -151,6 +156,8 @@ func (c codec_genStruct_codec) decode(d *codecapi.Decoder, x *codec.genStruct) {
 			x.U32 = uint32(d.DecodeUint())
 		case 12:
 			x.U64 = d.DecodeUint()
+		case 13:
+			(foo_T_codec{}).decode(d, &x.T)
 		default:
 			d.UnknownField("codec.genStruct", n)
 		}
@@ -160,4 +167,43 @@ func (c codec_genStruct_codec) decode(d *codecapi.Decoder, x *codec.genStruct) {
 func init() {
 	codecapi.Register(codec.genStruct{}, codec_genStruct_codec{})
 	codecapi.Register(&codec.genStruct{}, ptr_codec_genStruct_codec{})
+}
+
+type foo_T_codec struct{}
+
+func (foo_T_codec) Init() {}
+
+func (c foo_T_codec) Encode(e *codecapi.Encoder, x interface{}) { c.encode(e, x.(foo.T)) }
+
+func (c foo_T_codec) encode(e *codecapi.Encoder, s foo.T) {
+	if s == nil {
+		e.EncodeNil()
+		return
+	}
+	e.StartList(len(s))
+	for _, x := range s {
+		e.EncodeInt(int64(x))
+	}
+}
+
+func (c foo_T_codec) Decode(d *codecapi.Decoder) interface{} {
+	var x foo.T
+	c.decode(d, &x)
+	return x
+}
+
+func (c foo_T_codec) decode(d *codecapi.Decoder, p *foo.T) {
+	n := d.StartList()
+	if n < 0 {
+		return
+	}
+	s := make([]int, n)
+	for i := 0; i < n; i++ {
+		s[i] = int(d.DecodeInt())
+	}
+	*p = s
+}
+
+func init() {
+	codecapi.Register(foo.T(nil), foo_T_codec{})
 }

@@ -12,6 +12,7 @@ import (
 	"go/format"
 	"io"
 	"os"
+	"path"
 	"reflect"
 	"sort"
 	"strings"
@@ -23,8 +24,8 @@ import (
 // GenerateFile writes encoders and decoders to filename.
 // It generates code for the type of each given value, as well
 // as any types they depend on.
-// packageName is the name following the file's package declaration.
-func GenerateFile(filename, packageName string, values ...interface{}) error {
+// packagePath is the output package path.
+func GenerateFile(filename, packagePath string, values ...interface{}) error {
 	if !strings.HasSuffix(filename, ".go") {
 		filename += ".go"
 	}
@@ -36,7 +37,7 @@ func GenerateFile(filename, packageName string, values ...interface{}) error {
 	if err != nil {
 		return err
 	}
-	if err := generate(f, packageName, fieldNames, values...); err != nil {
+	if err := generate(f, packagePath, fieldNames, values...); err != nil {
 		_ = f.Close()
 		return err
 	}
@@ -71,9 +72,9 @@ func readFieldNames(filename string) (map[string][]string, error) {
 	return m, nil
 }
 
-func generate(w io.Writer, packageName string, fieldNames map[string][]string, vs ...interface{}) error {
+func generate(w io.Writer, packagePath string, fieldNames map[string][]string, vs ...interface{}) error {
 	g := &generator{
-		pkg:        packageName,
+		pkg:        packagePath,
 		done:       map[reflect.Type]bool{},
 		fieldNames: fieldNames,
 	}
@@ -83,8 +84,8 @@ func generate(w io.Writer, packageName string, fieldNames map[string][]string, v
 	funcs := template.FuncMap{
 		"typeID":     g.typeIdentifier,
 		"goName":     g.goName,
-		"encodeStmt": g.encodeStatement,
-		"decodeStmt": g.decodeStatement,
+		"encodeStmt": g.encodeStmt,
+		"decodeStmt": g.decodeStmt,
 		"encodeFunc": g.encodeFunc,
 		"decodeFunc": g.decodeFunc,
 	}
@@ -98,7 +99,7 @@ func generate(w io.Writer, packageName string, fieldNames map[string][]string, v
 	g.arrayTemplate = newTemplate("array", arrayBody)
 	g.mapTemplate = newTemplate("map", mapBody)
 	g.structTemplate = newTemplate("struct", structBody)
-	g.marshalTemplate = newTemplate("marshaller", marshalBody)
+	g.marshalTemplate = newTemplate("marshaler", marshalBody)
 
 	for _, v := range vs {
 		g.todo = append(g.todo, reflect.TypeOf(v))
@@ -149,7 +150,7 @@ func (g *generator) generate() ([]byte, error) {
 		t := g.todo[0]
 		g.todo = g.todo[1:]
 		if !g.done[t] {
-			if t.PkgPath() != "" && t.PkgPath() != "main" {
+			if t.PkgPath() != "" && t.PkgPath() != g.pkg {
 				g.importMap[t.PkgPath()] = true
 			}
 			piece, err := g.gen(t)
@@ -174,7 +175,7 @@ func (g *generator) generate() ([]byte, error) {
 		Package string
 		Imports []string
 	}{
-		Package: g.pkg,
+		Package: path.Base(g.pkg),
 		Imports: imports,
 	})
 	if err != nil {
@@ -387,8 +388,8 @@ func execute(tmpl *template.Template, data interface{}) ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-// encodeStatement returns a Go statement that encodes a value denoted by arg, of type t.
-func (g *generator) encodeStatement(t reflect.Type, arg string) string {
+// encodeStmt returns a Go statement that encodes a value denoted by arg, of type t.
+func (g *generator) encodeStmt(t reflect.Type, arg string) string {
 	bn, native := builtinName(t)
 	if bn != "" {
 		// t can be handled by an Encoder method.
@@ -441,7 +442,7 @@ func (g *generator) decodeFunc(t reflect.Type) string {
 	return fmt.Sprintf("(%s_codec{}).decode", typeName)
 }
 
-func (g *generator) decodeStatement(t reflect.Type, arg string) string {
+func (g *generator) decodeStmt(t reflect.Type, arg string) string {
 	bn, native := builtinName(t)
 	if bn != "" {
 		// t can be handled by a Decoder method.
@@ -506,15 +507,14 @@ func builtinName(t reflect.Type) (suffix string, native reflect.Type) {
 
 // goName returns the name of t as it should appear in a Go program.
 // E.g. "go/ast.File" => ast.File
-// It assumes all package paths are represented in the file by their last element.
-// TODO: relax that assumption.
 func (g *generator) goName(t reflect.Type) string {
 	if t.Name() != "" {
-		s := t.String()
-		if strings.HasPrefix(s, g.pkg+".") {
-			s = s[len(g.pkg)+1:]
+		// For a package whose name does not equal the last component of its path,
+		// t.String() will use the name and t.PkgPath() will be the full path.
+		if t.PkgPath() == g.pkg {
+			return t.Name()
 		}
-		return s
+		return t.String()
 	}
 	switch t.Kind() {
 	case reflect.Slice:

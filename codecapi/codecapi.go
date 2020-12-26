@@ -23,29 +23,21 @@ const uint64Size = 8
 var header = []byte("GJC0")
 
 type Encoder struct {
-	opts       EncodeOptions
-	w          io.Writer
-	buf        []byte
-	typeNums   map[reflect.Type]int
-	seen       map[uintptr]uint64 // for references; see StartStruct
-	UintSizes  [5]int             // number of 0, 1, 2, 4, 8-byte uints
-	encodeUint func(uint64)
+	opts     EncodeOptions
+	w        io.Writer
+	buf      []byte
+	typeNums map[reflect.Type]int
+	seen     map[uintptr]uint64 // for references; see StartStruct
 }
 
 type EncodeOptions struct {
-	TrackPointers   bool
-	GobEncodedUints bool
+	TrackPointers bool
 }
 
 func NewEncoder(w io.Writer, opts EncodeOptions) *Encoder {
 	e := &Encoder{w: w, opts: opts}
 	if e.opts.TrackPointers {
 		e.seen = map[uintptr]uint64{}
-	}
-	if e.opts.GobEncodedUints {
-		e.encodeUint = e.encodeUintGob
-	} else {
-		e.encodeUint = e.encodeUint1248
 	}
 	return e
 }
@@ -92,13 +84,10 @@ type Decoder struct {
 	i          int // offset
 	typeCodecs []typeCodec
 	refs       []interface{} // list of struct pointers, in the order seen
-	decodeUint func() uint64
 }
 
 func NewDecoder(r io.Reader) *Decoder {
-	d := &Decoder{r: r}
-	d.decodeUint = d.decodeUint1248
-	return d
+	return &Decoder{r: r}
 }
 
 // Decode decodes a value encoded with Encoder.Encode.
@@ -197,21 +186,17 @@ const (
 	// Bytes less than endCode represent themselves.
 )
 
-func (e *Encoder) EncodeUint(u uint64) { e.encodeUint(u) }
-
 // EncodeUint encodes a uint64.
-func (e *Encoder) encodeUint1248(u uint64) {
+func (e *Encoder) EncodeUint(u uint64) {
 	var buf [4]byte
 	switch {
 	case u < endCode:
 		// u fits into the initial byte.
 		e.writeByte(byte(u))
-		e.UintSizes[0]++
 
 	case u <= math.MaxUint8:
 		e.writeByte(bytes1Code)
 		e.writeByte(byte(u))
-		e.UintSizes[1]++
 
 	case u <= math.MaxUint16:
 		// Encode as a sequence of 2 bytes, the little-endian representation of
@@ -219,7 +204,6 @@ func (e *Encoder) encodeUint1248(u uint64) {
 		e.writeByte(bytes2Code)
 		binary.LittleEndian.PutUint16(buf[:2], uint16(u))
 		e.writeBytes(buf[:2])
-		e.UintSizes[2]++
 
 	case u <= math.MaxUint32:
 		// Encode as a sequence of 4 bytes, the little-endian representation of
@@ -227,7 +211,6 @@ func (e *Encoder) encodeUint1248(u uint64) {
 		e.writeByte(bytes4Code)
 		binary.LittleEndian.PutUint32(buf[:], uint32(u))
 		e.writeBytes(buf[:])
-		e.UintSizes[3]++
 
 	default:
 		// Encode as a sequence of 8 bytes, the little-endian representation of
@@ -235,42 +218,11 @@ func (e *Encoder) encodeUint1248(u uint64) {
 		e.writeByte(nBytesCode)
 		e.writeByte(uint64Size)
 		e.writeUint64(u)
-		e.UintSizes[4]++
 	}
-}
-
-func (e *Encoder) encodeUintGob(u uint64) {
-	if u < endCode {
-		e.writeByte(byte(u))
-	} else {
-		var buf [uint64Size]byte
-		binary.BigEndian.PutUint64(buf[:], u)
-		bc := bits.LeadingZeros64(u) >> 3 // uint64Size - bytelen(x)
-		e.encodeLen(uint64Size - bc)
-		e.writeBytes(buf[bc:])
-
-	}
-}
-
-func (d *Decoder) decodeUintGob() uint64 {
-	b := d.readByte()
-	if b < endCode {
-		return uint64(b)
-	}
-	n := d.resolveLen(b)
-	var u uint64
-	for _, b := range d.readBytes(n) {
-		u = u<<8 | uint64(b)
-	}
-	return u
-}
-
-func (d *Decoder) DecodeUint() uint64 {
-	return d.decodeUint()
 }
 
 // DecodeUint decodes a uint64.
-func (d *Decoder) decodeUint1248() uint64 {
+func (d *Decoder) DecodeUint() uint64 {
 	b := d.readByte()
 	switch {
 	case b < endCode:
@@ -640,15 +592,11 @@ func (e *Encoder) encodeInitial() {
 	for t, num := range e.typeNums {
 		names[num] = typeName(t)
 	}
-	ei := e.encodeUint
-	e.encodeUint = e.encodeUint1248
-	defer func() { e.encodeUint = ei }()
 	e.StartList(len(names))
 	for _, n := range names {
 		e.EncodeString(n)
 	}
 	e.EncodeBool(e.opts.TrackPointers)
-	e.EncodeBool(e.opts.GobEncodedUints)
 }
 
 // decodeInitial decodes metadata that appears at the start of the
@@ -667,12 +615,6 @@ func (d *Decoder) decodeInitial() {
 		d.typeCodecs[num] = tc
 	}
 	d.opts.TrackPointers = d.DecodeBool()
-	d.opts.GobEncodedUints = d.DecodeBool()
-	if d.opts.GobEncodedUints {
-		d.decodeUint = d.decodeUintGob
-	} else {
-		d.decodeUint = d.decodeUint1248
-	}
 }
 
 //////////////// Errors

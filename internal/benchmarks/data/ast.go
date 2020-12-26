@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package main
+package data
 
 // Go parse trees: the ast.Files from the net/http package.
 // These have cycles, which we remove before saving.
@@ -17,7 +17,7 @@ import (
 	"runtime"
 )
 
-var astData = gobBenchmarkData("ast", func() interface{} { return new(map[string]*ast.File) })
+var ASTData = gobBenchmarkData("ast", func() interface{} { return new(map[string]*ast.File) })
 
 var astTypes = []interface{}{
 	ast.ArrayType{},
@@ -156,7 +156,7 @@ func generateASTToFile(filename string) error {
 			return true
 		})
 	}
-	return writeNewFile(filename, func(f *os.File) error {
+	return WriteNewFile(filename, func(f *os.File) error {
 		return gob.NewEncoder(f).Encode(httpPkg.Files)
 	})
 }

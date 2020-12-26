@@ -6,10 +6,10 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"time"
 
 	"github.com/jba/codec/internal/bench"
+	"github.com/jba/codec/internal/benchmarks/data"
 )
 
 /*
@@ -79,17 +79,17 @@ Decoding was not slower (20ms vs. 20ms)
 const throughputThreshold = 60
 
 func runBreakEvenThroughput(dataNames []string) {
-	for _, bd := range datasToRun(dataNames) {
-		if err := breakEvenThroughput(jbaCodec, jbaCodecGob, bd); err != nil {
-			log.Fatal(err)
-		}
-		fmt.Println()
-	}
+	// for _, bd := range datasToRun(dataNames) {
+	// 	if err := breakEvenThroughput(jbaCodec, jbaCodecGob, bd); err != nil {
+	// 		log.Fatal(err)
+	// 	}
+	// 	fmt.Println()
+	// }
 }
 
-func breakEvenThroughput(origCodec, spaceOptCodec Codec, bd benchmarkData) error {
-	fmt.Printf("%s vs. %s on %s\n", origCodec.name, spaceOptCodec.name, bd.name)
-	data, err := bd.read()
+func breakEvenThroughput(origCodec, spaceOptCodec Codec, bd data.BenchmarkData) error {
+	fmt.Printf("%s vs. %s on %s\n", origCodec.name, spaceOptCodec.name, bd.Name)
+	data, err := bd.Read()
 	if err != nil {
 		return err
 	}
@@ -129,11 +129,11 @@ func breakEvenThroughput(origCodec, spaceOptCodec Codec, bd benchmarkData) error
 	}
 
 	fmt.Println("decoding:")
-	origTime, err = runDecoded(origCodec, origEnc, bd.newptr)
+	origTime, err = runDecoded(origCodec, origEnc, bd.Newptr)
 	if err != nil {
 		return err
 	}
-	optTime, err = runDecoded(spaceOptCodec, optEnc, bd.newptr)
+	optTime, err = runDecoded(spaceOptCodec, optEnc, bd.Newptr)
 	if err != nil {
 		return err
 	}

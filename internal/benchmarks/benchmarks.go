@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+//xxxxxxxxxxxxxxxxgo:generate codecgen -o urgorji.gen.go licenses.go
+
 package main
 
 import (
@@ -20,12 +22,11 @@ import (
 
 	"github.com/jba/codec/codecapi"
 	"github.com/jba/codec/internal/bench"
+	"github.com/jba/codec/internal/benchmarks/data"
+	pkg "github.com/jba/codec/internal/benchmarks/data"
 	"github.com/jba/codec/internal/testio"
 	ucodec "github.com/ugorji/go/codec"
 )
-
-//go:generate rm -f types.gen.go
-//go:generate go run . gen code
 
 var _ ucodec.CborHandle
 
@@ -36,10 +37,10 @@ var (
 
 // Throughputs to benchmark, in Mi/sec.
 var throughputs = []int{
-	0,    // unlimited throughput; speed of memory
-	3000, // reading from local disk
-	250,  // reading from a GCS bucket
-	100,  // reading from a cloud DB
+	0, // unlimited throughput; speed of memory
+	// 3000, // reading from local disk
+	// 250,  // reading from a GCS bucket
+	//	100, // reading from a cloud DB
 }
 
 type Codec struct {
@@ -58,16 +59,6 @@ var (
 		},
 		jbaCodecDecode,
 	}
-	jbaCodecGob = Codec{
-		"jba/codec gob",
-		func(w io.Writer, data interface{}) error {
-			e := codecapi.NewEncoder(w, codecapi.EncodeOptions{GobEncodedUints: true})
-			err := e.Encode(data)
-			return err
-		},
-		jbaCodecDecode,
-	}
-
 	gobCodec = Codec{
 		"gob",
 		func(w io.Writer, data interface{}) error {
@@ -83,7 +74,6 @@ var (
 
 var codecs = []Codec{
 	jbaCodec,
-	jbaCodecGob,
 	gobCodec,
 	{
 		"ugorji-cbor",
@@ -108,33 +98,13 @@ func jbaCodecDecode(r io.Reader, ptr interface{}) error {
 	return nil
 }
 
-type benchmarkData struct {
-	name   string
-	read   func() (interface{}, error)
-	newptr func() interface{}
-}
-
-func gobBenchmarkData(name string, newptr func() interface{}) benchmarkData {
-	return benchmarkData{
-		name:   name,
-		newptr: newptr,
-		read: func() (interface{}, error) {
-			ptr := newptr()
-			if _, err := gobDecodeFile(name+".gob", ptr); err != nil {
-				return nil, err
-			}
-			return reflect.ValueOf(ptr).Elem().Interface(), nil
-		},
-	}
-}
-
-var datas = []benchmarkData{
-	astData,
-	hyperledger,
-	licenses,
-	licensesSmall,
-	stocks,
-	scores,
+var datas = []pkg.BenchmarkData{
+	data.ASTData,
+	data.Hyperledger,
+	data.Licenses,
+	data.LicensesSmall,
+	data.Stocks,
+	data.Scores,
 }
 
 var cpuProfileFile *os.File
@@ -142,16 +112,6 @@ var cpuProfileFile *os.File
 func main() {
 	flag.Parse()
 	switch flag.Arg(0) {
-	case "gen":
-		things := flag.Args()[1:]
-		if len(things) == 0 {
-			log.Fatal("need things to generate")
-		}
-		if err := generate(things); err != nil {
-			log.Fatal(err)
-		}
-		fmt.Println("Generated files, exiting.")
-
 	case "bet":
 		runBreakEvenThroughput(flag.Args()[1:])
 
@@ -184,14 +144,14 @@ func runBenchmarks(dataNames []string) {
 	if *allocprofile {
 		kind := "allocs"
 		hp := pprof.Lookup(kind)
-		err := writeNewFile(kind+".out", func(f *os.File) error { return hp.WriteTo(f, 0) })
+		err := data.WriteNewFile(kind+".out", func(f *os.File) error { return hp.WriteTo(f, 0) })
 		if err != nil {
 			log.Fatal(err)
 		}
 	}
 }
 
-func datasToRun(dataNames []string) []benchmarkData {
+func datasToRun(dataNames []string) []pkg.BenchmarkData {
 	if len(dataNames) == 0 {
 		return datas
 	}
@@ -199,9 +159,9 @@ func datasToRun(dataNames []string) []benchmarkData {
 	for _, n := range dataNames {
 		runName[n] = true
 	}
-	var ds []benchmarkData
+	var ds []pkg.BenchmarkData
 	for _, bd := range datas {
-		if runName[bd.name] {
+		if runName[bd.Name] {
 			ds = append(ds, bd)
 		}
 	}
@@ -210,17 +170,17 @@ func datasToRun(dataNames []string) []benchmarkData {
 
 // runBenchmark uses bd to read data to be used for benchmarks.
 // It then uses the data to measure encoding and decoding for all the codecs.
-func runBenchmark(bd benchmarkData) {
-	data, err := bd.read()
+func runBenchmark(bd pkg.BenchmarkData) {
+	data, err := bd.Read()
 	if err != nil {
-		log.Fatalf("%s: %v", bd.name, err)
+		log.Fatalf("%s: %v", bd.Name, err)
 	}
 	for _, tput := range throughputs {
 		s := "max"
 		if tput > 0 {
 			s = fmt.Sprintf("%d", tput)
 		}
-		fmt.Printf("---- %s at %s Mi/sec ----\n", bd.name, s)
+		fmt.Printf("---- %s at %s Mi/sec ----\n", bd.Name, s)
 		fmt.Println("encode")
 		var bms []bench.Benchmark
 		encoded := make([][]byte, len(codecs))
@@ -234,7 +194,7 @@ func runBenchmark(bd benchmarkData) {
 		bms = nil
 		for i, c := range codecs {
 			c := c
-			bms = append(bms, newDecodeBenchmark(encoded[i], c, tput, bd.newptr))
+			bms = append(bms, newDecodeBenchmark(encoded[i], c, tput, bd.Newptr))
 		}
 		bench.Run(bms)
 		fmt.Println()
@@ -288,33 +248,8 @@ func newDecodeBenchmark(enc []byte, c Codec, tput int, newptr func() interface{}
 	}
 }
 
-func gobDecodeFile(filename string, ptr interface{}) (interface{}, error) {
-	f, err := os.Open(filename)
-	if err != nil {
-		return nil, err
-	}
-	defer f.Close()
-	d := gob.NewDecoder(f)
-	if err := d.Decode(ptr); err != nil {
-		return nil, err
-	}
-	return ptr, nil
-}
-
 func totalAlloc() uint64 {
 	var ms runtime.MemStats
 	runtime.ReadMemStats(&ms)
 	return ms.TotalAlloc
-}
-
-func writeNewFile(filename string, writer func(*os.File) error) error {
-	f, err := os.Create(filename)
-	if err != nil {
-		return err
-	}
-	if err := writer(f); err != nil {
-		_ = f.Close()
-		return err
-	}
-	return f.Close()
 }

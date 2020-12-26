@@ -3,14 +3,14 @@
 package codec
 
 import (
-	
 	"github.com/jba/codec/codecapi"
+	"github.com/jba/codec/internal/testpkg"
 	"go/token"
 	"net"
 	"time"
 )
 
-// Fields of generatedTestTypes: Node Slice Array Map Struct Time IP DefSlice DefArray DefMap Pos
+// Fields of generatedTestTypes: Node Slice Array Map Struct Time IP DefSlice DefArray DefMap Pos T
 
 type ptr_generatedTestTypes_codec struct{}
 
@@ -76,7 +76,7 @@ func (c generatedTestTypes_codec) encode(e *codecapi.Encoder, x *generatedTestTy
 	}
 
 	e.EncodeUint(4)
-	(structType_codec{}).encode(e, &x.Struct)
+	(StructType_codec{}).encode(e, &x.Struct)
 
 	e.EncodeUint(5)
 	(time_Time_codec{}).encode(e, x.Time)
@@ -98,6 +98,10 @@ func (c generatedTestTypes_codec) encode(e *codecapi.Encoder, x *generatedTestTy
 	if x.Pos != 0 {
 		e.EncodeUint(10)
 		e.EncodeInt(int64(x.Pos))
+	}
+	if x.T != nil {
+		e.EncodeUint(11)
+		(foo_T_codec{}).encode(e, foo.T(x.T))
 	}
 	e.EndStruct()
 }
@@ -125,7 +129,7 @@ func (c generatedTestTypes_codec) decode(d *codecapi.Decoder, x *generatedTestTy
 		case 3:
 			(map_string_bool_codec{}).decode(d, &x.Map)
 		case 4:
-			(structType_codec{}).decode(d, &x.Struct)
+			(StructType_codec{}).decode(d, &x.Struct)
 		case 5:
 			(time_Time_codec{}).decode(d, &x.Time)
 		case 6:
@@ -138,6 +142,8 @@ func (c generatedTestTypes_codec) decode(d *codecapi.Decoder, x *generatedTestTy
 			(definedMap_codec{}).decode(d, &x.DefMap)
 		case 10:
 			x.Pos = token.Pos(d.DecodeInt())
+		case 11:
+			(foo_T_codec{}).decode(d, &x.T)
 		default:
 			d.UnknownField("generatedTestTypes", n)
 		}
@@ -356,54 +362,54 @@ func (c map_string_bool_codec) decode(d *codecapi.Decoder, p *map[string]bool) {
 
 func init() { codecapi.Register(map[string]bool(nil), map_string_bool_codec{}) }
 
-// Fields of structType: N B
+// Fields of StructType: N B
 
-type ptr_structType_codec struct{}
+type ptr_StructType_codec struct{}
 
-func (ptr_structType_codec) Init() {}
+func (ptr_StructType_codec) Init() {}
 
-func (c ptr_structType_codec) Encode(e *codecapi.Encoder, x interface{}) {
-	c.encode(e, x.(*structType))
+func (c ptr_StructType_codec) Encode(e *codecapi.Encoder, x interface{}) {
+	c.encode(e, x.(*StructType))
 }
 
-func (c ptr_structType_codec) encode(e *codecapi.Encoder, x *structType) {
+func (c ptr_StructType_codec) encode(e *codecapi.Encoder, x *StructType) {
 	if !e.StartPtr(x == nil, x) {
 		return
 	}
-	(structType_codec{}).encode(e, x)
+	(StructType_codec{}).encode(e, x)
 }
 
-func (c ptr_structType_codec) Decode(d *codecapi.Decoder) interface{} {
-	var x *structType
+func (c ptr_StructType_codec) Decode(d *codecapi.Decoder) interface{} {
+	var x *StructType
 	c.decode(d, &x)
 	return x
 }
 
-func (c ptr_structType_codec) decode(d *codecapi.Decoder, p **structType) {
+func (c ptr_StructType_codec) decode(d *codecapi.Decoder, p **StructType) {
 	proceed, ref := d.StartPtr()
 	if !proceed {
 		return
 	}
 	if ref != nil {
-		*p = ref.(*structType)
+		*p = ref.(*StructType)
 		return
 	}
-	var x structType
+	var x StructType
 	d.StoreRef(&x)
-	(structType_codec{}).decode(d, &x)
+	(StructType_codec{}).decode(d, &x)
 	*p = &x
 }
 
-type structType_codec struct{}
+type StructType_codec struct{}
 
-func (structType_codec) Init() {}
+func (StructType_codec) Init() {}
 
-func (c structType_codec) Encode(e *codecapi.Encoder, x interface{}) {
-	s := x.(structType)
+func (c StructType_codec) Encode(e *codecapi.Encoder, x interface{}) {
+	s := x.(StructType)
 	c.encode(e, &s)
 }
 
-func (c structType_codec) encode(e *codecapi.Encoder, x *structType) {
+func (c StructType_codec) encode(e *codecapi.Encoder, x *StructType) {
 	e.StartStruct()
 
 	e.EncodeUint(0)
@@ -415,13 +421,13 @@ func (c structType_codec) encode(e *codecapi.Encoder, x *structType) {
 	e.EndStruct()
 }
 
-func (c structType_codec) Decode(d *codecapi.Decoder) interface{} {
-	var x structType
+func (c StructType_codec) Decode(d *codecapi.Decoder) interface{} {
+	var x StructType
 	c.decode(d, &x)
 	return x
 }
 
-func (c structType_codec) decode(d *codecapi.Decoder, x *structType) {
+func (c StructType_codec) decode(d *codecapi.Decoder, x *StructType) {
 	d.StartStruct()
 	for {
 		n := d.NextStructField()
@@ -434,14 +440,14 @@ func (c structType_codec) decode(d *codecapi.Decoder, x *structType) {
 		case 1:
 			x.B = d.DecodeByte()
 		default:
-			d.UnknownField("structType", n)
+			d.UnknownField("StructType", n)
 		}
 	}
 }
 
 func init() {
-	codecapi.Register(structType{}, structType_codec{})
-	codecapi.Register(&structType{}, ptr_structType_codec{})
+	codecapi.Register(StructType{}, StructType_codec{})
+	codecapi.Register(&StructType{}, ptr_StructType_codec{})
 }
 
 type time_Time_codec struct{}
@@ -619,3 +625,42 @@ func (c definedMap_codec) decode(d *codecapi.Decoder, p *definedMap) {
 }
 
 func init() { codecapi.Register(definedMap(nil), definedMap_codec{}) }
+
+type foo_T_codec struct{}
+
+func (foo_T_codec) Init() {}
+
+func (c foo_T_codec) Encode(e *codecapi.Encoder, x interface{}) { c.encode(e, x.(foo.T)) }
+
+func (c foo_T_codec) encode(e *codecapi.Encoder, s foo.T) {
+	if s == nil {
+		e.EncodeNil()
+		return
+	}
+	e.StartList(len(s))
+	for _, x := range s {
+		e.EncodeInt(int64(x))
+	}
+}
+
+func (c foo_T_codec) Decode(d *codecapi.Decoder) interface{} {
+	var x foo.T
+	c.decode(d, &x)
+	return x
+}
+
+func (c foo_T_codec) decode(d *codecapi.Decoder, p *foo.T) {
+	n := d.StartList()
+	if n < 0 {
+		return
+	}
+	s := make([]int, n)
+	for i := 0; i < n; i++ {
+		s[i] = int(d.DecodeInt())
+	}
+	*p = s
+}
+
+func init() {
+	codecapi.Register(foo.T(nil), foo_T_codec{})
+}

@@ -1,4 +1,4 @@
-package main
+package data
 
 import (
 	"encoding/gob"
@@ -9,7 +9,7 @@ import (
 
 // Synthetic, integer-heavy benchmark.
 
-var scores = gobBenchmarkData("scores", func() interface{} { return new([]Score) })
+var Scores = gobBenchmarkData("scores", func() interface{} { return new([]Score) })
 
 type Score struct {
 	GameID   int
@@ -19,7 +19,7 @@ type Score struct {
 
 func generateScoreDataToFile(filename string) error {
 	sd := generateScoreData(10_000, 100)
-	return writeNewFile(filename, func(f *os.File) error {
+	return WriteNewFile(filename, func(f *os.File) error {
 		return gob.NewEncoder(f).Encode(sd)
 	})
 }

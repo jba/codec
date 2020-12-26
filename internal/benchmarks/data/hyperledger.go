@@ -1,4 +1,4 @@
-package main
+package data
 
 // From https://github.com/hyperledger/fabric
 // Specifically, core/ledger/kvledger/tests/sample_data_helper.go.
@@ -8,9 +8,9 @@ import (
 	"os"
 )
 
-var hyperledger = benchmarkData{
+var Hyperledger = BenchmarkData{
 	"hyperledger",
-	func() (interface{}, error) { return hlDecodeJSON("ledgerAPIs.json") },
+	func() (interface{}, error) { return hlDecodeJSON("data/ledgerAPIs.json") },
 	func() interface{} { return new(submittedData) },
 }
 

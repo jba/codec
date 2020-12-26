@@ -4,7 +4,9 @@ This is a fork of pkgsite/internal/godoc/codec.
 
 TODO:
 
-- Test float byte reversal. See "float encodings" below.
+- Add builtin codecs for all builtin types.
+
+- Properly handle packages whose name is not the last component of import path.
 
 - Put benchmarks in separate module to avoid dependencies on GCS, GCP, etc.
 
@@ -64,20 +66,13 @@ Possible benchmarks:
 
 
 
-## uint encodings
+## numeric encodings
 
 See internal/benchmarks/uint-encodings.txt for data supporting the choice of
 1248 encoding.
 
-## float encodings
-
--  Test floats reversed vs. not, but only after we pick a uint encoding.
-   Reversing only saves space for integer-valued floats, those whose fractional
-   part is a power of two, perhaps others
-   (https://play.golang.org/p/pYNbvRq1N2S). But your average float will not get
-   shorter. It's not clear if it's worth it.
-
-
+See internal/benchmarks/float-encodings.txt for data supporting the choice of
+revering float bytes.
 
 ## Zero-copy DecodeBytes
 
