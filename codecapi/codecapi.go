@@ -23,29 +23,22 @@ const uint64Size = 8
 var header = []byte("GJC0")
 
 type Encoder struct {
-	opts        EncodeOptions
-	w           io.Writer
-	buf         []byte
-	typeNums    map[reflect.Type]int
-	seen        map[uintptr]uint64 // for references; see StartStruct
-	encodeFloat func(float64)
-	UintSizes   [5]int // number of 0, 1, 2, 4, 8-byte uints
+	opts      EncodeOptions
+	w         io.Writer
+	buf       []byte
+	typeNums  map[reflect.Type]int
+	seen      map[uintptr]uint64 // for references; see StartStruct
+	UintSizes [5]int             // number of 0, 1, 2, 4, 8-byte uints
 }
 
 type EncodeOptions struct {
 	TrackPointers bool
-	ReverseFloats bool
 }
 
 func NewEncoder(w io.Writer, opts EncodeOptions) *Encoder {
 	e := &Encoder{w: w, opts: opts}
 	if e.opts.TrackPointers {
 		e.seen = map[uintptr]uint64{}
-	}
-	if e.opts.ReverseFloats {
-		e.encodeFloat = e.encodeFloatReversed
-	} else {
-		e.encodeFloat = e.encodeFloatNormal
 	}
 	return e
 }
@@ -376,27 +369,11 @@ func (d *Decoder) DecodeBool() bool {
 
 // EncodeFloat encodes a float64.
 func (e *Encoder) EncodeFloat(f float64) {
-	e.encodeFloat(f)
-}
-
-func (e *Encoder) encodeFloatNormal(f float64) {
-	e.EncodeUint(math.Float64bits(f))
-}
-
-func (e *Encoder) encodeFloatReversed(f float64) {
 	e.EncodeUint(bits.ReverseBytes64(math.Float64bits(f)))
 }
 
 // DecodeFloat decodes a float64.
 func (d *Decoder) DecodeFloat() float64 {
-	return d.decodeFloat()
-}
-
-func (d *Decoder) decodeFloatNormal() float64 {
-	return math.Float64frombits(d.DecodeUint())
-}
-
-func (d *Decoder) decodeFloatReverse() float64 {
 	return math.Float64frombits(bits.ReverseBytes64(d.DecodeUint()))
 }
 
@@ -627,7 +604,6 @@ func (e *Encoder) encodeInitial() {
 		e.EncodeString(n)
 	}
 	e.EncodeBool(e.opts.TrackPointers)
-	e.EncodeBool(e.opts.ReverseFloats)
 }
 
 // decodeInitial decodes metadata that appears at the start of the
@@ -646,12 +622,6 @@ func (d *Decoder) decodeInitial() {
 		d.typeCodecs[num] = tc
 	}
 	d.opts.TrackPointers = d.DecodeBool()
-	d.opts.ReverseFloats = d.DecodeBool()
-	if d.opts.ReverseFloats {
-		d.decodeFloat = d.decodeFloatReverse
-	} else {
-		d.decodeFloat = d.decodeFloatNormal
-	}
 }
 
 //////////////// Errors

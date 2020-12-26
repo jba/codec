@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"go/token"
 	"log"
+	"math"
 	"net"
 	"os"
 	"strings"
@@ -17,6 +18,7 @@ import (
 	"time"
 
 	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp/cmpopts"
 	api "github.com/jba/codec/codecapi"
 )
 
@@ -81,7 +83,8 @@ func TestEncodeDecode(t *testing.T) {
 func testEncodeDecode(t *testing.T, aopts api.EncodeOptions) {
 	want := []interface{}{
 		nil, "Luke Luck likes lakes", true,
-		1, -5, 98.6, 255, 65000, uint64(65000), uint64(1 << 63),
+		1, -5, 255, 65000, uint64(65000), uint64(1 << 63),
+		0.0, 98.6, 100, 1.23e63, math.NaN(), math.Inf(1), math.Inf(-1),
 		time.Date(2020, time.January, 26, 0, 0, 0, 0, time.UTC),
 		net.IPv4(10, 128, 2, 18),
 		&node{1, &node{2, &node{3, nil}}},
@@ -115,7 +118,7 @@ func testEncodeDecode(t *testing.T, aopts api.EncodeOptions) {
 		if err != nil {
 			t.Fatalf("%#v: %v", w, err)
 		}
-		if !cmp.Equal(g, w) {
+		if !cmp.Equal(g, w, cmpopts.EquateNaNs()) {
 			t.Errorf("got %v, want %v", g, w)
 		}
 	}
