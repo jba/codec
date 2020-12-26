@@ -58,6 +58,16 @@ var (
 		},
 		jbaCodecDecode,
 	}
+	jbaCodecGob = Codec{
+		"jba/codec gob",
+		func(w io.Writer, data interface{}) error {
+			e := codecapi.NewEncoder(w, codecapi.EncodeOptions{GobEncodedUints: true})
+			err := e.Encode(data)
+			return err
+		},
+		jbaCodecDecode,
+	}
+
 	gobCodec = Codec{
 		"gob",
 		func(w io.Writer, data interface{}) error {
@@ -73,6 +83,7 @@ var (
 
 var codecs = []Codec{
 	jbaCodec,
+	jbaCodecGob,
 	gobCodec,
 	{
 		"ugorji-cbor",
