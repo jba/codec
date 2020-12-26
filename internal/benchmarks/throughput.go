@@ -80,7 +80,7 @@ const throughputThreshold = 60
 
 func runBreakEvenThroughput(dataNames []string) {
 	for _, bd := range datasToRun(dataNames) {
-		if err := breakEvenThroughput(jbaCodec, gobCodec, bd); err != nil {
+		if err := breakEvenThroughput(jbaCodec, jbaCodecRev, bd); err != nil {
 			log.Fatal(err)
 		}
 		fmt.Println()

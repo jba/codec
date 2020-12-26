@@ -53,7 +53,17 @@ var (
 		"jba/codec",
 		func(w io.Writer, data interface{}) error {
 			e := codecapi.NewEncoder(w, codecapi.EncodeOptions{})
-			return e.Encode(data)
+			err := e.Encode(data)
+			return err
+		},
+		jbaCodecDecode,
+	}
+	jbaCodecRev = Codec{
+		"jba/codec rev",
+		func(w io.Writer, data interface{}) error {
+			e := codecapi.NewEncoder(w, codecapi.EncodeOptions{ReverseFloats: true})
+			err := e.Encode(data)
+			return err
 		},
 		jbaCodecDecode,
 	}
@@ -72,17 +82,18 @@ var (
 
 var codecs = []Codec{
 	jbaCodec,
-	gobCodec,
-	{
-		"ugorji-cbor",
-		func(w io.Writer, data interface{}) error {
-			e := ucodec.NewEncoder(w, &ucodec.CborHandle{})
-			return e.Encode(data)
-		},
-		func(r io.Reader, ptr interface{}) error {
-			return ucodec.NewDecoder(r, &ucodec.CborHandle{}).Decode(ptr)
-		},
-	},
+	jbaCodecRev,
+	// gobCodec,
+	// {
+	// 	"ugorji-cbor",
+	// 	func(w io.Writer, data interface{}) error {
+	// 		e := ucodec.NewEncoder(w, &ucodec.CborHandle{})
+	// 		return e.Encode(data)
+	// 	},
+	// 	func(r io.Reader, ptr interface{}) error {
+	// 		return ucodec.NewDecoder(r, &ucodec.CborHandle{}).Decode(ptr)
+	// 	},
+	// },
 	// ugorji with msgpack and binc have almost identical performance to ugorji with cbor.
 }
 

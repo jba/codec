@@ -12,6 +12,7 @@ import (
 	"fmt"
 	"io"
 	"math"
+	"math/bits"
 	"reflect"
 )
 
@@ -22,21 +23,29 @@ const uint64Size = 8
 var header = []byte("GJC0")
 
 type Encoder struct {
-	opts     EncodeOptions
-	w        io.Writer
-	buf      []byte
-	typeNums map[reflect.Type]int
-	seen     map[uintptr]uint64 // for references; see StartStruct
+	opts        EncodeOptions
+	w           io.Writer
+	buf         []byte
+	typeNums    map[reflect.Type]int
+	seen        map[uintptr]uint64 // for references; see StartStruct
+	encodeFloat func(float64)
+	UintSizes   [5]int // number of 0, 1, 2, 4, 8-byte uints
 }
 
 type EncodeOptions struct {
 	TrackPointers bool
+	ReverseFloats bool
 }
 
 func NewEncoder(w io.Writer, opts EncodeOptions) *Encoder {
 	e := &Encoder{w: w, opts: opts}
 	if e.opts.TrackPointers {
 		e.seen = map[uintptr]uint64{}
+	}
+	if e.opts.ReverseFloats {
+		e.encodeFloat = e.encodeFloatReversed
+	} else {
+		e.encodeFloat = e.encodeFloatNormal
 	}
 	return e
 }
@@ -77,12 +86,13 @@ func (e *Encoder) Encode(x interface{}) (err error) {
 }
 
 type Decoder struct {
-	opts       EncodeOptions
-	r          io.Reader
-	buf        []byte
-	i          int // offset
-	typeCodecs []typeCodec
-	refs       []interface{} // list of struct pointers, in the order seen
+	opts        EncodeOptions
+	r           io.Reader
+	buf         []byte
+	i           int // offset
+	typeCodecs  []typeCodec
+	refs        []interface{} // list of struct pointers, in the order seen
+	decodeFloat func() float64
 }
 
 func NewDecoder(r io.Reader) *Decoder {
@@ -192,10 +202,12 @@ func (e *Encoder) EncodeUint(u uint64) {
 	case u < endCode:
 		// u fits into the initial byte.
 		e.writeByte(byte(u))
+		e.UintSizes[0]++
 
 	case u <= math.MaxUint8:
 		e.writeByte(bytes1Code)
 		e.writeByte(byte(u))
+		e.UintSizes[1]++
 
 	case u <= math.MaxUint16:
 		// Encode as a sequence of 2 bytes, the little-endian representation of
@@ -203,6 +215,7 @@ func (e *Encoder) EncodeUint(u uint64) {
 		e.writeByte(bytes2Code)
 		binary.LittleEndian.PutUint16(buf[:2], uint16(u))
 		e.writeBytes(buf[:2])
+		e.UintSizes[2]++
 
 	case u <= math.MaxUint32:
 		// Encode as a sequence of 4 bytes, the little-endian representation of
@@ -210,6 +223,7 @@ func (e *Encoder) EncodeUint(u uint64) {
 		e.writeByte(bytes4Code)
 		binary.LittleEndian.PutUint32(buf[:], uint32(u))
 		e.writeBytes(buf[:])
+		e.UintSizes[3]++
 
 	default:
 		// Encode as a sequence of 8 bytes, the little-endian representation of
@@ -217,6 +231,7 @@ func (e *Encoder) EncodeUint(u uint64) {
 		e.writeByte(nBytesCode)
 		e.writeByte(uint64Size)
 		e.writeUint64(u)
+		e.UintSizes[4]++
 	}
 }
 
@@ -361,12 +376,28 @@ func (d *Decoder) DecodeBool() bool {
 
 // EncodeFloat encodes a float64.
 func (e *Encoder) EncodeFloat(f float64) {
+	e.encodeFloat(f)
+}
+
+func (e *Encoder) encodeFloatNormal(f float64) {
 	e.EncodeUint(math.Float64bits(f))
+}
+
+func (e *Encoder) encodeFloatReversed(f float64) {
+	e.EncodeUint(bits.ReverseBytes64(math.Float64bits(f)))
 }
 
 // DecodeFloat decodes a float64.
 func (d *Decoder) DecodeFloat() float64 {
+	return d.decodeFloat()
+}
+
+func (d *Decoder) decodeFloatNormal() float64 {
 	return math.Float64frombits(d.DecodeUint())
+}
+
+func (d *Decoder) decodeFloatReverse() float64 {
+	return math.Float64frombits(bits.ReverseBytes64(d.DecodeUint()))
 }
 
 func (e *Encoder) EncodeNil() {
@@ -596,6 +627,7 @@ func (e *Encoder) encodeInitial() {
 		e.EncodeString(n)
 	}
 	e.EncodeBool(e.opts.TrackPointers)
+	e.EncodeBool(e.opts.ReverseFloats)
 }
 
 // decodeInitial decodes metadata that appears at the start of the
@@ -614,6 +646,12 @@ func (d *Decoder) decodeInitial() {
 		d.typeCodecs[num] = tc
 	}
 	d.opts.TrackPointers = d.DecodeBool()
+	d.opts.ReverseFloats = d.DecodeBool()
+	if d.opts.ReverseFloats {
+		d.decodeFloat = d.decodeFloatReverse
+	} else {
+		d.decodeFloat = d.decodeFloatNormal
+	}
 }
 
 //////////////// Errors

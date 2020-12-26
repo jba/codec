@@ -3,6 +3,7 @@ package main
 import (
 	"crypto/sha256"
 	"encoding/gob"
+	"fmt"
 	"os"
 
 	"github.com/google/licensecheck"
@@ -16,8 +17,33 @@ var (
 func licenseBenchmarkData(name string) benchmarkData {
 	return benchmarkData{
 		name,
-		func() (interface{}, error) { var ld LicenseData; return gobDecodeFile(name+".gob", &ld) },
+		func() (interface{}, error) {
+			var ld LicenseData
+			d, err := gobDecodeFile(name+".gob", &ld)
+			if err == nil {
+				n := 0
+				n100 := 0
+				for _, c := range ld.Contents {
+					cvgFloats(c.OldCoverage, &n, &n100)
+					cvgFloats(c.NewCoverage, &n, &n100)
+				}
+				fmt.Println(n, n100)
+			}
+			return d, err
+		},
 		func() interface{} { return new(*LicenseData) },
+	}
+}
+
+func cvgFloats(c licensecheck.Coverage, n, n100 *int) {
+	(*n) += 1 + len(c.Match)
+	if c.Percent == 100 {
+		(*n100)++
+	}
+	for _, m := range c.Match {
+		if m.Percent == 100 {
+			(*n100)++
+		}
 	}
 }
 

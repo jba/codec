@@ -1,0 +1,24 @@
+Reversing the bytes of floats only saves space for integer-valued floats, those whose fractional
+part is a power of two, perhaps others
+(https://play.golang.org/p/pYNbvRq1N2S). But your average float will not get
+shorter. 
+
+But it turns out it doesn't add significant time, and can help even
+when you might think it wouldn't.
+
+For example, the licenses benchmark has a few floats, most of which are not
+going to benefit. But since they represent percentages, many of them are 100.
+
+I ran
+
+	GOGC=off go run . bet licenses
+
+comparing reversed and un-reversed float encodings, ten times. In all cases,
+encoding took up less space and was faster. The break-even throughput for
+decoding ranged from 15 M/s to infinite (that is, reversed decoding was faster).
+
+The stocks benchmark uses random floats rounded to the nearest 1/100, so one
+would not expect float reversal to make a difference. Running break-even
+throughput comparison for stocks 10 times, I got faster and smaller encoding 7
+times, and decoding break-even throughput between 121 and infinite.
+
