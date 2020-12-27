@@ -13,28 +13,28 @@ import (
 
 const (
 	// ----- content types ----
-	codecSelferCcUTF88141 = 1
-	codecSelferCcRAW8141  = 255
+	codecSelferCcUTF87238 = 1
+	codecSelferCcRAW7238  = 255
 	// ----- value types used ----
-	codecSelferValueTypeArray8141     = 10
-	codecSelferValueTypeMap8141       = 9
-	codecSelferValueTypeString8141    = 6
-	codecSelferValueTypeInt8141       = 2
-	codecSelferValueTypeUint8141      = 3
-	codecSelferValueTypeFloat8141     = 4
-	codecSelferValueTypeNil8141       = 1
-	codecSelferBitsize8141            = uint8(32 << (^uint(0) >> 63))
-	codecSelferDecContainerLenNil8141 = -2147483648
+	codecSelferValueTypeArray7238     = 10
+	codecSelferValueTypeMap7238       = 9
+	codecSelferValueTypeString7238    = 6
+	codecSelferValueTypeInt7238       = 2
+	codecSelferValueTypeUint7238      = 3
+	codecSelferValueTypeFloat7238     = 4
+	codecSelferValueTypeNil7238       = 1
+	codecSelferBitsize7238            = uint8(32 << (^uint(0) >> 63))
+	codecSelferDecContainerLenNil7238 = -2147483648
 )
 
 var (
-	errCodecSelferOnlyMapOrArrayEncodeToStruct8141 = errors.New(`only encoded map or array can be decoded into a struct`)
+	errCodecSelferOnlyMapOrArrayEncodeToStruct7238 = errors.New(`only encoded map or array can be decoded into a struct`)
 )
 
-type codecSelfer8141 struct{}
+type codecSelfer7238 struct{}
 
-func codecSelfer8141False() bool { return false }
-func codecSelfer8141True() bool  { return true }
+func codecSelfer7238False() bool { return false }
+func codecSelfer7238True() bool  { return true }
 
 func init() {
 	if codec1978.GenVersion != 20 {
@@ -45,7 +45,7 @@ func init() {
 }
 
 func (x *Score) CodecEncodeSelf(e *codec1978.Encoder) {
-	var h codecSelfer8141
+	var h codecSelfer7238
 	z, r := codec1978.GenHelper().Encoder(e)
 	_, _, _ = h, z, r
 	if x == nil {
@@ -103,32 +103,32 @@ func (x *Score) CodecEncodeSelf(e *codec1978.Encoder) {
 }
 
 func (x *Score) CodecDecodeSelf(d *codec1978.Decoder) {
-	var h codecSelfer8141
+	var h codecSelfer7238
 	z, r := codec1978.GenHelper().Decoder(d)
 	_, _, _ = h, z, r
 	yyct2 := r.ContainerType()
-	if yyct2 == codecSelferValueTypeNil8141 {
+	if yyct2 == codecSelferValueTypeNil7238 {
 		*(x) = Score{}
-	} else if yyct2 == codecSelferValueTypeMap8141 {
+	} else if yyct2 == codecSelferValueTypeMap7238 {
 		yyl2 := z.DecReadMapStart()
 		if yyl2 == 0 {
 		} else {
 			x.codecDecodeSelfFromMap(yyl2, d)
 		}
 		z.DecReadMapEnd()
-	} else if yyct2 == codecSelferValueTypeArray8141 {
+	} else if yyct2 == codecSelferValueTypeArray7238 {
 		yyl2 := z.DecReadArrayStart()
 		if yyl2 != 0 {
 			x.codecDecodeSelfFromArray(yyl2, d)
 		}
 		z.DecReadArrayEnd()
 	} else {
-		panic(errCodecSelferOnlyMapOrArrayEncodeToStruct8141)
+		panic(errCodecSelferOnlyMapOrArrayEncodeToStruct7238)
 	}
 }
 
 func (x *Score) codecDecodeSelfFromMap(l int, d *codec1978.Decoder) {
-	var h codecSelfer8141
+	var h codecSelfer7238
 	z, r := codec1978.GenHelper().Decoder(d)
 	_, _, _ = h, z, r
 	var yyhl3 bool = l >= 0
@@ -147,9 +147,9 @@ func (x *Score) codecDecodeSelfFromMap(l int, d *codec1978.Decoder) {
 		z.DecReadMapElemValue()
 		switch yys3 {
 		case "GameID":
-			x.GameID = (int)(z.C.IntV(r.DecodeInt64(), codecSelferBitsize8141))
+			x.GameID = (int)(z.C.IntV(r.DecodeInt64(), codecSelferBitsize7238))
 		case "PlayerID":
-			x.PlayerID = (int)(z.C.IntV(r.DecodeInt64(), codecSelferBitsize8141))
+			x.PlayerID = (int)(z.C.IntV(r.DecodeInt64(), codecSelferBitsize7238))
 		case "Scores":
 			z.F.DecSliceIntX(&x.Scores, d)
 		default:
@@ -159,7 +159,7 @@ func (x *Score) codecDecodeSelfFromMap(l int, d *codec1978.Decoder) {
 }
 
 func (x *Score) codecDecodeSelfFromArray(l int, d *codec1978.Decoder) {
-	var h codecSelfer8141
+	var h codecSelfer7238
 	z, r := codec1978.GenHelper().Decoder(d)
 	_, _, _ = h, z, r
 	var yyj8 int
@@ -176,7 +176,7 @@ func (x *Score) codecDecodeSelfFromArray(l int, d *codec1978.Decoder) {
 		return
 	}
 	z.DecReadArrayElem()
-	x.GameID = (int)(z.C.IntV(r.DecodeInt64(), codecSelferBitsize8141))
+	x.GameID = (int)(z.C.IntV(r.DecodeInt64(), codecSelferBitsize7238))
 	yyj8++
 	if yyhl8 {
 		yyb8 = yyj8 > l
@@ -188,7 +188,7 @@ func (x *Score) codecDecodeSelfFromArray(l int, d *codec1978.Decoder) {
 		return
 	}
 	z.DecReadArrayElem()
-	x.PlayerID = (int)(z.C.IntV(r.DecodeInt64(), codecSelferBitsize8141))
+	x.PlayerID = (int)(z.C.IntV(r.DecodeInt64(), codecSelferBitsize7238))
 	yyj8++
 	if yyhl8 {
 		yyb8 = yyj8 > l

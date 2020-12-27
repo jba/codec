@@ -63,14 +63,16 @@ func WriteNewFile(filename string, writer func(*os.File) error) error {
 }
 
 func Generate(words []string) error {
+	thisPkgPath := "github.com/jba/codec/internal/benchmarks/data"
 	for _, w := range words {
 		var err error
 		switch w {
 		case "code":
-			err = codec.GenerateFile("types.gen.go", "github.com/jba/codec/internal/benchmarks/data",
+			err = codec.GenerateFile("types.gen.go", thisPkgPath, nil,
 				LicenseData{}, submittedData{}, []*StockData(nil), []Score(nil))
 			if err == nil {
-				err = codec.GenerateFile("ast_types.gen.go", "data", append(astTypes, map[string]*ast.File{})...)
+				err = codec.GenerateFile("ast_types.gen.go", thisPkgPath, nil,
+					append(astTypes, map[string]*ast.File{})...)
 			}
 		case "ast":
 			err = generateASTToFile("ast.gob")
