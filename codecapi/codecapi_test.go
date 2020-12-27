@@ -27,6 +27,7 @@ func TestEncodeDecode(t *testing.T) {
 		uint(17), uint8(11), uint8(255), uint16(32000), uint32(7676767), uint64(392032393), uint64(1 << 63),
 		uintptr(123456),
 		float32(98.1234), float64(98.1234), 1.23e63,
+		complex(float32(1), float32(2)), complex(3, 4),
 		math.NaN(), math.Inf(1), math.Inf(-1),
 	}
 	var buf bytes.Buffer

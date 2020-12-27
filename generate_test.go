@@ -71,6 +71,9 @@ type genStruct struct {
 	U32 uint32
 	U64 uint64
 
+	C64  complex64
+	C128 complex128
+
 	T foo.T
 }
 

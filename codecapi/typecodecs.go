@@ -137,6 +137,18 @@ func (uint64Codec) Init()                            {}
 func (uint64Codec) Encode(e *Encoder, x interface{}) { e.EncodeUint(x.(uint64)) }
 func (uint64Codec) Decode(d *Decoder) interface{}    { return d.DecodeUint() }
 
+type complex64Codec struct{}
+
+func (complex64Codec) Init()                            {}
+func (complex64Codec) Encode(e *Encoder, x interface{}) { e.EncodeComplex(complex128(x.(complex64))) }
+func (complex64Codec) Decode(d *Decoder) interface{}    { return complex64(d.DecodeComplex()) }
+
+type complex128Codec struct{}
+
+func (complex128Codec) Init()                            {}
+func (complex128Codec) Encode(e *Encoder, x interface{}) { e.EncodeComplex(x.(complex128)) }
+func (complex128Codec) Decode(d *Decoder) interface{}    { return d.DecodeComplex() }
+
 func init() {
 	Register(false, boolCodec{})
 	Register("", stringCodec{})
@@ -154,6 +166,8 @@ func init() {
 	Register(uint16(0), uint16Codec{})
 	Register(uint32(0), uint32Codec{})
 	Register(uint64(0), uint64Codec{})
+	Register(complex64(0), complex64Codec{})
+	Register(complex128(0), complex128Codec{})
 }
 
 var BuiltinTypes []reflect.Type

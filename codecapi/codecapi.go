@@ -370,6 +370,22 @@ func (d *Decoder) DecodeFloat() float64 {
 	return math.Float64frombits(bits.ReverseBytes64(d.DecodeUint()))
 }
 
+// EncodeComplex encodes a complex128.
+func (e *Encoder) EncodeComplex(c complex128) {
+	e.StartList(2)
+	e.EncodeFloat(real(c))
+	e.EncodeFloat(imag(c))
+}
+
+// DecodeComplex decodes a complex128.
+func (d *Decoder) DecodeComplex() complex128 {
+	n := d.StartList()
+	if n != 2 {
+		Failf("DecodeComplex: bad list length %d", n)
+	}
+	return complex(d.DecodeFloat(), d.DecodeFloat())
+}
+
 func (e *Encoder) EncodeNil() {
 	e.writeByte(nilCode)
 }

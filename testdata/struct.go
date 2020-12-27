@@ -8,7 +8,7 @@ import (
 	"github.com/jba/codec/internal/testpkg"
 )
 
-// Fields of codec_genStruct: S B I I8 I16 I32 I64 F32 F64 U8 U16 U32 U64 T
+// Fields of codec_genStruct: S B I I8 I16 I32 I64 F32 F64 U8 U16 U32 U64 C64 C128 T
 
 type ptr_codec_genStruct_codec struct{}
 
@@ -109,8 +109,16 @@ func (c codec_genStruct_codec) encode(e *codecapi.Encoder, x *codec.genStruct) {
 		e.EncodeUint(12)
 		e.EncodeUint(x.U64)
 	}
-	if x.T != nil {
+	if x.C64 != 0 {
 		e.EncodeUint(13)
+		e.EncodeComplex(complex128(x.C64))
+	}
+	if x.C128 != 0 {
+		e.EncodeUint(14)
+		e.EncodeComplex(x.C128)
+	}
+	if x.T != nil {
+		e.EncodeUint(15)
 		(foo_T_codec{}).encode(e, foo.T(x.T))
 	}
 	e.EndStruct()
@@ -157,6 +165,10 @@ func (c codec_genStruct_codec) decode(d *codecapi.Decoder, x *codec.genStruct) {
 		case 12:
 			x.U64 = d.DecodeUint()
 		case 13:
+			x.C64 = complex64(d.DecodeComplex())
+		case 14:
+			x.C128 = d.DecodeComplex()
+		case 15:
 			(foo_T_codec{}).decode(d, &x.T)
 		default:
 			d.UnknownField("codec.genStruct", n)

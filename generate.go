@@ -503,6 +503,8 @@ func builtinName(t reflect.Type) (suffix string, native reflect.Type) {
 		return "Uint", reflect.TypeOf(uint64(0))
 	case reflect.Float32, reflect.Float64:
 		return "Float", reflect.TypeOf(0.0)
+	case reflect.Complex64, reflect.Complex128:
+		return "Complex", reflect.TypeOf(0 + 0i)
 	case reflect.Slice:
 		if t.Elem() == reflect.TypeOf(byte(0)) {
 			return "Bytes", reflect.TypeOf([]byte(nil))
