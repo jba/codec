@@ -46,10 +46,10 @@ var (
 
 // Throughputs to benchmark, in Mi/sec.
 var throughputs = []int{
-	0, // unlimited throughput; speed of memory
-	// 3000, // reading from local disk
-	// 250,  // reading from a GCS bucket
-	// 100,  // reading from a cloud DB
+	0,    // unlimited throughput; speed of memory
+	3000, // reading from local disk
+	250,  // reading from a GCS bucket
+	100,  // reading from a cloud DB
 }
 
 type Codec struct {
@@ -59,16 +59,9 @@ type Codec struct {
 }
 
 var (
-	jbaCodec = Codec{
-		"jba/codec",
-		func(w io.Writer, data interface{}) error {
-			e := codecapi.NewEncoder(w, codecapi.EncodeOptions{})
-			err := e.Encode(data)
-			return err
-		},
-		jbaCodecDecode,
-	}
-	gobCodec = Codec{
+	jbaCodec    = newJbaCodec("", codecapi.EncodeOptions{})
+	jbaCodecBig = newJbaCodec("big", codecapi.EncodeOptions{Buffer: make([]byte, 100*1024*1024)})
+	gobCodec    = Codec{
 		"gob",
 		func(w io.Writer, data interface{}) error {
 			e := gob.NewEncoder(w)
@@ -79,12 +72,7 @@ var (
 			return d.Decode(ptr)
 		},
 	}
-)
-
-var codecs = []Codec{
-	jbaCodec,
-	gobCodec,
-	{
+	ugorjiCodec = Codec{
 		"ugorji-cbor",
 		func(w io.Writer, data interface{}) error {
 			e := ucodec.NewEncoder(w, &ucodec.CborHandle{})
@@ -93,8 +81,30 @@ var codecs = []Codec{
 		func(r io.Reader, ptr interface{}) error {
 			return ucodec.NewDecoder(r, &ucodec.CborHandle{}).Decode(ptr)
 		},
-	},
+	}
+)
+
+var codecs = []Codec{
+	jbaCodec,
+	jbaCodecBig,
+	gobCodec,
+	ugorjiCodec,
 	// ugorji with msgpack and binc have almost identical performance to ugorji with cbor.
+}
+
+func newJbaCodec(suffix string, opts codecapi.EncodeOptions) Codec {
+	name := "jba/codec"
+	if suffix != "" {
+		name += " " + suffix
+	}
+	return Codec{
+		name,
+		func(w io.Writer, data interface{}) error {
+			e := codecapi.NewEncoder(w, opts)
+			return e.Encode(data)
+		},
+		jbaCodecDecode,
+	}
 }
 
 func jbaCodecDecode(r io.Reader, ptr interface{}) error {

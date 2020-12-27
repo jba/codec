@@ -25,6 +25,11 @@ type EncodeOptions struct {
 	//
 	// Setting this to true will significantly slow down encoding.
 	TrackPointers bool
+
+	// If non-nil, Encode will use this buffer instead of creating one. If the
+	// encoding is large, providing a buffer of sufficient size can speed up
+	// encoding by reducing allocation.
+	Buffer []byte
 }
 
 var apiOpts api.EncodeOptions
@@ -34,6 +39,7 @@ func NewEncoder(w io.Writer, opts *EncodeOptions) *Encoder {
 	aopts := apiOpts
 	if opts != nil {
 		aopts.TrackPointers = opts.TrackPointers
+		aopts.Buffer = opts.Buffer
 	}
 	return &Encoder{state: api.NewEncoder(w, aopts)}
 }

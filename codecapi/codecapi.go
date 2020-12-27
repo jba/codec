@@ -32,6 +32,7 @@ type Encoder struct {
 
 type EncodeOptions struct {
 	TrackPointers bool
+	Buffer        []byte
 }
 
 func NewEncoder(w io.Writer, opts EncodeOptions) *Encoder {
@@ -52,6 +53,8 @@ func (e *Encoder) Encode(x interface{}) (err error) {
 	}
 	if e.buf != nil {
 		e.buf = e.buf[:0]
+	} else if e.opts.Buffer != nil {
+		e.buf = e.opts.Buffer[:0]
 	} else {
 		e.buf = make([]byte, 0, 64*1024)
 	}
@@ -63,6 +66,7 @@ func (e *Encoder) Encode(x interface{}) (err error) {
 	e.buf = nil       // start with a fresh buffer
 	e.encodeInitial() // encode metadata
 	initial := e.buf  // remember that
+	e.buf = data      // restore e.buf for next call to Encode
 
 	// Encode total size in 8 bytes.
 	var buf [uint64Size]byte

@@ -77,6 +77,7 @@ func TestEncodeDecode(t *testing.T) {
 	for _, opts := range []api.EncodeOptions{
 		{TrackPointers: false},
 		{TrackPointers: true},
+		{Buffer: make([]byte, 3)},
 	} {
 		t.Run(fmt.Sprintf("%+v", opts), func(t *testing.T) {
 			testEncodeDecode(t, opts)
