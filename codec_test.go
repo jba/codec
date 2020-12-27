@@ -38,7 +38,7 @@ type generatedTestTypes struct {
 	Slice    []int
 	Array    [1]int
 	Map      map[string]bool
-	Struct   StructType
+	Struct   structType
 	Time     time.Time
 	IP       net.IP
 	DefSlice definedSlice
@@ -55,9 +55,10 @@ type node struct {
 	Next  *node
 }
 
-type StructType struct {
-	N node
-	B byte
+type structType struct {
+	N          node
+	B          byte
+	unexported int
 }
 
 func TestMain(m *testing.M) {
@@ -101,7 +102,7 @@ func testEncodeDecode(t *testing.T, aopts api.EncodeOptions) {
 		[]int(nil),
 		map[string]bool{"a": true, "b": false},
 		map[string]bool(nil),
-		StructType{B: 129, N: node{1, nil}},
+		structType{B: 129, N: node{1, nil}, unexported: 23},
 		definedSlice{1, 2, 3},
 		definedArray{-7},
 		definedMap{"true": true},
@@ -121,7 +122,7 @@ func testEncodeDecode(t *testing.T, aopts api.EncodeOptions) {
 		if err != nil {
 			t.Fatalf("%#v: %v", w, err)
 		}
-		if !cmp.Equal(g, w, cmpopts.EquateNaNs()) {
+		if !cmp.Equal(g, w, cmpopts.EquateNaNs(), cmp.AllowUnexported(structType{})) {
 			t.Errorf("got %v, want %v", g, w)
 		}
 	}

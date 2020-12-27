@@ -84,7 +84,7 @@ func readFieldNames(filename string) (map[string][]string, error) {
 
 func generate(w io.Writer, packagePath string, fieldNames map[string][]string, fieldTag string, vs ...interface{}) error {
 	g := &generator{
-		pkg:         packagePath,
+		pkgPath:     packagePath,
 		done:        map[reflect.Type]bool{},
 		fieldNames:  fieldNames,
 		fieldTagKey: fieldTag,
@@ -141,7 +141,7 @@ func generate(w io.Writer, packagePath string, fieldNames map[string][]string, f
 }
 
 type generator struct {
-	pkg             string
+	pkgPath         string
 	todo            []reflect.Type
 	done            map[reflect.Type]bool
 	fieldNames      map[string][]string
@@ -162,7 +162,7 @@ func (g *generator) generate() ([]byte, error) {
 		t := g.todo[0]
 		g.todo = g.todo[1:]
 		if !g.done[t] {
-			if t.PkgPath() != "" && t.PkgPath() != g.pkg {
+			if t.PkgPath() != "" && t.PkgPath() != g.pkgPath {
 				g.importMap[t.PkgPath()] = true
 			}
 			piece, err := g.gen(t)
@@ -187,7 +187,7 @@ func (g *generator) generate() ([]byte, error) {
 		Package string
 		Imports []string
 	}{
-		Package: path.Base(g.pkg),
+		Package: path.Base(g.pkgPath),
 		Imports: imports,
 	})
 	if err != nil {
@@ -278,7 +278,7 @@ func (g *generator) genMarshaler(t reflect.Type, kind string) ([]byte, error) {
 func (g *generator) genStruct(t reflect.Type) ([]byte, error) {
 	fn := g.typeIdentifier(t)
 	var fields []field
-	fields = exportedFields(t, g.fieldNames[fn], g.fieldTagKey)
+	fields = g.structFields(t, g.fieldNames[fn])
 	var names []string
 	for _, f := range fields {
 		names = append(names, f.Name)
@@ -309,17 +309,18 @@ type field struct {
 	Zero string // representation of the type's zero value
 }
 
-// exportedFields returns the exported fields of the struct type t that
-// should be encoded, in the proper order.
-// Exported fields of embedded, unexported types are not included.
-// If there was a previous ordering, it is preserved, and new fields are
-// added to the end.
-// If a field was removed, we keep its number so as not to break existing
-// encoded values. It will appear in the return value with an empty type.
+// structFields returns the fields of the struct type t that
+// should be encoded, in the proper order. For structs in a package
+// other than the one being generated into, that includes all direct exported
+// fields, but not exported fields of embedded, unexported types.
+// For structs in the same package, unexported fields are included.
 //
-// One drawback of this scheme is that it is not possible to rename a field.
-// A rename will look like an addition and a removal.
-func exportedFields(t reflect.Type, oldNames []string, fieldTagKey string) []field {
+// If there was a previous ordering, it is preserved, and new fields are added
+// to the end. If a field was removed, we keep its number so as not to break
+// existing encoded values. It will appear in the return value with an empty
+// type. One drawback of this scheme is that it is not possible to rename a
+// field. A rename will look like an addition and a removal.
+func (g *generator) structFields(t reflect.Type, oldNames []string) []field {
 	// Record the positions of the field names previously used for this struct,
 	// so we can preserve them.
 	fieldPos := map[string]int{}
@@ -331,14 +332,16 @@ func exportedFields(t reflect.Type, oldNames []string, fieldTagKey string) []fie
 	// existing ones.
 	for i := 0; i < t.NumField(); i++ {
 		f := t.Field(i)
-		if f.PkgPath != "" { // Ignore unexported fields. A field is exported if its PkgPath is empty.
+		// Ignore unexported fields for structs in a different package. A field
+		// is exported if its PkgPath is empty.
+		if t.PkgPath() != g.pkgPath && f.PkgPath != "" {
 			continue
 		}
 		// Ignore fields of function and channel type.
 		if f.Type.Kind() == reflect.Chan || f.Type.Kind() == reflect.Func {
 			continue
 		}
-		_, omit, _ := parseTag(fieldTagKey, f.Tag)
+		_, omit, _ := parseTag(g.fieldTagKey, f.Tag)
 		// TODO: use the name to support renaming.
 		// Ignore a field if it has a struct tag with "-", like encoding/json.
 		if omit {
@@ -525,7 +528,7 @@ func (g *generator) goName(t reflect.Type) string {
 	if t.Name() != "" {
 		// For a package whose name does not equal the last component of its path,
 		// t.String() will use the name and t.PkgPath() will be the full path.
-		if t.PkgPath() == g.pkg {
+		if t.PkgPath() == g.pkgPath {
 			return t.Name()
 		}
 		return t.String()

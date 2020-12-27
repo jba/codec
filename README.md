@@ -8,6 +8,8 @@ TODO:
 
 - Support generating unexported fields in same package.
 
+- Support renaming with struct tags.
+
 # TypeCodec state
 
 The TypeCodec classes are effectively singletons now, but the idea is that

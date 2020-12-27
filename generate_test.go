@@ -30,7 +30,7 @@ type (
 
 func TestGoName(t *testing.T) {
 	var r io.Reader
-	g := &generator{pkg: "github.com/jba/codec"}
+	g := &generator{pkgPath: "github.com/jba/codec"}
 	for _, test := range []struct {
 		v    interface{}
 		want string
@@ -74,9 +74,9 @@ type genStruct struct {
 	C64  complex64
 	C128 complex128
 
-	T foo.T
-
-	Omit int `test:"-"`
+	T          foo.T
+	unexported int
+	Omit       int `test:"-"`
 }
 
 func TestGenerate(t *testing.T) {
@@ -93,7 +93,7 @@ func TestGenerate(t *testing.T) {
 func testGenerate(t *testing.T, name string, x interface{}) {
 	t.Helper()
 	var buf bytes.Buffer
-	if err := generate(&buf, "somepkg", nil, "test", x); err != nil {
+	if err := generate(&buf, "github.com/jba/codec", nil, "test", x); err != nil {
 		t.Fatal(err)
 	}
 	got := buf.String()
@@ -147,7 +147,8 @@ func TestExportedFields(t *testing.T) {
 	}
 
 	// First time we see ef, no previous fields.
-	got := exportedFields(reflect.TypeOf(ef{}), nil, "codec")
+	g := &generator{pkgPath: "p", fieldTagKey: "codec"}
+	got := g.structFields(reflect.TypeOf(ef{}), nil)
 	want := []field{
 		{"A", intType, "0"},
 		{"B", boolType, "false"},
@@ -157,7 +158,7 @@ func TestExportedFields(t *testing.T) {
 
 	// Imagine that the previous ef had fields C and A in that order, but not B or name.
 	// We should preserve the existing ordering and add B and name at the end.
-	got = exportedFields(reflect.TypeOf(ef{}), []string{"C", "A"}, "codec")
+	got = g.structFields(reflect.TypeOf(ef{}), []string{"C", "A"})
 	want = []field{
 		{"C", stringType, `""`},
 		{"A", intType, "0"},
@@ -167,7 +168,7 @@ func TestExportedFields(t *testing.T) {
 
 	// Imagine instead that there had been a field D that was removed.
 	// We still keep the names, but the entry for "D" has a nil type.
-	got = exportedFields(reflect.TypeOf(ef{}), []string{"A", "D", "B", "C"}, "codec")
+	got = g.structFields(reflect.TypeOf(ef{}), []string{"A", "D", "B", "C"})
 	want = []field{
 		{"A", intType, "0"},
 		{"D", nil, ""},
