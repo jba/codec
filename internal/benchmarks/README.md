@@ -2,7 +2,43 @@ To reconstruct licenses.gob:
 
 `cat licenses-gob-* > licenses.gob`
 
-# Ugorji Code Generation
+# Benchmarks for jba/codec
+
+This module compares some encoders using a collection of real-world and
+simulated benchmarks.
+
+The encoders are:
+
+- github.com/jba/codec
+- encoding/gob
+- github.com/ugorji/go/codec
+
+The benchmarks are:
+
+- ast: The syntax trees for the net/http package, modified to remove cycles.
+  Rapid decoding of syntax trees was the original motivation for the codec; see
+  https://go.googlesource.com/pkgsite/+/master/internal/godoc/codec.
+
+- scores: A synthetic, integer-heavy benchmark.
+
+- stocks: Float-heavy simulated stock data.
+
+- hyperledger: Some data from a blockchain package.
+
+- licenses: A real collection of license file data from public Go modules.
+
+- licenses-small: The same data as licenses, with truncated license file
+  contents so the data isn't dominated by large byte slices.
+
+Each benchmark is run with a set of simulated throughputs, to mimic real-world
+situations like reading from a storage bucket or database.
+
+
+## Ugorji Code Generation
+
+Generating code with the ugorji codec's `codecgen` program produced some
+improvement:
+>>>>>>> 59b9a78 (cleanup)
 
 ```
 * = with codegen
@@ -60,3 +96,9 @@ decode
   ugorji-cbor     3  10625K/op  0.41s/op 0.09x
 * ugorji-cbor     3  10624K/op  0.37s/op 0.10x
 ```
+
+## Numeric Encodings
+
+See uint-encodings.txt for data supporting the choice of 1248 encoding.
+
+See float-encodings.txt for data supporting the choice of reversing float bytes.

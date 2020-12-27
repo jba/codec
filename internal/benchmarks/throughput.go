@@ -2,45 +2,49 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+/*
+   This function computes the break-even throughput of two codecs, where second
+   codec produces smaller output with possibly greater computation.
+
+   Let
+        p = throughput
+        n = size
+   Then
+        I/O time = n / p
+
+   Say variant 1 produces n1 bytes and takes t1 time with infinite throughput.
+   Variant 2 produces n2 < n1 bytes and takes t2 > t1 time.
+
+   Total time Ti = ti + ni / p
+
+   When T1 = T2,
+        t1 + n1/p = t2 + n2/p
+        (n1 - n2)/p = t2 - t1
+   Break-even throughput p = (n1 - n2) / (t2 - t1).
+
+   Example: the more compact encoding saves 30K but takes 100ms longer.
+   Break-even throughput is 30K/.1s = 300 K/s.
+
+   If data can be read/written faster than the break-even throughput, then the
+   more compact encoding isn't worth the extra time. For example, at 1 M/s,
+   those 30K take ~30ms, much less than the 100ms extra compute time.
+
+   Slower than the break-even throughput and it's worth it. For example, at 100
+   K/s, the 30K take 300ms.
+*/
 package main
 
 import (
 	"fmt"
 	"time"
 
-	"github.com/jba/codec/internal/bench"
+	"github.com/jba/codec/internal/benchmarks/bench"
 	"github.com/jba/codec/internal/benchmarks/data"
 )
 
 /*
-Let
-    p = throughput
-    n = size
-Then
-    I/O time = n / p
+Using codes for short byte sequences: bytes0Code .. bytes4Code:
 
-Say variant 1 produces n1 bytes and takes t1 time with infinite throughput.
-Variant 2 produces n2 < n1 bytes and takes t2 > t1 time.
-
-Total time Ti = ti + ni / p
-
-When T1 = T2,
-    t1 + n1/p = t2 + n2/p
-    (n1 - n2)/p = t2 - t1
-Break-even throughput p = (n1 - n2) / (t2 - t1).
-
-Example: a more compact encoding saves 30K but takes 100ms longer.
-Break-even throughput is 30K/.1s = 300 K/s.
-
-Faster than that and the more compact encoding isn't worth the extra time.
-For example, at 1 M/s, those 30K take ~30ms, much less than the 100ms extra
-compute time.
-
-Slower than that and it's worth it. For example, at 100 K/s, the 30K take
-300ms.
-*/
-
-/*
 jba/codec orig vs. jba/codec shortlen on hyperledger
 encoding:
 Space-optimized codec took less space (27400 vs. 27556) and was not slower (0ms vs. 0ms)

@@ -2,8 +2,18 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-//xxxxxxxxxxxxxxxxgo:generate codecgen -o urgorji.gen.go licenses.go
+/* TODO
 
+Maybe generate more stuff for the hyperledger benchmark. A lot of types and
+fields are unused?
+
+
+Other possible benchmarks:
+- https://github.com/robertkrimen/otto/blob/15f95af6e78dcd2030d8195a138bd88d4f403546/script.go
+- https://github.com/gocolly/colly/blob/1cd684083cf9bf9a8e33b5dfd6414d8516ae63af/http_backend.go#L161
+*/
+
+// A program for benchmarking codecs.
 package main
 
 import (
@@ -21,10 +31,9 @@ import (
 	"testing"
 
 	"github.com/jba/codec/codecapi"
-	"github.com/jba/codec/internal/bench"
+	"github.com/jba/codec/internal/benchmarks/bench"
 	"github.com/jba/codec/internal/benchmarks/data"
-	pkg "github.com/jba/codec/internal/benchmarks/data"
-	"github.com/jba/codec/internal/testio"
+	"github.com/jba/codec/internal/benchmarks/testio"
 	ucodec "github.com/ugorji/go/codec"
 )
 
@@ -37,10 +46,10 @@ var (
 
 // Throughputs to benchmark, in Mi/sec.
 var throughputs = []int{
-	0, // unlimited throughput; speed of memory
-	//3000, // reading from local disk
-	//250,  // reading from a GCS bucket
-	100, // reading from a cloud DB
+	0,    // unlimited throughput; speed of memory
+	3000, // reading from local disk
+	250,  // reading from a GCS bucket
+	100,  // reading from a cloud DB
 }
 
 type Codec struct {
@@ -98,7 +107,7 @@ func jbaCodecDecode(r io.Reader, ptr interface{}) error {
 	return nil
 }
 
-var datas = []pkg.BenchmarkData{
+var datas = []data.BenchmarkData{
 	data.ASTData,
 	data.Hyperledger,
 	data.Licenses,
@@ -151,7 +160,7 @@ func runBenchmarks(dataNames []string) {
 	}
 }
 
-func datasToRun(dataNames []string) []pkg.BenchmarkData {
+func datasToRun(dataNames []string) []data.BenchmarkData {
 	if len(dataNames) == 0 {
 		return datas
 	}
@@ -159,7 +168,7 @@ func datasToRun(dataNames []string) []pkg.BenchmarkData {
 	for _, n := range dataNames {
 		runName[n] = true
 	}
-	var ds []pkg.BenchmarkData
+	var ds []data.BenchmarkData
 	for _, bd := range datas {
 		if runName[bd.Name] {
 			ds = append(ds, bd)
@@ -170,7 +179,7 @@ func datasToRun(dataNames []string) []pkg.BenchmarkData {
 
 // runBenchmark uses bd to read data to be used for benchmarks.
 // It then uses the data to measure encoding and decoding for all the codecs.
-func runBenchmark(bd pkg.BenchmarkData) {
+func runBenchmark(bd data.BenchmarkData) {
 	data, err := bd.Read()
 	if err != nil {
 		log.Fatalf("%s: %v", bd.Name, err)

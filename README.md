@@ -56,23 +56,9 @@ and created all the types' TypeCodecs.
 
 ## Benchmarks
 
-- Maybe generate more stuff for the hyperledger benchmark. A lot of types and
-  fields are unused?
-
-
-Possible benchmarks:
-- https://github.com/robertkrimen/otto/blob/15f95af6e78dcd2030d8195a138bd88d4f403546/script.go
-- https://github.com/gocolly/colly/blob/1cd684083cf9bf9a8e33b5dfd6414d8516ae63af/http_backend.go#L161
 
 
 
-## numeric encodings
-
-See internal/benchmarks/uint-encodings.txt for data supporting the choice of
-1248 encoding.
-
-See internal/benchmarks/float-encodings.txt for data supporting the choice of
-revering float bytes.
 
 ## Zero-copy DecodeBytes
 
