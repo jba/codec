@@ -5,44 +5,45 @@
 package codecapi
 
 import (
+	"bytes"
 	"math"
-	"math/bits"
+	"testing"
+
+	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp/cmpopts"
 )
 
-//func BenchmarkFloatEncoding(t *testing.T) {
-
-// }
-
-// func encodeFloatsDirect(w io.Writer, fs []float64) error {
-// 	// Encode a 1-byte code for # of bytes to follow.
-
-// 	for _, f := range fs {
-
-// func floatBitsDirect(f float64) uint64     { return math.Float64bits(f) }
-// func floatFromBitsDirect(u uint64) float64 { return math.Float64frombits(u) }
-
-// // FloatBitsReverse returns a uint64 holding the bits of a floating-point number.
-// // Floating-point numbers are transmitted as uint64s holding the bits
-// // of the underlying representation. They are sent byte-reversed, with
-// // the exponent end coming out first, so integer floating point numbers
-// // (for example) transmit more compactly. This routine does the
-// // swizzling.
-// // From encoding/gob.
-// func floatBitsReversed(f float64) uint64 {
-// 	return bits.ReverseBytes64(math.Float64bits(f))
-// }
-
-// func floatFromBitsReversed(u uint64) float64 {
-// 	return math.Float64frombits(bits.ReverseBytes64(u))
-// }
-
-// floatBits returns a uint64 holding the bits of a floating-point number.
-// Floating-point numbers are transmitted as uint64s holding the bits
-// of the underlying representation. They are sent byte-reversed, with
-// the exponent end coming out first, so integer floating point numbers
-// (for example) transmit more compactly. This routine does the
-// swizzling.
-func floatBits(f float64) uint64 {
-	u := math.Float64bits(f)
-	return bits.ReverseBytes64(u)
+func TestEncodeDecode(t *testing.T) {
+	want := []interface{}{
+		nil, "Luke Luck likes lakes", true,
+		[]byte{},
+		[]byte{1},
+		[]byte{1, 2},
+		[]byte{1, 2, 3},
+		[]byte{1, 2, 3, 4},
+		[]byte{1, 2, 3, 4, 5},
+		1, -5, 255, 65000, 130_000,
+		int8(-11), int16(-32000), int32(-7676767), int64(-392032393),
+		uint(17), uint8(11), uint8(255), uint16(32000), uint32(7676767), uint64(392032393), uint64(1 << 63),
+		uintptr(123456),
+		float32(98.1234), float64(98.1234), 1.23e63,
+		math.NaN(), math.Inf(1), math.Inf(-1),
+	}
+	var buf bytes.Buffer
+	e := NewEncoder(&buf, EncodeOptions{})
+	for _, w := range want {
+		if err := e.Encode(w); err != nil {
+			t.Fatalf("%#v: %v", w, err)
+		}
+	}
+	d := NewDecoder(bytes.NewReader(buf.Bytes()))
+	for _, w := range want {
+		g, err := d.Decode()
+		if err != nil {
+			t.Fatalf("%#v: %v", w, err)
+		}
+		if !cmp.Equal(g, w, cmpopts.EquateNaNs()) {
+			t.Errorf("got %v (%[1]T), want %v (%[2]T)", g, w)
+		}
+	}
 }

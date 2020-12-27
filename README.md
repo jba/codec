@@ -6,13 +6,7 @@ TODO:
 
 - Add builtin codecs for all builtin types.
 
-- Properly handle packages whose name is not the last component of import path.
-
 - Put benchmarks in separate module to avoid dependencies on GCS, GCP, etc.
-
-- ugorji/go/codec:
-  - see codegen option at http://ugorji.net/blog/go-codecgen
-  - I think that only works on types you own, because it adds methods to them?
 
 # Features
 
@@ -53,12 +47,6 @@ Init would be called by the decoder after it had read the initial metadata
 and created all the types' TypeCodecs.
 
 # Performance
-
-## Benchmarks
-
-
-
-
 
 ## Zero-copy DecodeBytes
 
