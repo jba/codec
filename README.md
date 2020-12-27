@@ -4,13 +4,11 @@ This is a fork of pkgsite/internal/godoc/codec.
 
 TODO:
 
-- Add builtin codecs for all builtin types.
-
 - Put benchmarks in separate module to avoid dependencies on GCS, GCP, etc.
 
-# Features
-
 - Add support for `foo:"name"`.
+
+- Support generating unexported fields in same package.
 
 # TypeCodec state
 

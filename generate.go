@@ -316,6 +316,7 @@ func exportedFields(t reflect.Type, oldNames []string) []field {
 	for i, n := range oldNames {
 		fieldPos[n] = i
 	}
+	fieldName := make([]string, t.NumField())
 
 	// If there are any new exported fields, assign them positions after the
 	// existing ones.
@@ -324,16 +325,21 @@ func exportedFields(t reflect.Type, oldNames []string) []field {
 		if f.PkgPath != "" { // Ignore unexported fields. A field is exported if its PkgPath is empty.
 			continue
 		}
-		// Ignore a field if it has a struct tag with "-", like encoding/json.
-		if tag, _ := f.Tag.Lookup(fieldTagKey); tag == "-" {
-			continue
-		}
 		// Ignore fields of function and channel type.
 		if f.Type.Kind() == reflect.Chan || f.Type.Kind() == reflect.Func {
 			continue
 		}
-		if _, ok := fieldPos[f.Name]; !ok {
-			fieldPos[f.Name] = len(fieldPos)
+		name, omit, _ := parseTag(fieldTagKey, f.Tag)
+		// Ignore a field if it has a struct tag with "-", like encoding/json.
+		if omit {
+			continue
+		}
+		if name == "" {
+			name = f.Name
+		}
+		fieldName[i] = name
+		if _, ok := fieldPos[name]; !ok {
+			fieldPos[name] = len(fieldPos)
 		}
 	}
 
@@ -341,9 +347,9 @@ func exportedFields(t reflect.Type, oldNames []string) []field {
 	fields := make([]field, len(fieldPos))
 	for i := 0; i < t.NumField(); i++ {
 		f := t.Field(i)
-		if pos, ok := fieldPos[f.Name]; ok {
+		if pos, ok := fieldPos[fieldName[i]]; ok {
 			fields[pos] = field{
-				Name: f.Name,
+				Name: fieldName[i],
 				Type: f.Type,
 				Zero: zeroValue(f.Type),
 			}
@@ -540,6 +546,29 @@ func (g *generator) typeIdentifier(t reflect.Type) string {
 		n = "array" + n
 	}
 	return n
+}
+
+// parseTag extracts the sub-tag named by key, then parses it using the
+// de facto standard format introduced in encoding/json:
+//   "-" means "ignore this tag". It must occur by itself. (parseTag returns an error
+//       in this case, whereas encoding/json accepts the "-" even if it is not alone.)
+//   "<name>" provides an alternative name for the field
+//   "<name>,opt1,opt2,..." specifies options after the name.
+// The return values are:
+// name: the name given in tag, or "" if there is no name.
+// omit: true if the field should be omitted.
+// options: the list of options.
+func parseTag(key string, t reflect.StructTag) (name string, omit bool, options []string) {
+	s := t.Get(key)
+	parts := strings.Split(s, ",")
+	if parts[0] == "-" {
+		// Ignore options after "-".
+		return "", true, nil
+	}
+	if len(parts) > 1 {
+		options = parts[1:]
+	}
+	return parts[0], false, options
 }
 
 // Template body for the beginning of the file.
