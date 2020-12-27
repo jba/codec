@@ -102,3 +102,31 @@ decode
 See uint-encodings.txt for data supporting the choice of 1248 encoding.
 
 See float-encodings.txt for data supporting the choice of reversing float bytes.
+
+# Notes
+
+## ugorji allocation
+How does ugorji encoding allocate like one tenth of what we and gob do? See
+the license benchmark.
+
+I confirmed that if EncodeAny has a big enough buffer, it does no allocation. In
+other words, all our alloc is from growing the buffer. With a magically big enough
+buffer, we have 258950K/op; but ugorji, with no previous knowledge, gets
+524295K/op, still half of us with an empty buffer and gob.
+
+The answer is that ugorji has a fixed-size buffer that is flushed when full to
+the io.Writer. See bufioEncWriter in ugorji/go/codec/writer.go. We can't do that
+because we need to write initial metadata.
+
+## gob allocation
+
+Gob allocates less than jba/codec when encoding the licenses benchmark:
+```
+---- licenses at max Mi/sec ----
+encode
+  jba/codec 48     1  2516760K/op  2.67s/op 1.00x
+           gob     1  2110611K/op  2.01s/op 1.33x
+```
+
+I'm not sure why, but since on most other benchmarks it allocates more and isn't
+faster anyway, I don't think it's worth more investigation.

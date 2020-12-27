@@ -6,8 +6,6 @@ TODO:
 
 - Put benchmarks in separate module to avoid dependencies on GCS, GCP, etc.
 
-- Support generating unexported fields in same package.
-
 - Support renaming with struct tags.
 
 # TypeCodec state
@@ -67,7 +65,7 @@ after changes and look for runtime.newobject to see what's escaping to the heap.
 
 - Compare the redundant (ptrCode; startCode) sequence with just startCode.
 
-Faster []bool codec.
+- Faster []bool codec (as bits)? Unlikely to be worth it.
 
 ## Slice Allocators
 
@@ -96,39 +94,3 @@ in the encoded header.
 
 Generics doesn't really buy you much. The type codecs for slices, maps and pointers no
 longer need to be generated, but those for structs still do.
-
-This package no longer uses generics, but it used to. To see that version, check
-out tag "uses-generics" and:
-
-- Make sure ~/repos/go is at the dev.go2go branch.
-- Use the `go2` alias, already defined in ~/.bash_aliases.
-
-
-
-# Notes
-
-## ugorji allocation
-How does ugorji encoding allocate like one tenth of what we and gob do? See
-the license benchmark.
-
-I confirmed that if EncodeAny has a big enough buffer, it does no allocation. In
-other words, all our alloc is from growing the buffer. With a magically big enough
-buffer, we have 258950K/op; but ugorji, with no previous knowledge, gets
-524295K/op, still half of us with an empty buffer and gob.
-
-The answer is that ugorji has a fixed-size buffer that is flushed when full to
-the io.Writer. See bufioEncWriter in ugorji/go/codec/writer.go. We can't do that
-because we need to write initial metadata.
-
-## gob allocation
-
-Gob allocates less than jba/codec when encoding the licenses benchmark:
-```
----- licenses at max Mi/sec ----
-encode
-  jba/codec 48     1  2516760K/op  2.67s/op 1.00x
-           gob     1  2110611K/op  2.01s/op 1.33x
-```
-
-I'm not sure why, but since on most other benchmarks it allocates more and isn't
-faster anyway, I don't think it's worth more investigation.
