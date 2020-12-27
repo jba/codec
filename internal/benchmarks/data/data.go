@@ -2,6 +2,10 @@ package data
 
 //go:generate rm -f types.gen.go ast_types.gen.go
 //go:generate go run generate.go code
+//go:generate codecgen -o hyperledger.ugorji.gen.go hyperledger.go
+//go:generate codecgen -o licenses.ugorji.gen.go licenses.go
+//go:generate codecgen -o scores.ugorji.gen.go scores.go
+//go:generate codecgen -o stocks.ugorji.gen.go stocks.go
 
 import (
 	"encoding/gob"
