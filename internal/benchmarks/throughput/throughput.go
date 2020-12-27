@@ -58,7 +58,7 @@ import (
 	"time"
 
 	"cloud.google.com/go/storage"
-	"github.com/jba/codec/internal/config"
+	"github.com/jba/codec/internal/benchmarks/config"
 )
 
 var initDB = flag.Bool("initdb", false, "init the DB")
