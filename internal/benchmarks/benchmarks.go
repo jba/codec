@@ -38,9 +38,9 @@ var (
 // Throughputs to benchmark, in Mi/sec.
 var throughputs = []int{
 	0, // unlimited throughput; speed of memory
-	// 3000, // reading from local disk
-	// 250,  // reading from a GCS bucket
-	//	100, // reading from a cloud DB
+	//3000, // reading from local disk
+	//250,  // reading from a GCS bucket
+	100, // reading from a cloud DB
 }
 
 type Codec struct {

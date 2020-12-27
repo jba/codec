@@ -1,3 +1,62 @@
 To reconstruct licenses.gob:
 
 `cat licenses-gob-* > licenses.gob`
+
+# Ugorji Code Generation
+
+```
+* = with codegen
+
+---- stocks at max Mi/sec ----
+encode
+    jba/codec     1  1320897K/op  1.00s/op 1.00x
+          gob     1  1046322K/op  1.25s/op 0.80x
+  ugorji-cbor     1   523841K/op  1.22s/op 0.82x
+* ugorji-cbor     2   261940K/op  0.77s/op 1.07x
+
+
+decode
+    jba/codec     3  303485K/op  0.37s/op 1.00x
+          gob     2  246484K/op  0.73s/op 0.51x
+  ugorji-cbor     1  406077K/op  9.12s/op 0.04x
+* ugorji-cbor     1  476451K/op  8.09s/op 0.05x
+
+---- stocks at 100 Mi/sec ----
+encode
+    jba/codec     1  1321311K/op  2.22s/op 1.00x
+          gob     1  1046700K/op  2.40s/op 0.92x
+  ugorji-cbor     1   524843K/op  1.55s/op 1.44x
+* ugorji-cbor     1   526196K/op  1.50s/op 1.38x
+
+decode
+    jba/codec     1  303901K/op   1.67s/op 1.00x
+          gob     1  246865K/op   1.90s/op 0.88x
+  ugorji-cbor     1  406077K/op  11.15s/op 0.15x
+* ugorji-cbor     1  476451K/op  10.27s/op 0.16x
+
+---- scores at max Mi/sec ----
+encode
+    jba/codec    78  10367K/op  0.02s/op 1.00x
+          gob    51   9463K/op  0.02s/op 0.66x
+  ugorji-cbor    42    197K/op  0.03s/op 0.61x
+* ugorji-cbor    44    188K/op  0.02s/op 0.64x
+
+decode
+    jba/codec    74  10950K/op  0.02s/op 1.00x
+          gob    51  11554K/op  0.02s/op 0.69x
+  ugorji-cbor     4  10625K/op  0.30s/op 0.05x
+* ugorji-cbor     4  10624K/op  0.30s/op 0.05x
+
+---- scores at 100 Mi/sec ----
+encode
+    jba/codec    36  10427K/op  0.03s/op 1.00x
+          gob    30   9519K/op  0.04s/op 0.82x
+  ugorji-cbor    43    193K/op  0.03s/op 1.29x
+* ugorji-cbor    42    197K/op  0.03s/op 1.24x
+
+decode
+    jba/codec    33  10955K/op  0.03s/op 1.00x
+          gob    30  11560K/op  0.04s/op 0.85x
+  ugorji-cbor     3  10625K/op  0.41s/op 0.09x
+* ugorji-cbor     3  10624K/op  0.37s/op 0.10x
+```
