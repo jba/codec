@@ -21,11 +21,17 @@ import (
 	"github.com/jba/codec/codecapi"
 )
 
+type GenerateOptions struct {
+	// FieldTag is the name that GenerateFile will use to look up
+	// field tag information. The default is "codec".
+	FieldTag string
+}
+
 // GenerateFile writes encoders and decoders to filename.
 // It generates code for the type of each given value, as well
 // as any types they depend on.
 // packagePath is the output package path.
-func GenerateFile(filename, packagePath string, values ...interface{}) error {
+func GenerateFile(filename, packagePath string, opts *GenerateOptions, values ...interface{}) error {
 	if !strings.HasSuffix(filename, ".go") {
 		filename += ".go"
 	}
@@ -37,7 +43,11 @@ func GenerateFile(filename, packagePath string, values ...interface{}) error {
 	if err != nil {
 		return err
 	}
-	if err := generate(f, packagePath, fieldNames, values...); err != nil {
+	fieldTag := "codec"
+	if opts != nil && opts.FieldTag != "" {
+		fieldTag = opts.FieldTag
+	}
+	if err := generate(f, packagePath, fieldNames, fieldTag, values...); err != nil {
 		_ = f.Close()
 		return err
 	}
@@ -72,11 +82,12 @@ func readFieldNames(filename string) (map[string][]string, error) {
 	return m, nil
 }
 
-func generate(w io.Writer, packagePath string, fieldNames map[string][]string, vs ...interface{}) error {
+func generate(w io.Writer, packagePath string, fieldNames map[string][]string, fieldTag string, vs ...interface{}) error {
 	g := &generator{
-		pkg:        packagePath,
-		done:       map[reflect.Type]bool{},
-		fieldNames: fieldNames,
+		pkg:         packagePath,
+		done:        map[reflect.Type]bool{},
+		fieldNames:  fieldNames,
+		fieldTagKey: fieldTag,
 	}
 	if g.fieldNames == nil {
 		g.fieldNames = map[string][]string{}
@@ -134,6 +145,7 @@ type generator struct {
 	todo            []reflect.Type
 	done            map[reflect.Type]bool
 	fieldNames      map[string][]string
+	fieldTagKey     string
 	importMap       map[string]bool
 	initialTemplate *template.Template
 	sliceTemplate   *template.Template
@@ -266,7 +278,7 @@ func (g *generator) genMarshaler(t reflect.Type, kind string) ([]byte, error) {
 func (g *generator) genStruct(t reflect.Type) ([]byte, error) {
 	fn := g.typeIdentifier(t)
 	var fields []field
-	fields = exportedFields(t, g.fieldNames[fn])
+	fields = exportedFields(t, g.fieldNames[fn], g.fieldTagKey)
 	var names []string
 	for _, f := range fields {
 		names = append(names, f.Name)
@@ -297,8 +309,6 @@ type field struct {
 	Zero string // representation of the type's zero value
 }
 
-const fieldTagKey = "codec"
-
 // exportedFields returns the exported fields of the struct type t that
 // should be encoded, in the proper order.
 // Exported fields of embedded, unexported types are not included.
@@ -309,14 +319,13 @@ const fieldTagKey = "codec"
 //
 // One drawback of this scheme is that it is not possible to rename a field.
 // A rename will look like an addition and a removal.
-func exportedFields(t reflect.Type, oldNames []string) []field {
+func exportedFields(t reflect.Type, oldNames []string, fieldTagKey string) []field {
 	// Record the positions of the field names previously used for this struct,
 	// so we can preserve them.
 	fieldPos := map[string]int{}
 	for i, n := range oldNames {
 		fieldPos[n] = i
 	}
-	fieldName := make([]string, t.NumField())
 
 	// If there are any new exported fields, assign them positions after the
 	// existing ones.
@@ -329,17 +338,14 @@ func exportedFields(t reflect.Type, oldNames []string) []field {
 		if f.Type.Kind() == reflect.Chan || f.Type.Kind() == reflect.Func {
 			continue
 		}
-		name, omit, _ := parseTag(fieldTagKey, f.Tag)
+		_, omit, _ := parseTag(fieldTagKey, f.Tag)
+		// TODO: use the name to support renaming.
 		// Ignore a field if it has a struct tag with "-", like encoding/json.
 		if omit {
 			continue
 		}
-		if name == "" {
-			name = f.Name
-		}
-		fieldName[i] = name
-		if _, ok := fieldPos[name]; !ok {
-			fieldPos[name] = len(fieldPos)
+		if _, ok := fieldPos[f.Name]; !ok {
+			fieldPos[f.Name] = len(fieldPos)
 		}
 	}
 
@@ -347,9 +353,9 @@ func exportedFields(t reflect.Type, oldNames []string) []field {
 	fields := make([]field, len(fieldPos))
 	for i := 0; i < t.NumField(); i++ {
 		f := t.Field(i)
-		if pos, ok := fieldPos[fieldName[i]]; ok {
+		if pos, ok := fieldPos[f.Name]; ok {
 			fields[pos] = field{
-				Name: fieldName[i],
+				Name: f.Name,
 				Type: f.Type,
 				Zero: zeroValue(f.Type),
 			}

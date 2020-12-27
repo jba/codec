@@ -63,7 +63,7 @@ type StructType struct {
 func TestMain(m *testing.M) {
 	flag.Parse()
 	if *generateTestCodeFilename != "" {
-		if err := GenerateFile(*generateTestCodeFilename, "github.com/jba/codec", generatedTestTypes{}); err != nil {
+		if err := GenerateFile(*generateTestCodeFilename, "github.com/jba/codec", nil, generatedTestTypes{}); err != nil {
 			log.Fatal(err)
 		}
 		fmt.Println("generated file, now run tests again")

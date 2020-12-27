@@ -75,6 +75,8 @@ type genStruct struct {
 	C128 complex128
 
 	T foo.T
+
+	Omit int `test:"-"`
 }
 
 func TestGenerate(t *testing.T) {
@@ -91,7 +93,7 @@ func TestGenerate(t *testing.T) {
 func testGenerate(t *testing.T, name string, x interface{}) {
 	t.Helper()
 	var buf bytes.Buffer
-	if err := generate(&buf, "somepkg", nil, x); err != nil {
+	if err := generate(&buf, "somepkg", nil, "test", x); err != nil {
 		t.Fatal(err)
 	}
 	got := buf.String()
@@ -127,7 +129,6 @@ func TestExportedFields(t *testing.T) {
 		B bool
 		I int `codec:"-"` // this field will be ignored
 		C string
-		D int `codec:"name"`
 	}
 
 	var (
@@ -146,48 +147,35 @@ func TestExportedFields(t *testing.T) {
 	}
 
 	// First time we see ef, no previous fields.
-	got := exportedFields(reflect.TypeOf(ef{}), nil)
+	got := exportedFields(reflect.TypeOf(ef{}), nil, "codec")
 	want := []field{
 		{"A", intType, "0"},
 		{"B", boolType, "false"},
 		{"C", stringType, `""`},
-		{"name", intType, "0"},
 	}
 	check(want, got)
 
 	// Imagine that the previous ef had fields C and A in that order, but not B or name.
 	// We should preserve the existing ordering and add B and name at the end.
-	got = exportedFields(reflect.TypeOf(ef{}), []string{"C", "A"})
+	got = exportedFields(reflect.TypeOf(ef{}), []string{"C", "A"}, "codec")
 	want = []field{
 		{"C", stringType, `""`},
 		{"A", intType, "0"},
 		{"B", boolType, "false"},
-		{"name", intType, "0"},
 	}
 	check(want, got)
 
 	// Imagine instead that there had been a field D that was removed.
 	// We still keep the names, but the entry for "D" has a nil type.
-	got = exportedFields(reflect.TypeOf(ef{}), []string{"A", "D", "B", "C"})
+	got = exportedFields(reflect.TypeOf(ef{}), []string{"A", "D", "B", "C"}, "codec")
 	want = []field{
 		{"A", intType, "0"},
 		{"D", nil, ""},
 		{"B", boolType, "false"},
 		{"C", stringType, `""`},
-		{"name", intType, "0"},
 	}
 	check(want, got)
 }
-
-type XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX struct {
-	NoTag     int
-	XXX       int           `test:"tag"` // tag name takes precedence
-	Anonymous `test:"anon"` // anonymous non-structs also get their name from the tag
-	Tag       int           // tag takes precedence over untagged field of the same name
-	YYY       int           `test:"Tag"`
-	Empty     int           `test:""` // empty tag is noop
-}
-type Anonymous int
 
 type parseTagStruct struct {
 	NoTag    int
