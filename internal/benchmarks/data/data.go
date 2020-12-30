@@ -1,6 +1,6 @@
 package data
 
-//go:generate rm -f types.gen.go ast_types.gen.go
+//go:generate rm -f *.gen.go
 //go:generate go run generate.go code
 //go:generate codecgen -o hyperledger.ugorji.gen.go hyperledger.go
 //go:generate codecgen -o licenses.ugorji.gen.go licenses.go

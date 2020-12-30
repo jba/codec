@@ -15,6 +15,6 @@ require (
 	golang.org/x/mod v0.4.0 // indirect
 	golang.org/x/pkgsite v0.0.0-20201120215659-fd89b15b0860 // indirect
 	golang.org/x/time v0.0.0-20191024005414-555d28b269f0
-	golang.org/x/tools v0.0.0-20201224043029-2b0845dc783e // indirect
+	golang.org/x/tools v0.0.0-20201230224404-63754364767c // indirect
 	gotest.tools v2.2.0+incompatible
 )

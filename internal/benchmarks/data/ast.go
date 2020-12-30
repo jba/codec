@@ -13,6 +13,7 @@ import (
 	"go/parser"
 	"go/token"
 	"os"
+	"path"
 	"path/filepath"
 	"runtime"
 )
@@ -137,15 +138,24 @@ func init() {
 	}
 }
 
-func generateASTToFile(filename string) error {
-	// Get the AST for the net/http package.
+// ParseStdlibPackage parses and returns the standard library package at ppath.
+// It assumes the package name is the last component of the path.
+func ParseStdlibPackage(ppath string) (*ast.Package, error) {
 	dir := filepath.Join(runtime.GOROOT(), "src", "net", "http")
 	fset := token.NewFileSet()
 	pkgs, err := parser.ParseDir(fset, dir, nil, parser.ParseComments)
 	if err != nil {
+		return nil, err
+	}
+	return pkgs[path.Base(ppath)], nil
+}
+
+func generateASTToFile(filename string) error {
+	// Get the AST for the net/http package.
+	httpPkg, err := ParseStdlibPackage("net/http")
+	if err != nil {
 		return err
 	}
-	httpPkg := pkgs["http"]
 	// nil out things that result in cycles.
 	for _, f := range httpPkg.Files {
 		f.Scope = nil

@@ -7,7 +7,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"os"
 
@@ -22,5 +21,4 @@ func main() {
 	if err := data.Generate(things); err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println("Generated files, exiting.")
 }

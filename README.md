@@ -4,6 +4,10 @@ This is a fork of pkgsite/internal/godoc/codec.
 
 TODO:
 
+- backpatch refs as in Sereal
+
+- User-provided UnknownFIeld function
+
 - Put benchmarks in separate module to avoid dependencies on GCS, GCP, etc.
 
 - Support renaming with struct tags.
