@@ -267,7 +267,9 @@ func runBenchmarkRefs([]string) error {
 	// newptr := data.LicensesSmall.Newptr
 
 	standard := newJbaCodec("standard", codecapi.EncodeOptions{TrackPointers: true})
-	marked := newJbaCodec("marked refs", codecapi.EncodeOptions{TrackPointers: true, MarkRefs: true})
+	marked := newJbaCodec("marked refs", codecapi.EncodeOptions{TrackPointers: true,
+		/*MarkRefs: true*/
+	})
 	var encodedStandard, encodedMarked []byte
 
 	bms := []bench.Benchmark{

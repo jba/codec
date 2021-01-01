@@ -23,24 +23,22 @@ const uint64Size = 8
 var header = []byte("GJC0")
 
 type Encoder struct {
-	opts         EncodeOptions
-	w            io.Writer
-	buf          []byte
-	typeNums     map[reflect.Type]int
-	seen         map[uintptr]uint64 // for references; see StartStruct
-	nRefs, nPtrs int
+	opts     EncodeOptions
+	w        io.Writer
+	buf      []byte
+	typeNums map[reflect.Type]int
+	seen     map[uintptr]int // for references; see StartStruct
 }
 
 type EncodeOptions struct {
 	TrackPointers bool
 	Buffer        []byte
-	MarkRefs      bool
 }
 
 func NewEncoder(w io.Writer, opts EncodeOptions) *Encoder {
 	e := &Encoder{w: w, opts: opts}
 	if e.opts.TrackPointers {
-		e.seen = make(map[uintptr]uint64, 1000)
+		e.seen = make(map[uintptr]int, 1000)
 	}
 	return e
 }
@@ -89,7 +87,6 @@ type Decoder struct {
 	buf        []byte
 	i          int // offset
 	typeCodecs []typeCodec
-	refs       []interface{}       // list of pointers, in the order seen
 	storeIndex int                 // for StartPtr to communicate with StoreRef
 	refMap     map[int]interface{} // from buf offset to pointer
 }
@@ -438,34 +435,16 @@ func (e *Encoder) StartPtr(isNil bool, p interface{}) bool {
 			// If we have already seen this struct pointer,
 			// encode a reference to it.
 			e.writeByte(refCode)
-			if e.opts.MarkRefs {
-				// Encode the relative position, because the buffer
-				// will have data prepended to it.
-				e.EncodeUint(uint64(len(e.buf)) - u)
-				// Backpatch the ptrCode to a refPtrCode.
-				if !(e.buf[u] == ptrCode || e.buf[u] == refPtrCode) {
-					panic(fmt.Sprintf("e.buf[%d] not ptrCode or refPtrCode but %d", u, e.buf[u]))
-				}
-				if e.buf[u] == ptrCode {
-					e.nRefs++
-				}
-				e.buf[u] = refPtrCode
-			} else {
-				e.EncodeUint(u)
-			}
-			return false // Caller should not encode the struct.
+			// Encode the relative position, because the buffer
+			// will have data prepended to it.
+			e.EncodeUint(uint64(len(e.buf) - u))
+			e.buf[u] = refPtrCode // Backpatch the ptrCode to a refPtrCode.
+			return false          // Caller should not encode the struct.
 		}
-		// Note that we have seen this pointer, and remember
-		if !e.opts.MarkRefs {
-			// its position in the encoding.
-			e.seen[ptr] = uint64(len(e.seen))
-		} else {
-			// the position of the ptrCode.
-			e.seen[ptr] = uint64(len(e.buf))
-		}
+		// Note that we have seen this pointer, and remember the position of the ptrCode.
+		e.seen[ptr] = len(e.buf)
 	}
 	e.writeByte(ptrCode)
-	e.nPtrs++
 	return true
 }
 
@@ -481,15 +460,7 @@ func (d *Decoder) StartPtr() (bool, interface{}) {
 	case refCode:
 		i := d.i
 		u := d.DecodeUint()
-		if d.opts.MarkRefs {
-			r := d.refMap[i-int(u)]
-			if r == nil {
-				panic("nil ref")
-			}
-			return true, r
-		} else {
-			return true, d.refs[u]
-		}
+		return true, d.refMap[i-int(u)]
 	case ptrCode:
 		d.storeIndex = -1
 		return true, nil
@@ -519,14 +490,8 @@ func (d *Decoder) StartStruct() {
 // StoreRef should be called by a struct decoder immediately after it allocates
 // a struct pointer.
 func (d *Decoder) StoreRef(p interface{}) {
-	if d.opts.TrackPointers {
-		if d.opts.MarkRefs {
-			if d.storeIndex > 0 {
-				d.refMap[d.storeIndex] = p
-			}
-		} else {
-			d.refs = append(d.refs, p)
-		}
+	if d.opts.TrackPointers && d.storeIndex > 0 {
+		d.refMap[d.storeIndex] = p
 	}
 }
 
@@ -655,7 +620,6 @@ func (e *Encoder) encodeInitial() {
 		e.EncodeString(n)
 	}
 	e.EncodeBool(e.opts.TrackPointers)
-	e.EncodeBool(e.opts.MarkRefs)
 }
 
 // decodeInitial decodes metadata that appears at the start of the
@@ -674,8 +638,7 @@ func (d *Decoder) decodeInitial() {
 		d.typeCodecs[num] = tc
 	}
 	d.opts.TrackPointers = d.DecodeBool()
-	d.opts.MarkRefs = d.DecodeBool()
-	if d.opts.MarkRefs {
+	if d.opts.TrackPointers {
 		d.refMap = make(map[int]interface{}, 100)
 	}
 }

@@ -5,7 +5,6 @@
 package codec
 
 import (
-	"fmt"
 	"io"
 
 	api "github.com/jba/codec/codecapi"
@@ -41,8 +40,6 @@ func NewEncoder(w io.Writer, opts *EncodeOptions) *Encoder {
 	if opts != nil {
 		aopts.TrackPointers = opts.TrackPointers
 		aopts.Buffer = opts.Buffer
-		aopts.MarkRefs = true
-		fmt.Println("!!!! using MarkRefs")
 	}
 	return &Encoder{state: api.NewEncoder(w, aopts)}
 }
