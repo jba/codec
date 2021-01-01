@@ -22,6 +22,7 @@ import (
 	"encoding/gob"
 	"flag"
 	"fmt"
+	"go/ast"
 	"io"
 	"log"
 	"os"
@@ -128,26 +129,29 @@ var datas = []data.BenchmarkData{
 
 var cpuProfileFile *os.File
 
+var commands = map[string]func([]string) error{
+	"bm":   runBenchmarks,
+	"bet":  runBreakEvenThroughput,
+	"refs": runBenchmarkRefs,
+}
+
 func main() {
 	flag.Parse()
-	switch flag.Arg(0) {
-	case "bet":
-		runBreakEvenThroughput(flag.Args()[1:])
-
-	case "bm":
-		runBenchmarks(flag.Args()[1:])
-
-	default:
+	cmd := commands[flag.Arg(0)]
+	if cmd == nil {
 		log.Fatalf("unknown command %q", flag.Arg(0))
+	}
+	if err := cmd(flag.Args()[1:]); err != nil {
+		log.Fatal(err)
 	}
 }
 
-func runBenchmarks(dataNames []string) {
+func runBenchmarks(dataNames []string) error {
 	if *cpuprofile != "" {
 		var err error
 		cpuProfileFile, err = os.Create(*cpuprofile)
 		if err != nil {
-			log.Fatal("could not create CPU profile: ", err)
+			return fmt.Errorf("could not create CPU profile: %v", err)
 		}
 		defer func() {
 			if err := cpuProfileFile.Close(); err != nil {
@@ -165,9 +169,10 @@ func runBenchmarks(dataNames []string) {
 		hp := pprof.Lookup(kind)
 		err := data.WriteNewFile(kind+".out", func(f *os.File) error { return hp.WriteTo(f, 0) })
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 	}
+	return nil
 }
 
 func datasToRun(dataNames []string) []data.BenchmarkData {
@@ -218,6 +223,68 @@ func runBenchmark(bd data.BenchmarkData) {
 		bench.Run(bms)
 		fmt.Println()
 	}
+}
+
+// Compare decoding where we remember all incoming pointers, to
+// where we only remember ones that are marked by the encoder.
+/*
+Results:
+   Times are about the same, much less allocation for marked refs.
+
+> GOGC=off go run . refs
+encode:
+     jba/codec standard    19  24058K/op  0.06s/op 1.00x
+  jba/codec marked refs    20  24039K/op  0.05s/op 1.04x
+
+decode:
+     jba/codec standard    42  17895K/op  0.03s/op 1.00x
+  jba/codec marked refs    39  10755K/op  0.03s/op 1.00x
+
+> GOGC=off go run . refs
+encode:
+     jba/codec standard    19  24061K/op  0.05s/op 1.00x
+  jba/codec marked refs    21  24018K/op  0.05s/op 1.03x
+
+decode:
+     jba/codec standard    43  17895K/op  0.03s/op 1.00x
+  jba/codec marked refs    38  10756K/op  0.03s/op 0.94x
+*/
+
+func runBenchmarkRefs([]string) error {
+	// About 20% of the pointers in the net/http ASTs need to be remembered for sharing.
+	pkg, err := data.ParseStdlibPackage("net/http")
+	if err != nil {
+		return err
+	}
+	dat := pkg.Files
+	newptr := func() interface{} { return new(map[string]*ast.File) }
+
+	// With data that has no sharing, like licenses, decoding is 10-15% faster.
+	// dat, err := data.LicensesSmall.Read()
+	// if err != nil {
+	// 	return err
+	// }
+	// newptr := data.LicensesSmall.Newptr
+
+	standard := newJbaCodec("standard", codecapi.EncodeOptions{TrackPointers: true})
+	marked := newJbaCodec("marked refs", codecapi.EncodeOptions{TrackPointers: true, MarkRefs: true})
+	var encodedStandard, encodedMarked []byte
+
+	bms := []bench.Benchmark{
+		newEncodeBenchmark(dat, standard, 0, &encodedStandard),
+		newEncodeBenchmark(dat, marked, 0, &encodedMarked),
+	}
+	fmt.Println("encode:")
+	bench.Run(bms)
+	fmt.Println()
+
+	bms = []bench.Benchmark{
+		newDecodeBenchmark(encodedStandard, standard, 0, newptr),
+		newDecodeBenchmark(encodedMarked, marked, 0, newptr),
+	}
+	fmt.Println("decode:")
+	bench.Run(bms)
+	return nil
 }
 
 func newEncodeBenchmark(data interface{}, c Codec, tput int, out *[]byte) bench.Benchmark {

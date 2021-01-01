@@ -67,7 +67,9 @@ after changes and look for runtime.newobject to see what's escaping to the heap.
 
 - Compare gob length-prefixed values with nValues and start/end.
 
-- Compare the redundant (ptrCode; startCode) sequence with just startCode.
+- Compare combined instructions ptrStartCode, refPtrStartCode with the pairs
+  ([ref]PtrCode, startCode). Might make a small difference since there can be a
+  lot of struct pointers.
 
 - Faster []bool codec (as bits)? Unlikely to be worth it.
 

@@ -26,10 +26,6 @@ type Benchmark struct {
 func Run(bms []Benchmark) {
 	var r0 testing.BenchmarkResult
 	w := tabwriter.NewWriter(os.Stdout, 6, 8, 2, ' ', tabwriter.AlignRight)
-	// Do a warm-up run.
-	for _, bm := range bms {
-		_, _ = Run1(bm)
-	}
 	for i, bm := range bms {
 		r, err := Run1(bm)
 		if err != nil {

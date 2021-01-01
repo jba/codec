@@ -23,22 +23,24 @@ const uint64Size = 8
 var header = []byte("GJC0")
 
 type Encoder struct {
-	opts     EncodeOptions
-	w        io.Writer
-	buf      []byte
-	typeNums map[reflect.Type]int
-	seen     map[uintptr]uint64 // for references; see StartStruct
+	opts         EncodeOptions
+	w            io.Writer
+	buf          []byte
+	typeNums     map[reflect.Type]int
+	seen         map[uintptr]uint64 // for references; see StartStruct
+	nRefs, nPtrs int
 }
 
 type EncodeOptions struct {
 	TrackPointers bool
 	Buffer        []byte
+	MarkRefs      bool
 }
 
 func NewEncoder(w io.Writer, opts EncodeOptions) *Encoder {
 	e := &Encoder{w: w, opts: opts}
 	if e.opts.TrackPointers {
-		e.seen = map[uintptr]uint64{}
+		e.seen = make(map[uintptr]uint64, 1000)
 	}
 	return e
 }
@@ -87,7 +89,9 @@ type Decoder struct {
 	buf        []byte
 	i          int // offset
 	typeCodecs []typeCodec
-	refs       []interface{} // list of struct pointers, in the order seen
+	refs       []interface{}       // list of pointers, in the order seen
+	storeIndex int                 // for StartPtr to communicate with StoreRef
+	refMap     map[int]interface{} // from buf offset to pointer
 }
 
 func NewDecoder(r io.Reader) *Decoder {
@@ -120,6 +124,7 @@ func (d *Decoder) Decode() (_ interface{}, err error) {
 	}
 	defer handlePanic(&err)
 	d.decodeInitial()
+
 	return d.DecodeAny(), nil
 }
 
@@ -180,7 +185,8 @@ const (
 	nBytesCode  // uint n follows, then n bytes
 	nValuesCode // uint n follows, then n values
 	ptrCode     // non-nil, non-ref pointer
-	refCode     // uint n follows, referring to a previous value
+	refPtrCode  // non-nil, non-ref pointer that has a later ref
+	refCode     // uint n follows: relative offset of previous refPtrCode
 	// reserve a few values for future use
 	reserved1
 	reserved2
@@ -432,14 +438,34 @@ func (e *Encoder) StartPtr(isNil bool, p interface{}) bool {
 			// If we have already seen this struct pointer,
 			// encode a reference to it.
 			e.writeByte(refCode)
-			e.EncodeUint(u)
+			if e.opts.MarkRefs {
+				// Encode the relative position, because the buffer
+				// will have data prepended to it.
+				e.EncodeUint(uint64(len(e.buf)) - u)
+				// Backpatch the ptrCode to a refPtrCode.
+				if !(e.buf[u] == ptrCode || e.buf[u] == refPtrCode) {
+					panic(fmt.Sprintf("e.buf[%d] not ptrCode or refPtrCode but %d", u, e.buf[u]))
+				}
+				if e.buf[u] == ptrCode {
+					e.nRefs++
+				}
+				e.buf[u] = refPtrCode
+			} else {
+				e.EncodeUint(u)
+			}
 			return false // Caller should not encode the struct.
 		}
-		// Note that we have seen this pointer, and assign it
-		// its position in the encoding.
-		e.seen[ptr] = uint64(len(e.seen))
+		// Note that we have seen this pointer, and remember
+		if !e.opts.MarkRefs {
+			// its position in the encoding.
+			e.seen[ptr] = uint64(len(e.seen))
+		} else {
+			// the position of the ptrCode.
+			e.seen[ptr] = uint64(len(e.buf))
+		}
 	}
 	e.writeByte(ptrCode)
+	e.nPtrs++
 	return true
 }
 
@@ -453,31 +479,37 @@ func (d *Decoder) StartPtr() (bool, interface{}) {
 	case nilCode: // do not set the pointer
 		return false, nil
 	case refCode:
+		i := d.i
 		u := d.DecodeUint()
-		return true, d.refs[u]
+		if d.opts.MarkRefs {
+			r := d.refMap[i-int(u)]
+			if r == nil {
+				panic("nil ref")
+			}
+			return true, r
+		} else {
+			return true, d.refs[u]
+		}
 	case ptrCode:
+		d.storeIndex = -1
+		return true, nil
+	case refPtrCode:
+		// d.i was incremented by d.readByte, so the actual position of the code is one before.
+		d.storeIndex = d.i - 1
 		return true, nil
 	default:
 		d.badcode(b)
-		return false, nil // unreached, needed for compiler
+		panic("unreachable")
 	}
 }
 
 //////////////// Struct Support
 
-// TODO: now for struct pointers we write
-//    ptrCode
-//    startCode
-// which is a little redundant. What do we gain by optimizing the ptrCode away?
-
 func (e *Encoder) StartStruct() {
 	e.writeByte(startCode)
 }
 
-// StartStruct should be called before decoding a struct pointer. If it returns
-// false, decoding should not proceed. If it returns true and the second return
-// value is non-nil, it is a reference to a previous value and should be used
-// instead of proceeding with decoding.
+// StartStruct should be called before decoding a struct.
 func (d *Decoder) StartStruct() {
 	if b := d.readByte(); b != startCode {
 		d.badcode(b)
@@ -488,7 +520,13 @@ func (d *Decoder) StartStruct() {
 // a struct pointer.
 func (d *Decoder) StoreRef(p interface{}) {
 	if d.opts.TrackPointers {
-		d.refs = append(d.refs, p)
+		if d.opts.MarkRefs {
+			if d.storeIndex > 0 {
+				d.refMap[d.storeIndex] = p
+			}
+		} else {
+			d.refs = append(d.refs, p)
+		}
 	}
 }
 
@@ -541,7 +579,7 @@ func (d *Decoder) skip() {
 	case refCode:
 		// A uint follows.
 		d.DecodeUint()
-	case ptrCode:
+	case ptrCode, refPtrCode:
 		// One value follows.
 		d.skip()
 	case startCode:
@@ -617,6 +655,7 @@ func (e *Encoder) encodeInitial() {
 		e.EncodeString(n)
 	}
 	e.EncodeBool(e.opts.TrackPointers)
+	e.EncodeBool(e.opts.MarkRefs)
 }
 
 // decodeInitial decodes metadata that appears at the start of the
@@ -635,6 +674,10 @@ func (d *Decoder) decodeInitial() {
 		d.typeCodecs[num] = tc
 	}
 	d.opts.TrackPointers = d.DecodeBool()
+	d.opts.MarkRefs = d.DecodeBool()
+	if d.opts.MarkRefs {
+		d.refMap = make(map[int]interface{}, 100)
+	}
 }
 
 //////////////// Errors
@@ -667,7 +710,8 @@ func Fail(err error) {
 }
 
 func (d *Decoder) badcode(c byte) {
-	Failf("bad code %d at %d", c, d.i-1)
+	//Failf("bad code %d at %d", c, d.i-1)
+	panic(fmt.Sprintf("bad code %d", c))
 }
 
 // codecError wraps errors from Fail so a recover

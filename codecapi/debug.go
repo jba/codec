@@ -9,6 +9,16 @@ package codecapi
 import "fmt"
 
 func (d *Decoder) dump() {
+	for d.i < len(d.buf) {
+		d.dump1(0)
+	}
+}
+
+func (d *Decoder) dump1(level int) {
+	fmt.Printf("%3d ", d.i)
+	for i := 0; i < level; i++ {
+		fmt.Print("    ")
+	}
 	b := d.readByte()
 	if b < endCode {
 		// Small integers represent themselves in a single byte.
@@ -25,23 +35,36 @@ func (d *Decoder) dump() {
 		fmt.Println("nil")
 	case nBytesCode:
 		n := int(d.DecodeUint())
-		fmt.Printf("%d bytes: %v\n", n, d.readBytes(n))
+		fmt.Printf("nBytes %d", n)
+		data := d.readBytes(n)
+		if n < 10 {
+			fmt.Printf(" %v", data)
+		}
+		fmt.Println()
 	case nValuesCode:
 		// A uint n and n values follow.
 		n := int(d.DecodeUint())
+		fmt.Printf("nValues %d\n", n)
 		for i := 0; i < n; i++ {
-			d.dump()
+			d.dump1(level + 1)
 		}
+	case ptrCode:
+		fmt.Println("ptr")
+		d.dump1(level)
+	case refPtrCode:
+		fmt.Println("refPtr")
+		d.dump1(level)
 	case refCode:
 		// A uint follows.
-		fmt.Printf("ref: %d\n", d.DecodeUint())
+		fmt.Printf("ref %d\n", d.DecodeUint())
 	case startCode:
-		fmt.Println("startCode")
+		fmt.Println("start")
 		for d.curByte() != endCode {
-			d.dump()
+			d.dump1(level + 1)
 		}
-		d.readByte() // consume the endCode byte
-		fmt.Println("endCode")
+		d.dump1(level) // endCode
+	case endCode:
+		fmt.Println("end")
 	default:
 		d.badcode(b)
 	}
