@@ -37,6 +37,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/jba/codec/internal/benchmarks/bench"
@@ -85,12 +86,13 @@ const throughputThreshold = 60
 
 func runBreakEvenThroughput(dataNames []string) error {
 	return errors.New("inactive")
-	// for _, bd := range datasToRun(dataNames) {
-	// 	if err := breakEvenThroughput(jbaCodec, jbaCodecGob, bd); err != nil {
-	// 		log.Fatal(err)
-	// 	}
-	// 	fmt.Println()
-	// }
+	for _, bd := range datasToRun(dataNames) {
+		if err := breakEvenThroughput(jbaCodec, gobCodec, bd); err != nil {
+			log.Fatal(err)
+		}
+		fmt.Println()
+	}
+	return nil
 }
 
 func breakEvenThroughput(origCodec, spaceOptCodec Codec, bd data.BenchmarkData) error {

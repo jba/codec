@@ -27,7 +27,6 @@ import (
 	"log"
 	"os"
 	"reflect"
-	"runtime"
 	"runtime/pprof"
 	"testing"
 
@@ -334,10 +333,4 @@ func newDecodeBenchmark(enc []byte, c Codec, tput int, newptr func() interface{}
 			return nil
 		},
 	}
-}
-
-func totalAlloc() uint64 {
-	var ms runtime.MemStats
-	runtime.ReadMemStats(&ms)
-	return ms.TotalAlloc
 }
