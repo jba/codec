@@ -29,6 +29,7 @@ import (
 	"reflect"
 	"runtime/pprof"
 	"testing"
+	"time"
 
 	"github.com/jba/codec/codecapi"
 	"github.com/jba/codec/internal/benchmarks/bench"
@@ -46,10 +47,10 @@ var (
 
 // Throughputs to benchmark, in Mi/sec.
 var throughputs = []int{
-	0,    // unlimited throughput; speed of memory
-	3000, // reading from local disk
-	250,  // reading from a GCS bucket
-	100,  // reading from a cloud DB
+	0, // unlimited throughput; speed of memory
+	//3000, // reading from local disk
+	250, // reading from a GCS bucket
+	//	100, // reading from a cloud DB
 }
 
 type Codec struct {
@@ -132,6 +133,7 @@ var commands = map[string]func([]string) error{
 	"bm":   runBenchmarks,
 	"bet":  runBreakEvenThroughput,
 	"refs": runBenchmarkRefs,
+	"one":  runBenchmarksJbaOnly,
 }
 
 func main() {
@@ -224,6 +226,39 @@ func runBenchmark(bd data.BenchmarkData) {
 	}
 }
 
+func runBenchmarksJbaOnly(dataNames []string) error {
+	for _, bd := range datasToRun(dataNames) {
+		data, err := bd.Read()
+		if err != nil {
+			return fmt.Errorf("%s: %v", bd.Name, err)
+		}
+		for _, tput := range throughputs {
+			print := func(msg string, res testing.BenchmarkResult) {
+				s := "max"
+				if tput > 0 {
+					s = fmt.Sprintf("%d", tput)
+				}
+				fmt.Printf("%-14s %4s %s %8.3f ms\n", bd.Name, s, msg, time.Duration(res.NsPerOp()).Seconds()*1000)
+			}
+
+			var encoded []byte
+			bm := newEncodeBenchmark(data, jbaCodec, tput, &encoded)
+			res, err := bench.Run1(bm)
+			if err != nil {
+				return err
+			}
+			print("encode", res)
+			bm = newDecodeBenchmark(encoded, jbaCodec, tput, bd.Newptr)
+			res, err = bench.Run1(bm)
+			if err != nil {
+				return err
+			}
+			print("decode", res)
+		}
+	}
+	return nil
+}
+
 // Compare decoding where we remember all incoming pointers, to
 // where we only remember ones that are marked by the encoder.
 /*
@@ -266,9 +301,7 @@ func runBenchmarkRefs([]string) error {
 	// newptr := data.LicensesSmall.Newptr
 
 	standard := newJbaCodec("standard", codecapi.EncodeOptions{TrackPointers: true})
-	marked := newJbaCodec("marked refs", codecapi.EncodeOptions{TrackPointers: true,
-		/*MarkRefs: true*/
-	})
+	marked := newJbaCodec("marked refs", codecapi.EncodeOptions{TrackPointers: true})
 	var encodedStandard, encodedMarked []byte
 
 	bms := []bench.Benchmark{
