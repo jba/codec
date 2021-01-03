@@ -8,6 +8,9 @@ rather than reflection, so it is significantly faster than reflection-based
 encoders like gob. It can also preserve sharing among pointers (but not other
 forms of sharing, like sub-slices).
 
+Struct Tags
+
+
 
 */
 package codec

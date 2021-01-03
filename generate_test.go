@@ -124,12 +124,13 @@ func readGolden(t *testing.T, name string) string {
 	return string(data)
 }
 
-func TestExportedFields(t *testing.T) {
+func TestStructFields(t *testing.T) {
 	type ef struct {
 		A int
 		B bool
 		I int `codec:"-"` // this field will be ignored
 		C string
+		D int `codec:"N"`
 	}
 
 	var (
@@ -154,16 +155,19 @@ func TestExportedFields(t *testing.T) {
 		{"A", intType, "0"},
 		{"B", boolType, "false"},
 		{"C", stringType, `""`},
+		{"N", intType, "0"},
 	}
 	check(want, got)
 
-	// Imagine that the previous ef had fields C and A in that order, but not B or name.
-	// We should preserve the existing ordering and add B and name at the end.
+	// Imagine that the previous definition of ef had fields C and A in that
+	// order, but not B or N. We should preserve the existing ordering and
+	// add B and N at the end.
 	got = g.structFields(reflect.TypeOf(ef{}), []string{"C", "A"})
 	want = []field{
 		{"C", stringType, `""`},
 		{"A", intType, "0"},
 		{"B", boolType, "false"},
+		{"N", intType, "0"},
 	}
 	check(want, got)
 
@@ -175,6 +179,7 @@ func TestExportedFields(t *testing.T) {
 		{"D", nil, ""},
 		{"B", boolType, "false"},
 		{"C", stringType, `""`},
+		{"N", intType, "0"},
 	}
 	check(want, got)
 }

@@ -22,6 +22,8 @@ main() {
   ensure_go_binary mvdan.cc/unparam
   unparam ./... | warnout
 
+  go test ./...
+
   exit $EXIT_CODE
 }
 

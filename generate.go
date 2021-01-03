@@ -327,8 +327,10 @@ func (g *generator) structFields(t reflect.Type, oldNames []string) []field {
 	for i, n := range oldNames {
 		fieldPos[n] = i
 	}
+	// We will note the names of each current field, by position. Struct tags can alter these.
+	fieldNames := make([]string, t.NumField())
 
-	// If there are any new exported fields, assign them positions after the
+	// If there are any new fields, assign them positions after the
 	// existing ones.
 	for i := 0; i < t.NumField(); i++ {
 		f := t.Field(i)
@@ -341,14 +343,17 @@ func (g *generator) structFields(t reflect.Type, oldNames []string) []field {
 		if f.Type.Kind() == reflect.Chan || f.Type.Kind() == reflect.Func {
 			continue
 		}
-		_, omit, _ := parseTag(g.fieldTagKey, f.Tag)
-		// TODO: use the name to support renaming.
+		name, omit, _ := parseTag(g.fieldTagKey, f.Tag)
 		// Ignore a field if it has a struct tag with "-", like encoding/json.
 		if omit {
 			continue
 		}
-		if _, ok := fieldPos[f.Name]; !ok {
-			fieldPos[f.Name] = len(fieldPos)
+		if name == "" {
+			name = f.Name
+		}
+		fieldNames[i] = name
+		if _, ok := fieldPos[name]; !ok {
+			fieldPos[name] = len(fieldPos)
 		}
 	}
 
@@ -356,9 +361,9 @@ func (g *generator) structFields(t reflect.Type, oldNames []string) []field {
 	fields := make([]field, len(fieldPos))
 	for i := 0; i < t.NumField(); i++ {
 		f := t.Field(i)
-		if pos, ok := fieldPos[f.Name]; ok {
+		if pos, ok := fieldPos[fieldNames[i]]; ok {
 			fields[pos] = field{
-				Name: f.Name,
+				Name: fieldNames[i],
 				Type: f.Type,
 				Zero: zeroValue(f.Type),
 			}

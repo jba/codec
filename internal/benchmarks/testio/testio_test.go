@@ -48,7 +48,7 @@ func checkThroughput(t *testing.T, w io.Writer, r io.Reader, want int64, buf []b
 		t.Fatal(err)
 	}
 	got := float64(n) / meb / time.Since(start).Seconds()
-	if math.Abs(float64(got-float64(want))) > 1 {
+	if math.Abs(float64(got-float64(want))) > 5 {
 		t.Errorf("got throughput %f, want %d M/s", got, want)
 	}
 
