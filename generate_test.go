@@ -81,6 +81,7 @@ type genStruct struct {
 
 func TestGenerate(t *testing.T) {
 	testGenerate(t, "slice", [][]int(nil))
+	testGenerate(t, "islice", []interface{}(nil))
 	testGenerate(t, "map", map[string]bool(nil))
 	testGenerate(t, "struct", genStruct{})
 	testGenerate(t, "binmarsh", time.Time{})

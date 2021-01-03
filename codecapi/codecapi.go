@@ -70,7 +70,7 @@ func (e *Encoder) Encode(x interface{}) (err error) {
 
 	// Encode total size in 8 bytes.
 	var buf [uint64Size]byte
-	binary.LittleEndian.PutUint64(buf[:], uint64(len(initial)+len(data)))
+	binary.BigEndian.PutUint64(buf[:], uint64(len(initial)+len(data)))
 	if _, err := e.w.Write(buf[:]); err != nil {
 		return err
 	}
@@ -116,7 +116,7 @@ func (d *Decoder) Decode() (_ interface{}, err error) {
 	if _, err := io.ReadFull(d.r, szbuf[:]); err != nil {
 		return nil, err
 	}
-	sz := binary.LittleEndian.Uint64(szbuf[:])
+	sz := binary.BigEndian.Uint64(szbuf[:])
 	// TODO: We can reuse d.buf iff we didn't let slices from it escape previously.
 	d.buf = make([]byte, sz)
 	d.i = 0
@@ -166,12 +166,6 @@ func (d *Decoder) readString(len int) string {
 	return string(d.readBytes(len))
 }
 
-func (e *Encoder) writeUint64(u uint64) {
-	var buf [8]byte
-	binary.LittleEndian.PutUint64(buf[:], u)
-	e.writeBytes(buf[:])
-}
-
 //////////////// Encoding Scheme
 
 // Byte codes that begin each encoded value.
@@ -199,7 +193,7 @@ const (
 
 // EncodeUint encodes a uint64.
 func (e *Encoder) EncodeUint(u uint64) {
-	var buf [4]byte
+	var buf [uint64Size]byte
 	switch {
 	case u < endCode:
 		// u fits into the initial byte.
@@ -210,25 +204,26 @@ func (e *Encoder) EncodeUint(u uint64) {
 		e.writeByte(byte(u))
 
 	case u <= math.MaxUint16:
-		// Encode as a sequence of 2 bytes, the little-endian representation of
+		// Encode as a sequence of 2 bytes, the big-endian representation of
 		// a uint16.
 		e.writeByte(bytes2Code)
-		binary.LittleEndian.PutUint16(buf[:2], uint16(u))
+		binary.BigEndian.PutUint16(buf[:2], uint16(u))
 		e.writeBytes(buf[:2])
 
 	case u <= math.MaxUint32:
-		// Encode as a sequence of 4 bytes, the little-endian representation of
+		// Encode as a sequence of 4 bytes, the big-endian representation of
 		// a uint32.
 		e.writeByte(bytes4Code)
-		binary.LittleEndian.PutUint32(buf[:], uint32(u))
-		e.writeBytes(buf[:])
+		binary.BigEndian.PutUint32(buf[:4], uint32(u))
+		e.writeBytes(buf[:4])
 
 	default:
-		// Encode as a sequence of 8 bytes, the little-endian representation of
+		// Encode as a sequence of 8 bytes, the big-endian representation of
 		// a uint64.
 		e.writeByte(nBytesCode)
 		e.writeByte(uint64Size)
-		e.writeUint64(u)
+		binary.BigEndian.PutUint64(buf[:], u)
+		e.writeBytes(buf[:])
 	}
 }
 
@@ -241,12 +236,12 @@ func (d *Decoder) DecodeUint() uint64 {
 	case b == bytes1Code:
 		return uint64(d.readByte())
 	case b == bytes2Code:
-		return uint64(binary.LittleEndian.Uint16(d.readBytes(2)))
+		return uint64(binary.BigEndian.Uint16(d.readBytes(2)))
 	case b == bytes4Code:
-		return uint64(binary.LittleEndian.Uint32(d.readBytes(4)))
+		return uint64(binary.BigEndian.Uint32(d.readBytes(4)))
 	case b == nBytesCode:
 		if d.readByte() == uint64Size {
-			return binary.LittleEndian.Uint64(d.readBytes(uint64Size))
+			return binary.BigEndian.Uint64(d.readBytes(uint64Size))
 		}
 		Failf("DecodeUint: bad length")
 	default:
