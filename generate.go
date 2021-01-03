@@ -542,12 +542,24 @@ func (g *generator) goName(t reflect.Type) string {
 		return fmt.Sprintf("map[%s]%s", g.goName(t.Key()), g.goName(t.Elem()))
 	case reflect.Ptr:
 		return fmt.Sprintf("*%s", g.goName(t.Elem()))
+	case reflect.Interface:
+		// We only support the empty interface.
+		if t.NumMethod() == 0 {
+			return "interface{}"
+		} else {
+			panic(fmt.Sprintf("bad interface type (only unnamed empty interface is valid): %s", t))
+		}
 	default:
 		panic(fmt.Sprintf("bad type: %s", t))
 	}
 }
 
-var typeIdentifierReplacer = strings.NewReplacer("[]", "slice_", "[", "_", "]", "_", ".", "_", "*", "ptr_")
+var typeIdentifierReplacer = strings.NewReplacer(
+	"[]", "slice_",
+	"{}", "", // for empty interface
+	"[", "_", "]", "_", ".", "_",
+	"*", "ptr_",
+)
 
 // typeIdentifier returns a valid Go identifier for type t.
 // E.g. "ast.File" => "ast_File", "[]int" => "slice_int".

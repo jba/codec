@@ -131,21 +131,6 @@ type complex128Codec struct{}
 func (complex128Codec) Encode(e *Encoder, x interface{}) { e.EncodeComplex(x.(complex128)) }
 func (complex128Codec) Decode(d *Decoder) interface{}    { return d.DecodeComplex() }
 
-type sliceInterfaceCodec struct{}
-
-// func (s sliceInterfaceCodec) Encode(e *Encoder, x interface{}) { s.encode(e, x.([]interface{})) }
-// func (s sliceInterfaceCodec) Decode(d *Decoder) interface{}    { return s.decode() }
-
-// func (c sliceInterfaceCodec) encode(e *Encoder, s []interface{}) {
-// 	if s == nil {
-// 		e.EncodeNil()
-// 		return
-// 	}
-// 	e.StartList(len(s))
-// 	for _, x := range s {
-// 		.encode(e, x)
-// 	}
-
 func init() {
 	Register(false, boolCodec{})
 	Register("", stringCodec{})
