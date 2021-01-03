@@ -6,7 +6,7 @@ TODO:
 
 - Put benchmarks in separate module to avoid dependencies on GCS, GCP, etc.
 
-- Support renaming with struct tags.
+- Add EncodeBytes, DecodeBytes
 
 # Encoding Scheme
 

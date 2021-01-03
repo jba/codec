@@ -303,6 +303,7 @@ func (g *generator) genStruct(t reflect.Type) ([]byte, error) {
 }
 
 // A field holds the information necessary to generate the encoder for a struct field.
+// This struct's fields are exported so they can be used in templates.
 type field struct {
 	Name string
 	Type reflect.Type
@@ -370,7 +371,8 @@ func (g *generator) structFields(t reflect.Type, oldNames []string) []field {
 		}
 	}
 	// Add back in the removed names, so their positions can be preserved in the
-	// future.
+	// future. The Type field will be nil for these, which the genStruct template
+	// will use to avoid generating code for them.
 	for i, n := range oldNames {
 		if fields[i].Name == "" {
 			fields[i].Name = n
