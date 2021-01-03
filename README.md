@@ -8,6 +8,8 @@ TODO:
 
 - Add EncodeBytes, DecodeBytes
 
+- Have Decode return a documented error at EOF.
+
 # Encoding Scheme
 
 Every encoded value begins with a 1-byte code that describes what (if
@@ -66,8 +68,6 @@ Run
 after changes and look for runtime.newobject to see what's escaping to the heap.
 
 ## Micro-Benchmarks
-
-- Time the explicit x==nil arg to StartStruct against using reflection.
 
 - Compare combined instructions ptrStartCode, refPtrStartCode with the pairs
   ([ref]PtrCode, startCode). Might make a small difference since there can be a
