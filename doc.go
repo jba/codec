@@ -8,6 +8,25 @@ rather than reflection, so it is significantly faster than reflection-based
 encoders like gob. It can also preserve sharing among pointers (but not other
 forms of sharing, like sub-slices).
 
+Generating Code
+
+The package supports built-in types (int, string and so on) out of the box,
+but for XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+
+   Usage
+
+   Create an Encoder by passing it an io.Writer:
+
+	var buf bytes.Buffer
+	e := NewEncoder(&buf, nil)
+
+   Then use it to encode one or more values:
+
+   if err := e.Encode(x); err != nil { ... }
+
+
+
 
 Struct Tags
 
