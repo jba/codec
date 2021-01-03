@@ -45,6 +45,11 @@ func NewEncoder(w io.Writer, opts EncodeOptions) *Encoder {
 
 // Encode encodes x.
 func (e *Encoder) Encode(x interface{}) (err error) {
+	// Each call to Encode results in the following output:
+	// - A size in bytes (uint64)
+	// - Initial metadata
+	// - The encoded value
+
 	if e.typeNums == nil {
 		// First call to encode: write the header.
 		if _, err := e.w.Write(header); err != nil {
@@ -68,7 +73,7 @@ func (e *Encoder) Encode(x interface{}) (err error) {
 	initial := e.buf  // remember that
 	e.buf = data      // restore e.buf for next call to Encode
 
-	// Encode total size in 8 bytes.
+	// Encode total size in a uint64.
 	var buf [uint64Size]byte
 	binary.BigEndian.PutUint64(buf[:], uint64(len(initial)+len(data)))
 	if _, err := e.w.Write(buf[:]); err != nil {
@@ -112,13 +117,17 @@ func (d *Decoder) Decode() (_ interface{}, err error) {
 			return nil, fmt.Errorf("bad header: got %q, want %q", buf[:], header)
 		}
 	}
-	var szbuf [8]byte
+	var szbuf [uint64Size]byte
 	if _, err := io.ReadFull(d.r, szbuf[:]); err != nil {
 		return nil, err
 	}
 	sz := binary.BigEndian.Uint64(szbuf[:])
-	// TODO: We can reuse d.buf iff we didn't let slices from it escape previously.
-	d.buf = make([]byte, sz)
+	// We can reuse d.buf because we didn't let slices from it escape previously.
+	if cap(d.buf) >= int(sz) {
+		d.buf = d.buf[:sz]
+	} else {
+		d.buf = make([]byte, sz)
+	}
 	d.i = 0
 	if _, err := io.ReadFull(d.r, d.buf); err != nil {
 		return nil, err
