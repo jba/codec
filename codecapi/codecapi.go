@@ -429,7 +429,7 @@ func (d *Decoder) StartList() int {
 // argument says whether the pointer is nil. The p argument is the
 // pointer. If StartPtr returns false, encoding should not proceed.
 func (e *Encoder) StartPtr(isNil bool, p interface{}) bool {
-	if reflect.ValueOf(p).IsNil() {
+	if isNil {
 		e.EncodeNil()
 		return false
 	}
