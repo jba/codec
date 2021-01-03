@@ -37,7 +37,7 @@ func TestEncodeDecode(t *testing.T) {
 			t.Fatalf("%#v: %v", w, err)
 		}
 	}
-	d := NewDecoder(bytes.NewReader(buf.Bytes()))
+	d := NewDecoder(bytes.NewReader(buf.Bytes()), DecodeOptions{})
 	for _, w := range want {
 		g, err := d.Decode()
 		if err != nil {

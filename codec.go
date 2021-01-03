@@ -32,11 +32,9 @@ type EncodeOptions struct {
 	Buffer []byte
 }
 
-var apiOpts api.EncodeOptions
-
 // NewEncoder returns an Encoder that writes to w.
 func NewEncoder(w io.Writer, opts *EncodeOptions) *Encoder {
-	aopts := apiOpts
+	aopts := api.EncodeOptions{}
 	if opts != nil {
 		aopts.TrackPointers = opts.TrackPointers
 		aopts.Buffer = opts.Buffer
@@ -57,9 +55,20 @@ type Decoder struct {
 	state *api.Decoder
 }
 
+// DecodeOptions holds options for Decoding.
+type DecodeOptions struct {
+	// FailOnUnknownField configures whether unknown struct fields are skipped
+	// (the default) or cause decoding to fail immediately.
+	FailOnUnknownField bool
+}
+
 // NewDecoder creates a Decoder that reads from r.
-func NewDecoder(r io.Reader) *Decoder {
-	return &Decoder{state: api.NewDecoder(r)}
+func NewDecoder(r io.Reader, opts *DecodeOptions) *Decoder {
+	aopts := api.DecodeOptions{}
+	if opts != nil {
+		aopts.FailOnUnknownField = opts.FailOnUnknownField
+	}
+	return &Decoder{state: api.NewDecoder(r, aopts)}
 }
 
 // Decode decodes a value encoded with Encoder.Encode.

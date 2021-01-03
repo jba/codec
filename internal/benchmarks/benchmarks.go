@@ -108,7 +108,7 @@ func newJbaCodec(suffix string, opts codecapi.EncodeOptions) Codec {
 }
 
 func jbaCodecDecode(r io.Reader, ptr interface{}) error {
-	d := codecapi.NewDecoder(r)
+	d := codecapi.NewDecoder(r, codecapi.DecodeOptions{})
 	x, err := d.Decode()
 	if err != nil {
 		return err

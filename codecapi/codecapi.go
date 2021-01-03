@@ -82,17 +82,21 @@ func (e *Encoder) Encode(x interface{}) (err error) {
 }
 
 type Decoder struct {
-	opts       EncodeOptions
+	opts       DecodeOptions
 	r          io.Reader
 	buf        []byte
-	i          int // offset
+	i          int // offset into buf
 	typeCodecs []typeCodec
 	storeIndex int                 // for StartPtr to communicate with StoreRef
 	refMap     map[int]interface{} // from buf offset to pointer
 }
 
-func NewDecoder(r io.Reader) *Decoder {
-	return &Decoder{r: r}
+type DecodeOptions struct {
+	FailOnUnknownField bool
+}
+
+func NewDecoder(r io.Reader, opts DecodeOptions) *Decoder {
+	return &Decoder{r: r, opts: opts}
 }
 
 // Decode decodes a value encoded with Encoder.Encode.
@@ -490,7 +494,10 @@ func (d *Decoder) StartStruct() {
 // StoreRef should be called by a struct decoder immediately after it allocates
 // a struct pointer.
 func (d *Decoder) StoreRef(p interface{}) {
-	if d.opts.TrackPointers && d.storeIndex > 0 {
+	if d.storeIndex > 0 {
+		if d.refMap == nil {
+			d.refMap = map[int]interface{}{}
+		}
 		d.refMap[d.storeIndex] = p
 	}
 }
@@ -514,7 +521,11 @@ func (d *Decoder) NextStructField() int {
 // UnknownField should be called by a struct decoder
 // when it sees a field number that it doesn't know.
 func (d *Decoder) UnknownField(typeName string, num int) {
-	d.skip()
+	if d.opts.FailOnUnknownField {
+		Failf("unknown field number %d for type %s", num, typeName)
+	} else {
+		d.skip()
+	}
 }
 
 // skip reads past a value in the input.
@@ -619,7 +630,6 @@ func (e *Encoder) encodeInitial() {
 	for _, n := range names {
 		e.EncodeString(n)
 	}
-	e.EncodeBool(e.opts.TrackPointers)
 }
 
 // decodeInitial decodes metadata that appears at the start of the
@@ -636,10 +646,6 @@ func (d *Decoder) decodeInitial() {
 			Failf("unregistered type: %s", name)
 		}
 		d.typeCodecs[num] = tc
-	}
-	d.opts.TrackPointers = d.DecodeBool()
-	if d.opts.TrackPointers {
-		d.refMap = make(map[int]interface{}, 100)
 	}
 }
 

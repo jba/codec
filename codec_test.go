@@ -19,7 +19,6 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
-	api "github.com/jba/codec/codecapi"
 	foo "github.com/jba/codec/internal/testpkg"
 )
 
@@ -74,7 +73,7 @@ func TestMain(m *testing.M) {
 }
 
 func TestEncodeDecode(t *testing.T) {
-	for _, opts := range []api.EncodeOptions{
+	for _, opts := range []EncodeOptions{
 		{TrackPointers: false},
 		{TrackPointers: true},
 		{Buffer: make([]byte, 3)},
@@ -85,7 +84,7 @@ func TestEncodeDecode(t *testing.T) {
 	}
 }
 
-func testEncodeDecode(t *testing.T, aopts api.EncodeOptions) {
+func testEncodeDecode(t *testing.T, opts EncodeOptions) {
 	want := []interface{}{
 		nil, "Luke Luck likes lakes", true,
 		1, -5, 255, 65000, uint64(65000), uint64(1 << 63),
@@ -109,15 +108,14 @@ func testEncodeDecode(t *testing.T, aopts api.EncodeOptions) {
 		definedMap{"true": true},
 	}
 	var buf bytes.Buffer
-	apiOpts = aopts
-	e := NewEncoder(&buf, nil)
+	e := NewEncoder(&buf, &opts)
 	for _, w := range want {
 		if err := e.Encode(w); err != nil {
 			t.Fatalf("%#v: %v", w, err)
 		}
 	}
 	r := bytes.NewReader(buf.Bytes())
-	d := NewDecoder(r)
+	d := NewDecoder(r, nil)
 	for _, w := range want {
 		g, err := d.Decode()
 		if err != nil {
@@ -138,7 +136,7 @@ func TestSharing(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	d := NewDecoder(bytes.NewReader(buf.Bytes()))
+	d := NewDecoder(bytes.NewReader(buf.Bytes()), nil)
 	g, err := d.Decode()
 	if err != nil {
 		t.Fatal(err)
@@ -174,8 +172,7 @@ type Skip struct {
 	L  []*Skip
 }
 
-// Test Skip by calling Decoder.Unknown repeatedly.
-func TestSkip(t *testing.T) {
+func TestSkipUnknownFields(t *testing.T) {
 	s := &Skip{
 		U:  1,     // < endCode
 		S1: "ab",  // bytes2
@@ -194,7 +191,7 @@ func TestSkip(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	d := NewDecoder(bytes.NewReader(buf.Bytes()))
+	d := NewDecoder(bytes.NewReader(buf.Bytes()), nil)
 
 	got, err := d.Decode()
 	if err != nil {
@@ -203,5 +200,19 @@ func TestSkip(t *testing.T) {
 	var want Skip
 	if !cmp.Equal(got, want) {
 		t.Errorf("got %+v, want %+v", got, want)
+	}
+}
+
+func TestFailOnUnknownField(t *testing.T) {
+	v := &Skip{U: 1}
+	var buf bytes.Buffer
+	e := NewEncoder(&buf, nil)
+	if err := e.Encode(v); err != nil {
+		t.Fatal(err)
+	}
+	d := NewDecoder(bytes.NewReader(buf.Bytes()), &DecodeOptions{FailOnUnknownField: true})
+	_, err := d.Decode()
+	if err == nil {
+		t.Fatal("got nil, want error")
 	}
 }
