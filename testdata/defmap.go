@@ -8,8 +8,6 @@ import (
 
 type definedMap_codec struct{}
 
-func (c definedMap_codec) Init() {}
-
 func (c definedMap_codec) Encode(e *codecapi.Encoder, x interface{}) { c.encode(e, x.(definedMap)) }
 
 func (c definedMap_codec) encode(e *codecapi.Encoder, m definedMap) {

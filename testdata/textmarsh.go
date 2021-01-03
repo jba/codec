@@ -9,8 +9,6 @@ import (
 
 type net_IP_codec struct{}
 
-func (c net_IP_codec) Init() {}
-
 func (c net_IP_codec) Encode(e *codecapi.Encoder, x interface{}) { c.encode(e, x.(net.IP)) }
 
 func (c net_IP_codec) encode(e *codecapi.Encoder, m net.IP) {

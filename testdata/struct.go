@@ -11,8 +11,6 @@ import (
 
 type ptr_genStruct_codec struct{}
 
-func (ptr_genStruct_codec) Init() {}
-
 func (c ptr_genStruct_codec) Encode(e *codecapi.Encoder, x interface{}) { c.encode(e, x.(*genStruct)) }
 
 func (c ptr_genStruct_codec) encode(e *codecapi.Encoder, x *genStruct) {
@@ -44,8 +42,6 @@ func (c ptr_genStruct_codec) decode(d *codecapi.Decoder, p **genStruct) {
 }
 
 type genStruct_codec struct{}
-
-func (genStruct_codec) Init() {}
 
 func (c genStruct_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	s := x.(genStruct)
@@ -185,8 +181,6 @@ func init() {
 }
 
 type foo_T_codec struct{}
-
-func (foo_T_codec) Init() {}
 
 func (c foo_T_codec) Encode(e *codecapi.Encoder, x interface{}) { c.encode(e, x.(foo.T)) }
 

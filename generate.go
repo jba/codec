@@ -603,8 +603,6 @@ const sliceBody = `
 « $goName := goName .Type »
 type «$typeName» struct {}
 
-func («$typeName») Init() {}
-
 func (c «$typeName») Encode(e *codecapi.Encoder, x interface{}) { c.encode(e, x.(«$goName»)) }
 
 func (c «$typeName») encode(e *codecapi.Encoder, s «$goName») {
@@ -645,8 +643,6 @@ const arrayBody = `
 « $typeName := print $typeID "_codec" »
 « $goName := goName .Type »
 type «$typeName» struct {}
-
-func («$typeName») Init() {}
 
 func (c «$typeName») Encode(e *codecapi.Encoder, x interface{}) {
 	a := x.(«$goName»)
@@ -698,8 +694,6 @@ const mapBody = `
 « $goName := goName .Type »
 type «$typeName» struct{}
 
-func (c «$typeName») Init() {}
-
 func (c «$typeName») Encode(e *codecapi.Encoder, x interface{}) { c.encode(e, x.(«$goName»)) }
 
 func (c «$typeName») encode(e *codecapi.Encoder, m «$goName») {
@@ -745,8 +739,6 @@ const marshalBody = `
 « $goName := goName .Type »
 type «$typeName» struct{}
 
-func (c «$typeName») Init() {}
-
 func (c «$typeName») Encode(e *codecapi.Encoder, x interface{}) { c.encode(e, x.(«$goName»)) }
 
 func (c «$typeName») encode(e *codecapi.Encoder, m «$goName») {
@@ -791,8 +783,6 @@ const structBody = `
 
 type «$ptrTypeName» struct{}
 
-func («$ptrTypeName») Init() {}
-
 func (c «$ptrTypeName») Encode(e *codecapi.Encoder, x interface{}) { c.encode(e, x.(*«$goName»)) }
 
 func (c «$ptrTypeName») encode(e *codecapi.Encoder, x *«$goName») {
@@ -820,8 +810,6 @@ func (c «$ptrTypeName») decode(d *codecapi.Decoder, p **«$goName») {
 }
 
 type «$typeName» struct{}
-
-func («$typeName») Init() {}
 
 func (c «$typeName») Encode(e *codecapi.Encoder, x interface{}) {
 	s := x.(«$goName»)

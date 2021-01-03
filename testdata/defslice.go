@@ -8,8 +8,6 @@ import (
 
 type definedSlice_codec struct{}
 
-func (definedSlice_codec) Init() {}
-
 func (c definedSlice_codec) Encode(e *codecapi.Encoder, x interface{}) { c.encode(e, x.(definedSlice)) }
 
 func (c definedSlice_codec) encode(e *codecapi.Encoder, s definedSlice) {

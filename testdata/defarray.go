@@ -8,8 +8,6 @@ import (
 
 type definedArray_codec struct{}
 
-func (definedArray_codec) Init() {}
-
 func (c definedArray_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	a := x.(definedArray)
 	c.encode(e, &a)
@@ -43,8 +41,6 @@ func init() {
 }
 
 type slice_int_codec struct{}
-
-func (slice_int_codec) Init() {}
 
 func (c slice_int_codec) Encode(e *codecapi.Encoder, x interface{}) { c.encode(e, x.([]int)) }
 

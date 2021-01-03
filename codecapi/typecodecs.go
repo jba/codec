@@ -9,8 +9,8 @@ import (
 	"reflect"
 )
 
+// A typeCodec handles encoding and decoding of a particular type.
 type typeCodec interface {
-	Init()
 	Encode(*Encoder, interface{})
 	Decode(*Decoder) interface{}
 }
@@ -43,109 +43,91 @@ func Register(x interface{}, tc typeCodec) {
 
 type boolCodec struct{}
 
-func (boolCodec) Init()                            {}
 func (boolCodec) Encode(e *Encoder, x interface{}) { e.EncodeBool(x.(bool)) }
 func (boolCodec) Decode(d *Decoder) interface{}    { return d.DecodeBool() }
 
 type bytesCodec struct{}
 
-func (bytesCodec) Init()                            {}
 func (bytesCodec) Encode(e *Encoder, x interface{}) { e.EncodeBytes(x.([]byte)) }
 func (bytesCodec) Decode(d *Decoder) interface{}    { return d.DecodeBytes() }
 
 type stringCodec struct{}
 
-func (stringCodec) Init()                            {}
 func (stringCodec) Encode(e *Encoder, x interface{}) { e.EncodeString(x.(string)) }
 func (stringCodec) Decode(d *Decoder) interface{}    { return d.DecodeString() }
 
 type intCodec struct{}
 
-func (intCodec) Init()                            {}
 func (intCodec) Encode(e *Encoder, x interface{}) { e.EncodeInt(int64(x.(int))) }
 func (intCodec) Decode(d *Decoder) interface{}    { return int(d.DecodeInt()) }
 
 type int8Codec struct{}
 
-func (int8Codec) Init()                            {}
 func (int8Codec) Encode(e *Encoder, x interface{}) { e.writeByte(byte(x.(int8))) }
 func (int8Codec) Decode(d *Decoder) interface{}    { return int8(d.readByte()) }
 
 type int16Codec struct{}
 
-func (int16Codec) Init()                            {}
 func (int16Codec) Encode(e *Encoder, x interface{}) { e.EncodeInt(int64(x.(int16))) }
 func (int16Codec) Decode(d *Decoder) interface{}    { return int16(d.DecodeInt()) }
 
 type int32Codec struct{}
 
-func (int32Codec) Init()                            {}
 func (int32Codec) Encode(e *Encoder, x interface{}) { e.EncodeInt(int64(x.(int32))) }
 func (int32Codec) Decode(d *Decoder) interface{}    { return int32(d.DecodeInt()) }
 
 type int64Codec struct{}
 
-func (int64Codec) Init()                            {}
 func (int64Codec) Encode(e *Encoder, x interface{}) { e.EncodeInt(x.(int64)) }
 func (int64Codec) Decode(d *Decoder) interface{}    { return d.DecodeInt() }
 
 type float32Codec struct{}
 
-func (float32Codec) Init()                            {}
 func (float32Codec) Encode(e *Encoder, x interface{}) { e.EncodeFloat(float64(x.(float32))) }
 func (float32Codec) Decode(d *Decoder) interface{}    { return float32(d.DecodeFloat()) }
 
 type float64Codec struct{}
 
-func (float64Codec) Init()                            {}
 func (float64Codec) Encode(e *Encoder, x interface{}) { e.EncodeFloat(x.(float64)) }
 func (float64Codec) Decode(d *Decoder) interface{}    { return d.DecodeFloat() }
 
 type uintCodec struct{}
 
-func (uintCodec) Init()                            {}
 func (uintCodec) Encode(e *Encoder, x interface{}) { e.EncodeUint(uint64(x.(uint))) }
 func (uintCodec) Decode(d *Decoder) interface{}    { return uint(d.DecodeUint()) }
 
 type uintptrCodec struct{}
 
-func (uintptrCodec) Init()                            {}
 func (uintptrCodec) Encode(e *Encoder, x interface{}) { e.EncodeUint(uint64(x.(uintptr))) }
 func (uintptrCodec) Decode(d *Decoder) interface{}    { return uintptr(d.DecodeUint()) }
 
 type uint8Codec struct{}
 
-func (uint8Codec) Init()                            {}
 func (uint8Codec) Encode(e *Encoder, x interface{}) { e.writeByte(byte(x.(uint8))) }
 func (uint8Codec) Decode(d *Decoder) interface{}    { return d.readByte() }
 
 type uint16Codec struct{}
 
-func (uint16Codec) Init()                            {}
 func (uint16Codec) Encode(e *Encoder, x interface{}) { e.EncodeUint(uint64(x.(uint16))) }
 func (uint16Codec) Decode(d *Decoder) interface{}    { return uint16(d.DecodeUint()) }
 
 type uint32Codec struct{}
 
-func (uint32Codec) Init()                            {}
 func (uint32Codec) Encode(e *Encoder, x interface{}) { e.EncodeUint(uint64(x.(uint32))) }
 func (uint32Codec) Decode(d *Decoder) interface{}    { return uint32(d.DecodeUint()) }
 
 type uint64Codec struct{}
 
-func (uint64Codec) Init()                            {}
 func (uint64Codec) Encode(e *Encoder, x interface{}) { e.EncodeUint(x.(uint64)) }
 func (uint64Codec) Decode(d *Decoder) interface{}    { return d.DecodeUint() }
 
 type complex64Codec struct{}
 
-func (complex64Codec) Init()                            {}
 func (complex64Codec) Encode(e *Encoder, x interface{}) { e.EncodeComplex(complex128(x.(complex64))) }
 func (complex64Codec) Decode(d *Decoder) interface{}    { return complex64(d.DecodeComplex()) }
 
 type complex128Codec struct{}
 
-func (complex128Codec) Init()                            {}
 func (complex128Codec) Encode(e *Encoder, x interface{}) { e.EncodeComplex(x.(complex128)) }
 func (complex128Codec) Decode(d *Decoder) interface{}    { return d.DecodeComplex() }
 

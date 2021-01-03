@@ -12,8 +12,6 @@ import (
 
 type ptr_ast_ArrayType_codec struct{}
 
-func (ptr_ast_ArrayType_codec) Init() {}
-
 func (c ptr_ast_ArrayType_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	c.encode(e, x.(*ast.ArrayType))
 }
@@ -47,8 +45,6 @@ func (c ptr_ast_ArrayType_codec) decode(d *codecapi.Decoder, p **ast.ArrayType) 
 }
 
 type ast_ArrayType_codec struct{}
-
-func (ast_ArrayType_codec) Init() {}
 
 func (c ast_ArrayType_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	s := x.(ast.ArrayType)
@@ -107,8 +103,6 @@ func init() {
 
 type ptr_ast_AssignStmt_codec struct{}
 
-func (ptr_ast_AssignStmt_codec) Init() {}
-
 func (c ptr_ast_AssignStmt_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	c.encode(e, x.(*ast.AssignStmt))
 }
@@ -142,8 +136,6 @@ func (c ptr_ast_AssignStmt_codec) decode(d *codecapi.Decoder, p **ast.AssignStmt
 }
 
 type ast_AssignStmt_codec struct{}
-
-func (ast_AssignStmt_codec) Init() {}
 
 func (c ast_AssignStmt_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	s := x.(ast.AssignStmt)
@@ -208,8 +200,6 @@ func init() {
 
 type ptr_ast_BadDecl_codec struct{}
 
-func (ptr_ast_BadDecl_codec) Init() {}
-
 func (c ptr_ast_BadDecl_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	c.encode(e, x.(*ast.BadDecl))
 }
@@ -243,8 +233,6 @@ func (c ptr_ast_BadDecl_codec) decode(d *codecapi.Decoder, p **ast.BadDecl) {
 }
 
 type ast_BadDecl_codec struct{}
-
-func (ast_BadDecl_codec) Init() {}
 
 func (c ast_BadDecl_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	s := x.(ast.BadDecl)
@@ -297,8 +285,6 @@ func init() {
 
 type ptr_ast_BadExpr_codec struct{}
 
-func (ptr_ast_BadExpr_codec) Init() {}
-
 func (c ptr_ast_BadExpr_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	c.encode(e, x.(*ast.BadExpr))
 }
@@ -332,8 +318,6 @@ func (c ptr_ast_BadExpr_codec) decode(d *codecapi.Decoder, p **ast.BadExpr) {
 }
 
 type ast_BadExpr_codec struct{}
-
-func (ast_BadExpr_codec) Init() {}
 
 func (c ast_BadExpr_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	s := x.(ast.BadExpr)
@@ -386,8 +370,6 @@ func init() {
 
 type ptr_ast_BadStmt_codec struct{}
 
-func (ptr_ast_BadStmt_codec) Init() {}
-
 func (c ptr_ast_BadStmt_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	c.encode(e, x.(*ast.BadStmt))
 }
@@ -421,8 +403,6 @@ func (c ptr_ast_BadStmt_codec) decode(d *codecapi.Decoder, p **ast.BadStmt) {
 }
 
 type ast_BadStmt_codec struct{}
-
-func (ast_BadStmt_codec) Init() {}
 
 func (c ast_BadStmt_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	s := x.(ast.BadStmt)
@@ -475,8 +455,6 @@ func init() {
 
 type ptr_ast_BasicLit_codec struct{}
 
-func (ptr_ast_BasicLit_codec) Init() {}
-
 func (c ptr_ast_BasicLit_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	c.encode(e, x.(*ast.BasicLit))
 }
@@ -510,8 +488,6 @@ func (c ptr_ast_BasicLit_codec) decode(d *codecapi.Decoder, p **ast.BasicLit) {
 }
 
 type ast_BasicLit_codec struct{}
-
-func (ast_BasicLit_codec) Init() {}
 
 func (c ast_BasicLit_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	s := x.(ast.BasicLit)
@@ -570,8 +546,6 @@ func init() {
 
 type ptr_ast_BinaryExpr_codec struct{}
 
-func (ptr_ast_BinaryExpr_codec) Init() {}
-
 func (c ptr_ast_BinaryExpr_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	c.encode(e, x.(*ast.BinaryExpr))
 }
@@ -605,8 +579,6 @@ func (c ptr_ast_BinaryExpr_codec) decode(d *codecapi.Decoder, p **ast.BinaryExpr
 }
 
 type ast_BinaryExpr_codec struct{}
-
-func (ast_BinaryExpr_codec) Init() {}
 
 func (c ast_BinaryExpr_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	s := x.(ast.BinaryExpr)
@@ -671,8 +643,6 @@ func init() {
 
 type ptr_ast_BlockStmt_codec struct{}
 
-func (ptr_ast_BlockStmt_codec) Init() {}
-
 func (c ptr_ast_BlockStmt_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	c.encode(e, x.(*ast.BlockStmt))
 }
@@ -706,8 +676,6 @@ func (c ptr_ast_BlockStmt_codec) decode(d *codecapi.Decoder, p **ast.BlockStmt) 
 }
 
 type ast_BlockStmt_codec struct{}
-
-func (ast_BlockStmt_codec) Init() {}
 
 func (c ast_BlockStmt_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	s := x.(ast.BlockStmt)
@@ -766,8 +734,6 @@ func init() {
 
 type ptr_ast_BranchStmt_codec struct{}
 
-func (ptr_ast_BranchStmt_codec) Init() {}
-
 func (c ptr_ast_BranchStmt_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	c.encode(e, x.(*ast.BranchStmt))
 }
@@ -801,8 +767,6 @@ func (c ptr_ast_BranchStmt_codec) decode(d *codecapi.Decoder, p **ast.BranchStmt
 }
 
 type ast_BranchStmt_codec struct{}
-
-func (ast_BranchStmt_codec) Init() {}
 
 func (c ast_BranchStmt_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	s := x.(ast.BranchStmt)
@@ -861,8 +825,6 @@ func init() {
 
 type ptr_ast_CallExpr_codec struct{}
 
-func (ptr_ast_CallExpr_codec) Init() {}
-
 func (c ptr_ast_CallExpr_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	c.encode(e, x.(*ast.CallExpr))
 }
@@ -896,8 +858,6 @@ func (c ptr_ast_CallExpr_codec) decode(d *codecapi.Decoder, p **ast.CallExpr) {
 }
 
 type ast_CallExpr_codec struct{}
-
-func (ast_CallExpr_codec) Init() {}
 
 func (c ast_CallExpr_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	s := x.(ast.CallExpr)
@@ -968,8 +928,6 @@ func init() {
 
 type ptr_ast_CaseClause_codec struct{}
 
-func (ptr_ast_CaseClause_codec) Init() {}
-
 func (c ptr_ast_CaseClause_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	c.encode(e, x.(*ast.CaseClause))
 }
@@ -1003,8 +961,6 @@ func (c ptr_ast_CaseClause_codec) decode(d *codecapi.Decoder, p **ast.CaseClause
 }
 
 type ast_CaseClause_codec struct{}
-
-func (ast_CaseClause_codec) Init() {}
 
 func (c ast_CaseClause_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	s := x.(ast.CaseClause)
@@ -1069,8 +1025,6 @@ func init() {
 
 type ptr_ast_ChanType_codec struct{}
 
-func (ptr_ast_ChanType_codec) Init() {}
-
 func (c ptr_ast_ChanType_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	c.encode(e, x.(*ast.ChanType))
 }
@@ -1104,8 +1058,6 @@ func (c ptr_ast_ChanType_codec) decode(d *codecapi.Decoder, p **ast.ChanType) {
 }
 
 type ast_ChanType_codec struct{}
-
-func (ast_ChanType_codec) Init() {}
 
 func (c ast_ChanType_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	s := x.(ast.ChanType)
@@ -1170,8 +1122,6 @@ func init() {
 
 type ptr_ast_CommClause_codec struct{}
 
-func (ptr_ast_CommClause_codec) Init() {}
-
 func (c ptr_ast_CommClause_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	c.encode(e, x.(*ast.CommClause))
 }
@@ -1205,8 +1155,6 @@ func (c ptr_ast_CommClause_codec) decode(d *codecapi.Decoder, p **ast.CommClause
 }
 
 type ast_CommClause_codec struct{}
-
-func (ast_CommClause_codec) Init() {}
 
 func (c ast_CommClause_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	s := x.(ast.CommClause)
@@ -1271,8 +1219,6 @@ func init() {
 
 type ptr_ast_CommentGroup_codec struct{}
 
-func (ptr_ast_CommentGroup_codec) Init() {}
-
 func (c ptr_ast_CommentGroup_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	c.encode(e, x.(*ast.CommentGroup))
 }
@@ -1306,8 +1252,6 @@ func (c ptr_ast_CommentGroup_codec) decode(d *codecapi.Decoder, p **ast.CommentG
 }
 
 type ast_CommentGroup_codec struct{}
-
-func (ast_CommentGroup_codec) Init() {}
 
 func (c ast_CommentGroup_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	s := x.(ast.CommentGroup)
@@ -1354,8 +1298,6 @@ func init() {
 
 type ptr_ast_Comment_codec struct{}
 
-func (ptr_ast_Comment_codec) Init() {}
-
 func (c ptr_ast_Comment_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	c.encode(e, x.(*ast.Comment))
 }
@@ -1389,8 +1331,6 @@ func (c ptr_ast_Comment_codec) decode(d *codecapi.Decoder, p **ast.Comment) {
 }
 
 type ast_Comment_codec struct{}
-
-func (ast_Comment_codec) Init() {}
 
 func (c ast_Comment_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	s := x.(ast.Comment)
@@ -1443,8 +1383,6 @@ func init() {
 
 type ptr_ast_CompositeLit_codec struct{}
 
-func (ptr_ast_CompositeLit_codec) Init() {}
-
 func (c ptr_ast_CompositeLit_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	c.encode(e, x.(*ast.CompositeLit))
 }
@@ -1478,8 +1416,6 @@ func (c ptr_ast_CompositeLit_codec) decode(d *codecapi.Decoder, p **ast.Composit
 }
 
 type ast_CompositeLit_codec struct{}
-
-func (ast_CompositeLit_codec) Init() {}
 
 func (c ast_CompositeLit_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	s := x.(ast.CompositeLit)
@@ -1550,8 +1486,6 @@ func init() {
 
 type ptr_ast_DeclStmt_codec struct{}
 
-func (ptr_ast_DeclStmt_codec) Init() {}
-
 func (c ptr_ast_DeclStmt_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	c.encode(e, x.(*ast.DeclStmt))
 }
@@ -1585,8 +1519,6 @@ func (c ptr_ast_DeclStmt_codec) decode(d *codecapi.Decoder, p **ast.DeclStmt) {
 }
 
 type ast_DeclStmt_codec struct{}
-
-func (ast_DeclStmt_codec) Init() {}
 
 func (c ast_DeclStmt_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	s := x.(ast.DeclStmt)
@@ -1633,8 +1565,6 @@ func init() {
 
 type ptr_ast_DeferStmt_codec struct{}
 
-func (ptr_ast_DeferStmt_codec) Init() {}
-
 func (c ptr_ast_DeferStmt_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	c.encode(e, x.(*ast.DeferStmt))
 }
@@ -1668,8 +1598,6 @@ func (c ptr_ast_DeferStmt_codec) decode(d *codecapi.Decoder, p **ast.DeferStmt) 
 }
 
 type ast_DeferStmt_codec struct{}
-
-func (ast_DeferStmt_codec) Init() {}
 
 func (c ast_DeferStmt_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	s := x.(ast.DeferStmt)
@@ -1722,8 +1650,6 @@ func init() {
 
 type ptr_ast_Ellipsis_codec struct{}
 
-func (ptr_ast_Ellipsis_codec) Init() {}
-
 func (c ptr_ast_Ellipsis_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	c.encode(e, x.(*ast.Ellipsis))
 }
@@ -1757,8 +1683,6 @@ func (c ptr_ast_Ellipsis_codec) decode(d *codecapi.Decoder, p **ast.Ellipsis) {
 }
 
 type ast_Ellipsis_codec struct{}
-
-func (ast_Ellipsis_codec) Init() {}
 
 func (c ast_Ellipsis_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	s := x.(ast.Ellipsis)
@@ -1811,8 +1735,6 @@ func init() {
 
 type ptr_ast_EmptyStmt_codec struct{}
 
-func (ptr_ast_EmptyStmt_codec) Init() {}
-
 func (c ptr_ast_EmptyStmt_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	c.encode(e, x.(*ast.EmptyStmt))
 }
@@ -1846,8 +1768,6 @@ func (c ptr_ast_EmptyStmt_codec) decode(d *codecapi.Decoder, p **ast.EmptyStmt) 
 }
 
 type ast_EmptyStmt_codec struct{}
-
-func (ast_EmptyStmt_codec) Init() {}
 
 func (c ast_EmptyStmt_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	s := x.(ast.EmptyStmt)
@@ -1900,8 +1820,6 @@ func init() {
 
 type ptr_ast_ExprStmt_codec struct{}
 
-func (ptr_ast_ExprStmt_codec) Init() {}
-
 func (c ptr_ast_ExprStmt_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	c.encode(e, x.(*ast.ExprStmt))
 }
@@ -1935,8 +1853,6 @@ func (c ptr_ast_ExprStmt_codec) decode(d *codecapi.Decoder, p **ast.ExprStmt) {
 }
 
 type ast_ExprStmt_codec struct{}
-
-func (ast_ExprStmt_codec) Init() {}
 
 func (c ast_ExprStmt_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	s := x.(ast.ExprStmt)
@@ -1983,8 +1899,6 @@ func init() {
 
 type ptr_ast_FieldList_codec struct{}
 
-func (ptr_ast_FieldList_codec) Init() {}
-
 func (c ptr_ast_FieldList_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	c.encode(e, x.(*ast.FieldList))
 }
@@ -2018,8 +1932,6 @@ func (c ptr_ast_FieldList_codec) decode(d *codecapi.Decoder, p **ast.FieldList) 
 }
 
 type ast_FieldList_codec struct{}
-
-func (ast_FieldList_codec) Init() {}
 
 func (c ast_FieldList_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	s := x.(ast.FieldList)
@@ -2078,8 +1990,6 @@ func init() {
 
 type ptr_ast_Field_codec struct{}
 
-func (ptr_ast_Field_codec) Init() {}
-
 func (c ptr_ast_Field_codec) Encode(e *codecapi.Encoder, x interface{}) { c.encode(e, x.(*ast.Field)) }
 
 func (c ptr_ast_Field_codec) encode(e *codecapi.Encoder, x *ast.Field) {
@@ -2111,8 +2021,6 @@ func (c ptr_ast_Field_codec) decode(d *codecapi.Decoder, p **ast.Field) {
 }
 
 type ast_Field_codec struct{}
-
-func (ast_Field_codec) Init() {}
 
 func (c ast_Field_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	s := x.(ast.Field)
@@ -2183,8 +2091,6 @@ func init() {
 
 type ptr_ast_ForStmt_codec struct{}
 
-func (ptr_ast_ForStmt_codec) Init() {}
-
 func (c ptr_ast_ForStmt_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	c.encode(e, x.(*ast.ForStmt))
 }
@@ -2218,8 +2124,6 @@ func (c ptr_ast_ForStmt_codec) decode(d *codecapi.Decoder, p **ast.ForStmt) {
 }
 
 type ast_ForStmt_codec struct{}
-
-func (ast_ForStmt_codec) Init() {}
 
 func (c ast_ForStmt_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	s := x.(ast.ForStmt)
@@ -2290,8 +2194,6 @@ func init() {
 
 type ptr_ast_FuncDecl_codec struct{}
 
-func (ptr_ast_FuncDecl_codec) Init() {}
-
 func (c ptr_ast_FuncDecl_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	c.encode(e, x.(*ast.FuncDecl))
 }
@@ -2325,8 +2227,6 @@ func (c ptr_ast_FuncDecl_codec) decode(d *codecapi.Decoder, p **ast.FuncDecl) {
 }
 
 type ast_FuncDecl_codec struct{}
-
-func (ast_FuncDecl_codec) Init() {}
 
 func (c ast_FuncDecl_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	s := x.(ast.FuncDecl)
@@ -2397,8 +2297,6 @@ func init() {
 
 type ptr_ast_FuncLit_codec struct{}
 
-func (ptr_ast_FuncLit_codec) Init() {}
-
 func (c ptr_ast_FuncLit_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	c.encode(e, x.(*ast.FuncLit))
 }
@@ -2432,8 +2330,6 @@ func (c ptr_ast_FuncLit_codec) decode(d *codecapi.Decoder, p **ast.FuncLit) {
 }
 
 type ast_FuncLit_codec struct{}
-
-func (ast_FuncLit_codec) Init() {}
 
 func (c ast_FuncLit_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	s := x.(ast.FuncLit)
@@ -2486,8 +2382,6 @@ func init() {
 
 type ptr_ast_FuncType_codec struct{}
 
-func (ptr_ast_FuncType_codec) Init() {}
-
 func (c ptr_ast_FuncType_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	c.encode(e, x.(*ast.FuncType))
 }
@@ -2521,8 +2415,6 @@ func (c ptr_ast_FuncType_codec) decode(d *codecapi.Decoder, p **ast.FuncType) {
 }
 
 type ast_FuncType_codec struct{}
-
-func (ast_FuncType_codec) Init() {}
 
 func (c ast_FuncType_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	s := x.(ast.FuncType)
@@ -2581,8 +2473,6 @@ func init() {
 
 type ptr_ast_GenDecl_codec struct{}
 
-func (ptr_ast_GenDecl_codec) Init() {}
-
 func (c ptr_ast_GenDecl_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	c.encode(e, x.(*ast.GenDecl))
 }
@@ -2616,8 +2506,6 @@ func (c ptr_ast_GenDecl_codec) decode(d *codecapi.Decoder, p **ast.GenDecl) {
 }
 
 type ast_GenDecl_codec struct{}
-
-func (ast_GenDecl_codec) Init() {}
 
 func (c ast_GenDecl_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	s := x.(ast.GenDecl)
@@ -2694,8 +2582,6 @@ func init() {
 
 type ptr_ast_GoStmt_codec struct{}
 
-func (ptr_ast_GoStmt_codec) Init() {}
-
 func (c ptr_ast_GoStmt_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	c.encode(e, x.(*ast.GoStmt))
 }
@@ -2729,8 +2615,6 @@ func (c ptr_ast_GoStmt_codec) decode(d *codecapi.Decoder, p **ast.GoStmt) {
 }
 
 type ast_GoStmt_codec struct{}
-
-func (ast_GoStmt_codec) Init() {}
 
 func (c ast_GoStmt_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	s := x.(ast.GoStmt)
@@ -2783,8 +2667,6 @@ func init() {
 
 type ptr_ast_Ident_codec struct{}
 
-func (ptr_ast_Ident_codec) Init() {}
-
 func (c ptr_ast_Ident_codec) Encode(e *codecapi.Encoder, x interface{}) { c.encode(e, x.(*ast.Ident)) }
 
 func (c ptr_ast_Ident_codec) encode(e *codecapi.Encoder, x *ast.Ident) {
@@ -2816,8 +2698,6 @@ func (c ptr_ast_Ident_codec) decode(d *codecapi.Decoder, p **ast.Ident) {
 }
 
 type ast_Ident_codec struct{}
-
-func (ast_Ident_codec) Init() {}
 
 func (c ast_Ident_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	s := x.(ast.Ident)
@@ -2876,8 +2756,6 @@ func init() {
 
 type ptr_ast_IfStmt_codec struct{}
 
-func (ptr_ast_IfStmt_codec) Init() {}
-
 func (c ptr_ast_IfStmt_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	c.encode(e, x.(*ast.IfStmt))
 }
@@ -2911,8 +2789,6 @@ func (c ptr_ast_IfStmt_codec) decode(d *codecapi.Decoder, p **ast.IfStmt) {
 }
 
 type ast_IfStmt_codec struct{}
-
-func (ast_IfStmt_codec) Init() {}
 
 func (c ast_IfStmt_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	s := x.(ast.IfStmt)
@@ -2983,8 +2859,6 @@ func init() {
 
 type ptr_ast_ImportSpec_codec struct{}
 
-func (ptr_ast_ImportSpec_codec) Init() {}
-
 func (c ptr_ast_ImportSpec_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	c.encode(e, x.(*ast.ImportSpec))
 }
@@ -3018,8 +2892,6 @@ func (c ptr_ast_ImportSpec_codec) decode(d *codecapi.Decoder, p **ast.ImportSpec
 }
 
 type ast_ImportSpec_codec struct{}
-
-func (ast_ImportSpec_codec) Init() {}
 
 func (c ast_ImportSpec_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	s := x.(ast.ImportSpec)
@@ -3090,8 +2962,6 @@ func init() {
 
 type ptr_ast_IncDecStmt_codec struct{}
 
-func (ptr_ast_IncDecStmt_codec) Init() {}
-
 func (c ptr_ast_IncDecStmt_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	c.encode(e, x.(*ast.IncDecStmt))
 }
@@ -3125,8 +2995,6 @@ func (c ptr_ast_IncDecStmt_codec) decode(d *codecapi.Decoder, p **ast.IncDecStmt
 }
 
 type ast_IncDecStmt_codec struct{}
-
-func (ast_IncDecStmt_codec) Init() {}
 
 func (c ast_IncDecStmt_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	s := x.(ast.IncDecStmt)
@@ -3185,8 +3053,6 @@ func init() {
 
 type ptr_ast_IndexExpr_codec struct{}
 
-func (ptr_ast_IndexExpr_codec) Init() {}
-
 func (c ptr_ast_IndexExpr_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	c.encode(e, x.(*ast.IndexExpr))
 }
@@ -3220,8 +3086,6 @@ func (c ptr_ast_IndexExpr_codec) decode(d *codecapi.Decoder, p **ast.IndexExpr) 
 }
 
 type ast_IndexExpr_codec struct{}
-
-func (ast_IndexExpr_codec) Init() {}
 
 func (c ast_IndexExpr_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	s := x.(ast.IndexExpr)
@@ -3286,8 +3150,6 @@ func init() {
 
 type ptr_ast_InterfaceType_codec struct{}
 
-func (ptr_ast_InterfaceType_codec) Init() {}
-
 func (c ptr_ast_InterfaceType_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	c.encode(e, x.(*ast.InterfaceType))
 }
@@ -3321,8 +3183,6 @@ func (c ptr_ast_InterfaceType_codec) decode(d *codecapi.Decoder, p **ast.Interfa
 }
 
 type ast_InterfaceType_codec struct{}
-
-func (ast_InterfaceType_codec) Init() {}
 
 func (c ast_InterfaceType_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	s := x.(ast.InterfaceType)
@@ -3381,8 +3241,6 @@ func init() {
 
 type ptr_ast_KeyValueExpr_codec struct{}
 
-func (ptr_ast_KeyValueExpr_codec) Init() {}
-
 func (c ptr_ast_KeyValueExpr_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	c.encode(e, x.(*ast.KeyValueExpr))
 }
@@ -3416,8 +3274,6 @@ func (c ptr_ast_KeyValueExpr_codec) decode(d *codecapi.Decoder, p **ast.KeyValue
 }
 
 type ast_KeyValueExpr_codec struct{}
-
-func (ast_KeyValueExpr_codec) Init() {}
 
 func (c ast_KeyValueExpr_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	s := x.(ast.KeyValueExpr)
@@ -3476,8 +3332,6 @@ func init() {
 
 type ptr_ast_LabeledStmt_codec struct{}
 
-func (ptr_ast_LabeledStmt_codec) Init() {}
-
 func (c ptr_ast_LabeledStmt_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	c.encode(e, x.(*ast.LabeledStmt))
 }
@@ -3511,8 +3365,6 @@ func (c ptr_ast_LabeledStmt_codec) decode(d *codecapi.Decoder, p **ast.LabeledSt
 }
 
 type ast_LabeledStmt_codec struct{}
-
-func (ast_LabeledStmt_codec) Init() {}
 
 func (c ast_LabeledStmt_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	s := x.(ast.LabeledStmt)
@@ -3571,8 +3423,6 @@ func init() {
 
 type ptr_ast_MapType_codec struct{}
 
-func (ptr_ast_MapType_codec) Init() {}
-
 func (c ptr_ast_MapType_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	c.encode(e, x.(*ast.MapType))
 }
@@ -3606,8 +3456,6 @@ func (c ptr_ast_MapType_codec) decode(d *codecapi.Decoder, p **ast.MapType) {
 }
 
 type ast_MapType_codec struct{}
-
-func (ast_MapType_codec) Init() {}
 
 func (c ast_MapType_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	s := x.(ast.MapType)
@@ -3666,8 +3514,6 @@ func init() {
 
 type ptr_ast_ParenExpr_codec struct{}
 
-func (ptr_ast_ParenExpr_codec) Init() {}
-
 func (c ptr_ast_ParenExpr_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	c.encode(e, x.(*ast.ParenExpr))
 }
@@ -3701,8 +3547,6 @@ func (c ptr_ast_ParenExpr_codec) decode(d *codecapi.Decoder, p **ast.ParenExpr) 
 }
 
 type ast_ParenExpr_codec struct{}
-
-func (ast_ParenExpr_codec) Init() {}
 
 func (c ast_ParenExpr_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	s := x.(ast.ParenExpr)
@@ -3761,8 +3605,6 @@ func init() {
 
 type ptr_ast_RangeStmt_codec struct{}
 
-func (ptr_ast_RangeStmt_codec) Init() {}
-
 func (c ptr_ast_RangeStmt_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	c.encode(e, x.(*ast.RangeStmt))
 }
@@ -3796,8 +3638,6 @@ func (c ptr_ast_RangeStmt_codec) decode(d *codecapi.Decoder, p **ast.RangeStmt) 
 }
 
 type ast_RangeStmt_codec struct{}
-
-func (ast_RangeStmt_codec) Init() {}
 
 func (c ast_RangeStmt_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	s := x.(ast.RangeStmt)
@@ -3880,8 +3720,6 @@ func init() {
 
 type ptr_ast_ReturnStmt_codec struct{}
 
-func (ptr_ast_ReturnStmt_codec) Init() {}
-
 func (c ptr_ast_ReturnStmt_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	c.encode(e, x.(*ast.ReturnStmt))
 }
@@ -3915,8 +3753,6 @@ func (c ptr_ast_ReturnStmt_codec) decode(d *codecapi.Decoder, p **ast.ReturnStmt
 }
 
 type ast_ReturnStmt_codec struct{}
-
-func (ast_ReturnStmt_codec) Init() {}
 
 func (c ast_ReturnStmt_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	s := x.(ast.ReturnStmt)
@@ -3969,8 +3805,6 @@ func init() {
 
 type ptr_ast_Scope_codec struct{}
 
-func (ptr_ast_Scope_codec) Init() {}
-
 func (c ptr_ast_Scope_codec) Encode(e *codecapi.Encoder, x interface{}) { c.encode(e, x.(*ast.Scope)) }
 
 func (c ptr_ast_Scope_codec) encode(e *codecapi.Encoder, x *ast.Scope) {
@@ -4002,8 +3836,6 @@ func (c ptr_ast_Scope_codec) decode(d *codecapi.Decoder, p **ast.Scope) {
 }
 
 type ast_Scope_codec struct{}
-
-func (ast_Scope_codec) Init() {}
 
 func (c ast_Scope_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	s := x.(ast.Scope)
@@ -4056,8 +3888,6 @@ func init() {
 
 type ptr_ast_SelectStmt_codec struct{}
 
-func (ptr_ast_SelectStmt_codec) Init() {}
-
 func (c ptr_ast_SelectStmt_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	c.encode(e, x.(*ast.SelectStmt))
 }
@@ -4091,8 +3921,6 @@ func (c ptr_ast_SelectStmt_codec) decode(d *codecapi.Decoder, p **ast.SelectStmt
 }
 
 type ast_SelectStmt_codec struct{}
-
-func (ast_SelectStmt_codec) Init() {}
 
 func (c ast_SelectStmt_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	s := x.(ast.SelectStmt)
@@ -4145,8 +3973,6 @@ func init() {
 
 type ptr_ast_SelectorExpr_codec struct{}
 
-func (ptr_ast_SelectorExpr_codec) Init() {}
-
 func (c ptr_ast_SelectorExpr_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	c.encode(e, x.(*ast.SelectorExpr))
 }
@@ -4180,8 +4006,6 @@ func (c ptr_ast_SelectorExpr_codec) decode(d *codecapi.Decoder, p **ast.Selector
 }
 
 type ast_SelectorExpr_codec struct{}
-
-func (ast_SelectorExpr_codec) Init() {}
 
 func (c ast_SelectorExpr_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	s := x.(ast.SelectorExpr)
@@ -4234,8 +4058,6 @@ func init() {
 
 type ptr_ast_SendStmt_codec struct{}
 
-func (ptr_ast_SendStmt_codec) Init() {}
-
 func (c ptr_ast_SendStmt_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	c.encode(e, x.(*ast.SendStmt))
 }
@@ -4269,8 +4091,6 @@ func (c ptr_ast_SendStmt_codec) decode(d *codecapi.Decoder, p **ast.SendStmt) {
 }
 
 type ast_SendStmt_codec struct{}
-
-func (ast_SendStmt_codec) Init() {}
 
 func (c ast_SendStmt_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	s := x.(ast.SendStmt)
@@ -4329,8 +4149,6 @@ func init() {
 
 type ptr_ast_SliceExpr_codec struct{}
 
-func (ptr_ast_SliceExpr_codec) Init() {}
-
 func (c ptr_ast_SliceExpr_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	c.encode(e, x.(*ast.SliceExpr))
 }
@@ -4364,8 +4182,6 @@ func (c ptr_ast_SliceExpr_codec) decode(d *codecapi.Decoder, p **ast.SliceExpr) 
 }
 
 type ast_SliceExpr_codec struct{}
-
-func (ast_SliceExpr_codec) Init() {}
 
 func (c ast_SliceExpr_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	s := x.(ast.SliceExpr)
@@ -4448,8 +4264,6 @@ func init() {
 
 type ptr_ast_StarExpr_codec struct{}
 
-func (ptr_ast_StarExpr_codec) Init() {}
-
 func (c ptr_ast_StarExpr_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	c.encode(e, x.(*ast.StarExpr))
 }
@@ -4483,8 +4297,6 @@ func (c ptr_ast_StarExpr_codec) decode(d *codecapi.Decoder, p **ast.StarExpr) {
 }
 
 type ast_StarExpr_codec struct{}
-
-func (ast_StarExpr_codec) Init() {}
 
 func (c ast_StarExpr_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	s := x.(ast.StarExpr)
@@ -4537,8 +4349,6 @@ func init() {
 
 type ptr_ast_StructType_codec struct{}
 
-func (ptr_ast_StructType_codec) Init() {}
-
 func (c ptr_ast_StructType_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	c.encode(e, x.(*ast.StructType))
 }
@@ -4572,8 +4382,6 @@ func (c ptr_ast_StructType_codec) decode(d *codecapi.Decoder, p **ast.StructType
 }
 
 type ast_StructType_codec struct{}
-
-func (ast_StructType_codec) Init() {}
 
 func (c ast_StructType_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	s := x.(ast.StructType)
@@ -4632,8 +4440,6 @@ func init() {
 
 type ptr_ast_SwitchStmt_codec struct{}
 
-func (ptr_ast_SwitchStmt_codec) Init() {}
-
 func (c ptr_ast_SwitchStmt_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	c.encode(e, x.(*ast.SwitchStmt))
 }
@@ -4667,8 +4473,6 @@ func (c ptr_ast_SwitchStmt_codec) decode(d *codecapi.Decoder, p **ast.SwitchStmt
 }
 
 type ast_SwitchStmt_codec struct{}
-
-func (ast_SwitchStmt_codec) Init() {}
 
 func (c ast_SwitchStmt_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	s := x.(ast.SwitchStmt)
@@ -4733,8 +4537,6 @@ func init() {
 
 type ptr_ast_TypeAssertExpr_codec struct{}
 
-func (ptr_ast_TypeAssertExpr_codec) Init() {}
-
 func (c ptr_ast_TypeAssertExpr_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	c.encode(e, x.(*ast.TypeAssertExpr))
 }
@@ -4768,8 +4570,6 @@ func (c ptr_ast_TypeAssertExpr_codec) decode(d *codecapi.Decoder, p **ast.TypeAs
 }
 
 type ast_TypeAssertExpr_codec struct{}
-
-func (ast_TypeAssertExpr_codec) Init() {}
 
 func (c ast_TypeAssertExpr_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	s := x.(ast.TypeAssertExpr)
@@ -4834,8 +4634,6 @@ func init() {
 
 type ptr_ast_TypeSpec_codec struct{}
 
-func (ptr_ast_TypeSpec_codec) Init() {}
-
 func (c ptr_ast_TypeSpec_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	c.encode(e, x.(*ast.TypeSpec))
 }
@@ -4869,8 +4667,6 @@ func (c ptr_ast_TypeSpec_codec) decode(d *codecapi.Decoder, p **ast.TypeSpec) {
 }
 
 type ast_TypeSpec_codec struct{}
-
-func (ast_TypeSpec_codec) Init() {}
 
 func (c ast_TypeSpec_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	s := x.(ast.TypeSpec)
@@ -4941,8 +4737,6 @@ func init() {
 
 type ptr_ast_TypeSwitchStmt_codec struct{}
 
-func (ptr_ast_TypeSwitchStmt_codec) Init() {}
-
 func (c ptr_ast_TypeSwitchStmt_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	c.encode(e, x.(*ast.TypeSwitchStmt))
 }
@@ -4976,8 +4770,6 @@ func (c ptr_ast_TypeSwitchStmt_codec) decode(d *codecapi.Decoder, p **ast.TypeSw
 }
 
 type ast_TypeSwitchStmt_codec struct{}
-
-func (ast_TypeSwitchStmt_codec) Init() {}
 
 func (c ast_TypeSwitchStmt_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	s := x.(ast.TypeSwitchStmt)
@@ -5042,8 +4834,6 @@ func init() {
 
 type ptr_ast_UnaryExpr_codec struct{}
 
-func (ptr_ast_UnaryExpr_codec) Init() {}
-
 func (c ptr_ast_UnaryExpr_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	c.encode(e, x.(*ast.UnaryExpr))
 }
@@ -5077,8 +4867,6 @@ func (c ptr_ast_UnaryExpr_codec) decode(d *codecapi.Decoder, p **ast.UnaryExpr) 
 }
 
 type ast_UnaryExpr_codec struct{}
-
-func (ast_UnaryExpr_codec) Init() {}
 
 func (c ast_UnaryExpr_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	s := x.(ast.UnaryExpr)
@@ -5137,8 +4925,6 @@ func init() {
 
 type ptr_ast_ValueSpec_codec struct{}
 
-func (ptr_ast_ValueSpec_codec) Init() {}
-
 func (c ptr_ast_ValueSpec_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	c.encode(e, x.(*ast.ValueSpec))
 }
@@ -5172,8 +4958,6 @@ func (c ptr_ast_ValueSpec_codec) decode(d *codecapi.Decoder, p **ast.ValueSpec) 
 }
 
 type ast_ValueSpec_codec struct{}
-
-func (ast_ValueSpec_codec) Init() {}
 
 func (c ast_ValueSpec_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	s := x.(ast.ValueSpec)
@@ -5242,8 +5026,6 @@ func init() {
 
 type map_string_ptr_ast_File_codec struct{}
 
-func (c map_string_ptr_ast_File_codec) Init() {}
-
 func (c map_string_ptr_ast_File_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	c.encode(e, x.(map[string]*ast.File))
 }
@@ -5287,8 +5069,6 @@ func init() { codecapi.Register(map[string]*ast.File(nil), map_string_ptr_ast_Fi
 
 type slice_ast_Expr_codec struct{}
 
-func (slice_ast_Expr_codec) Init() {}
-
 func (c slice_ast_Expr_codec) Encode(e *codecapi.Encoder, x interface{}) { c.encode(e, x.([]ast.Expr)) }
 
 func (c slice_ast_Expr_codec) encode(e *codecapi.Encoder, s []ast.Expr) {
@@ -5326,8 +5106,6 @@ func init() {
 
 type slice_ast_Stmt_codec struct{}
 
-func (slice_ast_Stmt_codec) Init() {}
-
 func (c slice_ast_Stmt_codec) Encode(e *codecapi.Encoder, x interface{}) { c.encode(e, x.([]ast.Stmt)) }
 
 func (c slice_ast_Stmt_codec) encode(e *codecapi.Encoder, s []ast.Stmt) {
@@ -5364,8 +5142,6 @@ func init() {
 }
 
 type slice_ptr_ast_Comment_codec struct{}
-
-func (slice_ptr_ast_Comment_codec) Init() {}
 
 func (c slice_ptr_ast_Comment_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	c.encode(e, x.([]*ast.Comment))
@@ -5406,8 +5182,6 @@ func init() {
 
 type slice_ptr_ast_Field_codec struct{}
 
-func (slice_ptr_ast_Field_codec) Init() {}
-
 func (c slice_ptr_ast_Field_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	c.encode(e, x.([]*ast.Field))
 }
@@ -5446,8 +5220,6 @@ func init() {
 }
 
 type slice_ptr_ast_Ident_codec struct{}
-
-func (slice_ptr_ast_Ident_codec) Init() {}
 
 func (c slice_ptr_ast_Ident_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	c.encode(e, x.([]*ast.Ident))
@@ -5488,8 +5260,6 @@ func init() {
 
 type slice_ast_Spec_codec struct{}
 
-func (slice_ast_Spec_codec) Init() {}
-
 func (c slice_ast_Spec_codec) Encode(e *codecapi.Encoder, x interface{}) { c.encode(e, x.([]ast.Spec)) }
 
 func (c slice_ast_Spec_codec) encode(e *codecapi.Encoder, s []ast.Spec) {
@@ -5529,8 +5299,6 @@ func init() {
 
 type ptr_ast_Object_codec struct{}
 
-func (ptr_ast_Object_codec) Init() {}
-
 func (c ptr_ast_Object_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	c.encode(e, x.(*ast.Object))
 }
@@ -5564,8 +5332,6 @@ func (c ptr_ast_Object_codec) decode(d *codecapi.Decoder, p **ast.Object) {
 }
 
 type ast_Object_codec struct{}
-
-func (ast_Object_codec) Init() {}
 
 func (c ast_Object_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	s := x.(ast.Object)
@@ -5634,8 +5400,6 @@ func init() {
 
 type map_string_ptr_ast_Object_codec struct{}
 
-func (c map_string_ptr_ast_Object_codec) Init() {}
-
 func (c map_string_ptr_ast_Object_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	c.encode(e, x.(map[string]*ast.Object))
 }
@@ -5681,8 +5445,6 @@ func init() { codecapi.Register(map[string]*ast.Object(nil), map_string_ptr_ast_
 
 type ptr_ast_File_codec struct{}
 
-func (ptr_ast_File_codec) Init() {}
-
 func (c ptr_ast_File_codec) Encode(e *codecapi.Encoder, x interface{}) { c.encode(e, x.(*ast.File)) }
 
 func (c ptr_ast_File_codec) encode(e *codecapi.Encoder, x *ast.File) {
@@ -5714,8 +5476,6 @@ func (c ptr_ast_File_codec) decode(d *codecapi.Decoder, p **ast.File) {
 }
 
 type ast_File_codec struct{}
-
-func (ast_File_codec) Init() {}
 
 func (c ast_File_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	s := x.(ast.File)
@@ -5802,8 +5562,6 @@ func init() {
 
 type slice_ast_Decl_codec struct{}
 
-func (slice_ast_Decl_codec) Init() {}
-
 func (c slice_ast_Decl_codec) Encode(e *codecapi.Encoder, x interface{}) { c.encode(e, x.([]ast.Decl)) }
 
 func (c slice_ast_Decl_codec) encode(e *codecapi.Encoder, s []ast.Decl) {
@@ -5840,8 +5598,6 @@ func init() {
 }
 
 type slice_ptr_ast_ImportSpec_codec struct{}
-
-func (slice_ptr_ast_ImportSpec_codec) Init() {}
 
 func (c slice_ptr_ast_ImportSpec_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	c.encode(e, x.([]*ast.ImportSpec))
@@ -5881,8 +5637,6 @@ func init() {
 }
 
 type slice_ptr_ast_CommentGroup_codec struct{}
-
-func (slice_ptr_ast_CommentGroup_codec) Init() {}
 
 func (c slice_ptr_ast_CommentGroup_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	c.encode(e, x.([]*ast.CommentGroup))

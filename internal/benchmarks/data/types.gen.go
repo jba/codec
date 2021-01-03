@@ -12,8 +12,6 @@ import (
 
 type ptr_LicenseData_codec struct{}
 
-func (ptr_LicenseData_codec) Init() {}
-
 func (c ptr_LicenseData_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	c.encode(e, x.(*LicenseData))
 }
@@ -47,8 +45,6 @@ func (c ptr_LicenseData_codec) decode(d *codecapi.Decoder, p **LicenseData) {
 }
 
 type LicenseData_codec struct{}
-
-func (LicenseData_codec) Init() {}
 
 func (c LicenseData_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	s := x.(LicenseData)
@@ -99,8 +95,6 @@ func init() {
 
 type submittedData_codec struct{}
 
-func (c submittedData_codec) Init() {}
-
 func (c submittedData_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	c.encode(e, x.(submittedData))
 }
@@ -144,8 +138,6 @@ func init() { codecapi.Register(submittedData(nil), submittedData_codec{}) }
 
 type slice_ptr_StockData_codec struct{}
 
-func (slice_ptr_StockData_codec) Init() {}
-
 func (c slice_ptr_StockData_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	c.encode(e, x.([]*StockData))
 }
@@ -185,8 +177,6 @@ func init() {
 
 type slice_Score_codec struct{}
 
-func (slice_Score_codec) Init() {}
-
 func (c slice_Score_codec) Encode(e *codecapi.Encoder, x interface{}) { c.encode(e, x.([]Score)) }
 
 func (c slice_Score_codec) encode(e *codecapi.Encoder, s []Score) {
@@ -223,8 +213,6 @@ func init() {
 }
 
 type slice_ptr_LicenseFile_codec struct{}
-
-func (slice_ptr_LicenseFile_codec) Init() {}
 
 func (c slice_ptr_LicenseFile_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	c.encode(e, x.([]*LicenseFile))
@@ -264,8 +252,6 @@ func init() {
 }
 
 type slice_ptr_LicenseContents_codec struct{}
-
-func (slice_ptr_LicenseContents_codec) Init() {}
 
 func (c slice_ptr_LicenseContents_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	c.encode(e, x.([]*LicenseContents))
@@ -308,8 +294,6 @@ func init() {
 
 type ptr_submittedLedgerData_codec struct{}
 
-func (ptr_submittedLedgerData_codec) Init() {}
-
 func (c ptr_submittedLedgerData_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	c.encode(e, x.(*submittedLedgerData))
 }
@@ -343,8 +327,6 @@ func (c ptr_submittedLedgerData_codec) decode(d *codecapi.Decoder, p **submitted
 }
 
 type submittedLedgerData_codec struct{}
-
-func (submittedLedgerData_codec) Init() {}
 
 func (c submittedLedgerData_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	s := x.(submittedLedgerData)
@@ -397,8 +379,6 @@ func init() {
 
 type ptr_StockData_codec struct{}
 
-func (ptr_StockData_codec) Init() {}
-
 func (c ptr_StockData_codec) Encode(e *codecapi.Encoder, x interface{}) { c.encode(e, x.(*StockData)) }
 
 func (c ptr_StockData_codec) encode(e *codecapi.Encoder, x *StockData) {
@@ -430,8 +410,6 @@ func (c ptr_StockData_codec) decode(d *codecapi.Decoder, p **StockData) {
 }
 
 type StockData_codec struct{}
-
-func (StockData_codec) Init() {}
 
 func (c StockData_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	s := x.(StockData)
@@ -484,8 +462,6 @@ func init() {
 
 type ptr_Score_codec struct{}
 
-func (ptr_Score_codec) Init() {}
-
 func (c ptr_Score_codec) Encode(e *codecapi.Encoder, x interface{}) { c.encode(e, x.(*Score)) }
 
 func (c ptr_Score_codec) encode(e *codecapi.Encoder, x *Score) {
@@ -517,8 +493,6 @@ func (c ptr_Score_codec) decode(d *codecapi.Decoder, p **Score) {
 }
 
 type Score_codec struct{}
-
-func (Score_codec) Init() {}
 
 func (c Score_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	s := x.(Score)
@@ -577,8 +551,6 @@ func init() {
 
 type ptr_LicenseFile_codec struct{}
 
-func (ptr_LicenseFile_codec) Init() {}
-
 func (c ptr_LicenseFile_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	c.encode(e, x.(*LicenseFile))
 }
@@ -612,8 +584,6 @@ func (c ptr_LicenseFile_codec) decode(d *codecapi.Decoder, p **LicenseFile) {
 }
 
 type LicenseFile_codec struct{}
-
-func (LicenseFile_codec) Init() {}
 
 func (c LicenseFile_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	s := x.(LicenseFile)
@@ -678,8 +648,6 @@ func init() {
 
 type ptr_LicenseContents_codec struct{}
 
-func (ptr_LicenseContents_codec) Init() {}
-
 func (c ptr_LicenseContents_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	c.encode(e, x.(*LicenseContents))
 }
@@ -713,8 +681,6 @@ func (c ptr_LicenseContents_codec) decode(d *codecapi.Decoder, p **LicenseConten
 }
 
 type LicenseContents_codec struct{}
-
-func (LicenseContents_codec) Init() {}
 
 func (c LicenseContents_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	s := x.(LicenseContents)
@@ -786,8 +752,6 @@ func init() {
 
 type slice_ptr_BlockAndPvtData_codec struct{}
 
-func (slice_ptr_BlockAndPvtData_codec) Init() {}
-
 func (c slice_ptr_BlockAndPvtData_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	c.encode(e, x.([]*BlockAndPvtData))
 }
@@ -826,8 +790,6 @@ func init() {
 }
 
 type slice_ptr_txAndPvtdata_codec struct{}
-
-func (slice_ptr_txAndPvtdata_codec) Init() {}
 
 func (c slice_ptr_txAndPvtdata_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	c.encode(e, x.([]*txAndPvtdata))
@@ -868,8 +830,6 @@ func init() {
 
 type slice_Interval_codec struct{}
 
-func (slice_Interval_codec) Init() {}
-
 func (c slice_Interval_codec) Encode(e *codecapi.Encoder, x interface{}) { c.encode(e, x.([]Interval)) }
 
 func (c slice_Interval_codec) encode(e *codecapi.Encoder, s []Interval) {
@@ -906,8 +866,6 @@ func init() {
 }
 
 type slice_int_codec struct{}
-
-func (slice_int_codec) Init() {}
 
 func (c slice_int_codec) Encode(e *codecapi.Encoder, x interface{}) { c.encode(e, x.([]int)) }
 
@@ -946,8 +904,6 @@ func init() {
 
 type array_32_uint8_codec struct{}
 
-func (array_32_uint8_codec) Init() {}
-
 func (c array_32_uint8_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	a := x.([32]uint8)
 	c.encode(e, &a)
@@ -973,8 +929,6 @@ func init() {
 }
 
 type slice_string_codec struct{}
-
-func (slice_string_codec) Init() {}
 
 func (c slice_string_codec) Encode(e *codecapi.Encoder, x interface{}) { c.encode(e, x.([]string)) }
 
@@ -1015,8 +969,6 @@ func init() {
 
 type ptr_licensecheck_Coverage_codec struct{}
 
-func (ptr_licensecheck_Coverage_codec) Init() {}
-
 func (c ptr_licensecheck_Coverage_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	c.encode(e, x.(*licensecheck.Coverage))
 }
@@ -1050,8 +1002,6 @@ func (c ptr_licensecheck_Coverage_codec) decode(d *codecapi.Decoder, p **license
 }
 
 type licensecheck_Coverage_codec struct{}
-
-func (licensecheck_Coverage_codec) Init() {}
 
 func (c licensecheck_Coverage_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	s := x.(licensecheck.Coverage)
@@ -1104,8 +1054,6 @@ func init() {
 
 type ptr_BlockAndPvtData_codec struct{}
 
-func (ptr_BlockAndPvtData_codec) Init() {}
-
 func (c ptr_BlockAndPvtData_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	c.encode(e, x.(*BlockAndPvtData))
 }
@@ -1139,8 +1087,6 @@ func (c ptr_BlockAndPvtData_codec) decode(d *codecapi.Decoder, p **BlockAndPvtDa
 }
 
 type BlockAndPvtData_codec struct{}
-
-func (BlockAndPvtData_codec) Init() {}
 
 func (c BlockAndPvtData_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	s := x.(BlockAndPvtData)
@@ -1199,8 +1145,6 @@ func init() {
 
 type ptr_txAndPvtdata_codec struct{}
 
-func (ptr_txAndPvtdata_codec) Init() {}
-
 func (c ptr_txAndPvtdata_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	c.encode(e, x.(*txAndPvtdata))
 }
@@ -1234,8 +1178,6 @@ func (c ptr_txAndPvtdata_codec) decode(d *codecapi.Decoder, p **txAndPvtdata) {
 }
 
 type txAndPvtdata_codec struct{}
-
-func (txAndPvtdata_codec) Init() {}
 
 func (c txAndPvtdata_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	s := x.(txAndPvtdata)
@@ -1294,8 +1236,6 @@ func init() {
 
 type ptr_Interval_codec struct{}
 
-func (ptr_Interval_codec) Init() {}
-
 func (c ptr_Interval_codec) Encode(e *codecapi.Encoder, x interface{}) { c.encode(e, x.(*Interval)) }
 
 func (c ptr_Interval_codec) encode(e *codecapi.Encoder, x *Interval) {
@@ -1327,8 +1267,6 @@ func (c ptr_Interval_codec) decode(d *codecapi.Decoder, p **Interval) {
 }
 
 type Interval_codec struct{}
-
-func (Interval_codec) Init() {}
 
 func (c Interval_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	s := x.(Interval)
@@ -1407,8 +1345,6 @@ func init() {
 
 type slice_licensecheck_Match_codec struct{}
 
-func (slice_licensecheck_Match_codec) Init() {}
-
 func (c slice_licensecheck_Match_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	c.encode(e, x.([]licensecheck.Match))
 }
@@ -1450,8 +1386,6 @@ func init() {
 
 type ptr_Block_codec struct{}
 
-func (ptr_Block_codec) Init() {}
-
 func (c ptr_Block_codec) Encode(e *codecapi.Encoder, x interface{}) { c.encode(e, x.(*Block)) }
 
 func (c ptr_Block_codec) encode(e *codecapi.Encoder, x *Block) {
@@ -1483,8 +1417,6 @@ func (c ptr_Block_codec) decode(d *codecapi.Decoder, p **Block) {
 }
 
 type Block_codec struct{}
-
-func (Block_codec) Init() {}
 
 func (c Block_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	s := x.(Block)
@@ -1541,8 +1473,6 @@ func init() {
 
 type TxPvtDataMap_codec struct{}
 
-func (c TxPvtDataMap_codec) Init() {}
-
 func (c TxPvtDataMap_codec) Encode(e *codecapi.Encoder, x interface{}) { c.encode(e, x.(TxPvtDataMap)) }
 
 func (c TxPvtDataMap_codec) encode(e *codecapi.Encoder, m TxPvtDataMap) {
@@ -1583,8 +1513,6 @@ func (c TxPvtDataMap_codec) decode(d *codecapi.Decoder, p *TxPvtDataMap) {
 func init() { codecapi.Register(TxPvtDataMap(nil), TxPvtDataMap_codec{}) }
 
 type TxMissingPvtData_codec struct{}
-
-func (c TxMissingPvtData_codec) Init() {}
 
 func (c TxMissingPvtData_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	c.encode(e, x.(TxMissingPvtData))
@@ -1631,8 +1559,6 @@ func init() { codecapi.Register(TxMissingPvtData(nil), TxMissingPvtData_codec{})
 
 type ptr_Envelope_codec struct{}
 
-func (ptr_Envelope_codec) Init() {}
-
 func (c ptr_Envelope_codec) Encode(e *codecapi.Encoder, x interface{}) { c.encode(e, x.(*Envelope)) }
 
 func (c ptr_Envelope_codec) encode(e *codecapi.Encoder, x *Envelope) {
@@ -1664,8 +1590,6 @@ func (c ptr_Envelope_codec) decode(d *codecapi.Decoder, p **Envelope) {
 }
 
 type Envelope_codec struct{}
-
-func (Envelope_codec) Init() {}
 
 func (c Envelope_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	s := x.(Envelope)
@@ -1718,8 +1642,6 @@ func init() {
 
 type ptr_TxPvtReadWriteSet_codec struct{}
 
-func (ptr_TxPvtReadWriteSet_codec) Init() {}
-
 func (c ptr_TxPvtReadWriteSet_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	c.encode(e, x.(*TxPvtReadWriteSet))
 }
@@ -1753,8 +1675,6 @@ func (c ptr_TxPvtReadWriteSet_codec) decode(d *codecapi.Decoder, p **TxPvtReadWr
 }
 
 type TxPvtReadWriteSet_codec struct{}
-
-func (TxPvtReadWriteSet_codec) Init() {}
 
 func (c TxPvtReadWriteSet_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	s := x.(TxPvtReadWriteSet)
@@ -1805,8 +1725,6 @@ func init() {
 
 type time_Time_codec struct{}
 
-func (c time_Time_codec) Init() {}
-
 func (c time_Time_codec) Encode(e *codecapi.Encoder, x interface{}) { c.encode(e, x.(time.Time)) }
 
 func (c time_Time_codec) encode(e *codecapi.Encoder, m time.Time) {
@@ -1835,8 +1753,6 @@ func init() { codecapi.Register(*new(time.Time), time_Time_codec{}) }
 // Fields of licensecheck_Match: Name Type Percent Start End IsURL
 
 type ptr_licensecheck_Match_codec struct{}
-
-func (ptr_licensecheck_Match_codec) Init() {}
 
 func (c ptr_licensecheck_Match_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	c.encode(e, x.(*licensecheck.Match))
@@ -1871,8 +1787,6 @@ func (c ptr_licensecheck_Match_codec) decode(d *codecapi.Decoder, p **licenseche
 }
 
 type licensecheck_Match_codec struct{}
-
-func (licensecheck_Match_codec) Init() {}
 
 func (c licensecheck_Match_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	s := x.(licensecheck.Match)
@@ -1949,8 +1863,6 @@ func init() {
 
 type ptr_BlockHeader_codec struct{}
 
-func (ptr_BlockHeader_codec) Init() {}
-
 func (c ptr_BlockHeader_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	c.encode(e, x.(*BlockHeader))
 }
@@ -1984,8 +1896,6 @@ func (c ptr_BlockHeader_codec) decode(d *codecapi.Decoder, p **BlockHeader) {
 }
 
 type BlockHeader_codec struct{}
-
-func (BlockHeader_codec) Init() {}
 
 func (c BlockHeader_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	s := x.(BlockHeader)
@@ -2044,8 +1954,6 @@ func init() {
 
 type ptr_BlockData_codec struct{}
 
-func (ptr_BlockData_codec) Init() {}
-
 func (c ptr_BlockData_codec) Encode(e *codecapi.Encoder, x interface{}) { c.encode(e, x.(*BlockData)) }
 
 func (c ptr_BlockData_codec) encode(e *codecapi.Encoder, x *BlockData) {
@@ -2077,8 +1985,6 @@ func (c ptr_BlockData_codec) decode(d *codecapi.Decoder, p **BlockData) {
 }
 
 type BlockData_codec struct{}
-
-func (BlockData_codec) Init() {}
 
 func (c BlockData_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	s := x.(BlockData)
@@ -2125,8 +2031,6 @@ func init() {
 
 type ptr_BlockMetadata_codec struct{}
 
-func (ptr_BlockMetadata_codec) Init() {}
-
 func (c ptr_BlockMetadata_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	c.encode(e, x.(*BlockMetadata))
 }
@@ -2160,8 +2064,6 @@ func (c ptr_BlockMetadata_codec) decode(d *codecapi.Decoder, p **BlockMetadata) 
 }
 
 type BlockMetadata_codec struct{}
-
-func (BlockMetadata_codec) Init() {}
 
 func (c BlockMetadata_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	s := x.(BlockMetadata)
@@ -2208,8 +2110,6 @@ func init() {
 
 type ptr_TxPvtData_codec struct{}
 
-func (ptr_TxPvtData_codec) Init() {}
-
 func (c ptr_TxPvtData_codec) Encode(e *codecapi.Encoder, x interface{}) { c.encode(e, x.(*TxPvtData)) }
 
 func (c ptr_TxPvtData_codec) encode(e *codecapi.Encoder, x *TxPvtData) {
@@ -2241,8 +2141,6 @@ func (c ptr_TxPvtData_codec) decode(d *codecapi.Decoder, p **TxPvtData) {
 }
 
 type TxPvtData_codec struct{}
-
-func (TxPvtData_codec) Init() {}
 
 func (c TxPvtData_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	s := x.(TxPvtData)
@@ -2293,8 +2191,6 @@ func init() {
 
 type slice_ptr_MissingPvtData_codec struct{}
 
-func (slice_ptr_MissingPvtData_codec) Init() {}
-
 func (c slice_ptr_MissingPvtData_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	c.encode(e, x.([]*MissingPvtData))
 }
@@ -2334,8 +2230,6 @@ func init() {
 
 type slice_ptr_NsPvtReadWriteSet_codec struct{}
 
-func (slice_ptr_NsPvtReadWriteSet_codec) Init() {}
-
 func (c slice_ptr_NsPvtReadWriteSet_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	c.encode(e, x.([]*NsPvtReadWriteSet))
 }
@@ -2374,8 +2268,6 @@ func init() {
 }
 
 type slice_slice_uint8_codec struct{}
-
-func (slice_slice_uint8_codec) Init() {}
 
 func (c slice_slice_uint8_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	c.encode(e, x.([][]uint8))
@@ -2418,8 +2310,6 @@ func init() {
 
 type ptr_MissingPvtData_codec struct{}
 
-func (ptr_MissingPvtData_codec) Init() {}
-
 func (c ptr_MissingPvtData_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	c.encode(e, x.(*MissingPvtData))
 }
@@ -2453,8 +2343,6 @@ func (c ptr_MissingPvtData_codec) decode(d *codecapi.Decoder, p **MissingPvtData
 }
 
 type MissingPvtData_codec struct{}
-
-func (MissingPvtData_codec) Init() {}
 
 func (c MissingPvtData_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	s := x.(MissingPvtData)
@@ -2513,8 +2401,6 @@ func init() {
 
 type ptr_NsPvtReadWriteSet_codec struct{}
 
-func (ptr_NsPvtReadWriteSet_codec) Init() {}
-
 func (c ptr_NsPvtReadWriteSet_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	c.encode(e, x.(*NsPvtReadWriteSet))
 }
@@ -2548,8 +2434,6 @@ func (c ptr_NsPvtReadWriteSet_codec) decode(d *codecapi.Decoder, p **NsPvtReadWr
 }
 
 type NsPvtReadWriteSet_codec struct{}
-
-func (NsPvtReadWriteSet_codec) Init() {}
 
 func (c NsPvtReadWriteSet_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	s := x.(NsPvtReadWriteSet)
@@ -2600,8 +2484,6 @@ func init() {
 
 type slice_ptr_CollectionPvtReadWriteSet_codec struct{}
 
-func (slice_ptr_CollectionPvtReadWriteSet_codec) Init() {}
-
 func (c slice_ptr_CollectionPvtReadWriteSet_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	c.encode(e, x.([]*CollectionPvtReadWriteSet))
 }
@@ -2643,8 +2525,6 @@ func init() {
 
 type ptr_CollectionPvtReadWriteSet_codec struct{}
 
-func (ptr_CollectionPvtReadWriteSet_codec) Init() {}
-
 func (c ptr_CollectionPvtReadWriteSet_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	c.encode(e, x.(*CollectionPvtReadWriteSet))
 }
@@ -2678,8 +2558,6 @@ func (c ptr_CollectionPvtReadWriteSet_codec) decode(d *codecapi.Decoder, p **Col
 }
 
 type CollectionPvtReadWriteSet_codec struct{}
-
-func (CollectionPvtReadWriteSet_codec) Init() {}
 
 func (c CollectionPvtReadWriteSet_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	s := x.(CollectionPvtReadWriteSet)

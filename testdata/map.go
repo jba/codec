@@ -8,8 +8,6 @@ import (
 
 type map_string_bool_codec struct{}
 
-func (c map_string_bool_codec) Init() {}
-
 func (c map_string_bool_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	c.encode(e, x.(map[string]bool))
 }

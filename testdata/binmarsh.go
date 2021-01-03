@@ -9,8 +9,6 @@ import (
 
 type time_Time_codec struct{}
 
-func (c time_Time_codec) Init() {}
-
 func (c time_Time_codec) Encode(e *codecapi.Encoder, x interface{}) { c.encode(e, x.(time.Time)) }
 
 func (c time_Time_codec) encode(e *codecapi.Encoder, m time.Time) {
