@@ -1,24 +1,6 @@
-ast             max encode   18.203 ms
-ast             max decode   22.597 ms
-ast             250 encode   32.190 ms
-ast             250 decode   35.394 ms
-hyperledger     max encode    0.031 ms
-hyperledger     max decode    0.086 ms
-hyperledger     250 encode    0.209 ms
-hyperledger     250 decode    0.218 ms
-licenses        max encode 1320.694 ms
-licenses        max decode  711.449 ms
-licenses        250 encode 2258.217 ms
-licenses        250 decode 1706.507 ms
-licenses-small  max encode  632.632 ms
-licenses-small  max decode  631.584 ms
-licenses-small  250 encode 1491.616 ms
-licenses-small  250 decode 1347.308 ms
-stocks          max encode  616.300 ms
-stocks          max decode  371.218 ms
-stocks          250 encode 1209.608 ms
-stocks          250 decode  892.830 ms
-scores          max encode   15.142 ms
-scores          max decode   16.453 ms
-scores          250 encode   24.414 ms
-scores          250 decode   27.374 ms
+ast             max encode   18.203 ms    17.402 ms
+hyperledger     max encode    0.031 ms     0.031 ms
+licenses        max encode 1320.694 ms  1290.637 ms
+licenses-small  max encode  632.632 ms   641.467 ms
+stocks          max encode  616.300 ms   616.266 ms
+scores          max encode   15.142 ms    15.809 ms

@@ -1,0 +1,6 @@
+ast             max encode   19.917 ms    18.465 ms
+hyperledger     max encode    0.032 ms     0.033 ms
+licenses        max encode 1532.194 ms  1731.340 ms
+licenses-small  max encode  638.394 ms   648.466 ms
+stocks          max encode  612.614 ms   615.525 ms
+scores          max encode   15.565 ms    16.768 ms
