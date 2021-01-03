@@ -4,11 +4,15 @@ This is a fork of pkgsite/internal/godoc/codec.
 
 TODO:
 
+- Add rationale at top of this file.
+
 - Put benchmarks in separate module to avoid dependencies on GCS, GCP, etc.
 
-- Add EncodeBytes, DecodeBytes
-
 - Have Decode return a documented error at EOF.
+
+- Add EncodeBytes, DecodeBytes?
+
+
 
 # Encoding Scheme
 
