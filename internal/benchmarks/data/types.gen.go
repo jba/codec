@@ -1750,7 +1750,7 @@ func (c time_Time_codec) decode(d *codecapi.Decoder, p *time.Time) {
 
 func init() { codecapi.Register(*new(time.Time), time_Time_codec{}) }
 
-// Fields of licensecheck_Match: ID Type Start End IsURL
+// Fields of licensecheck_Match: Name Type Percent Start End IsURL
 
 type ptr_licensecheck_Match_codec struct{}
 
@@ -1795,24 +1795,28 @@ func (c licensecheck_Match_codec) Encode(e *codecapi.Encoder, x interface{}) {
 
 func (c licensecheck_Match_codec) encode(e *codecapi.Encoder, x *licensecheck.Match) {
 	e.StartStruct()
-	if x.ID != "" {
+	if x.Name != "" {
 		e.EncodeUint(0)
-		e.EncodeString(x.ID)
+		e.EncodeString(x.Name)
 	}
 	if x.Type != 0 {
 		e.EncodeUint(1)
-		e.EncodeUint(uint64(x.Type))
+		e.EncodeInt(int64(x.Type))
+	}
+	if x.Percent != 0 {
+		e.EncodeUint(2)
+		e.EncodeFloat(x.Percent)
 	}
 	if x.Start != 0 {
-		e.EncodeUint(2)
+		e.EncodeUint(3)
 		e.EncodeInt(int64(x.Start))
 	}
 	if x.End != 0 {
-		e.EncodeUint(3)
+		e.EncodeUint(4)
 		e.EncodeInt(int64(x.End))
 	}
 	if x.IsURL != false {
-		e.EncodeUint(4)
+		e.EncodeUint(5)
 		e.EncodeBool(x.IsURL)
 	}
 	e.EndStruct()
@@ -1833,14 +1837,16 @@ func (c licensecheck_Match_codec) decode(d *codecapi.Decoder, x *licensecheck.Ma
 		}
 		switch n {
 		case 0:
-			x.ID = d.DecodeString()
+			x.Name = d.DecodeString()
 		case 1:
-			x.Type = licensecheck.Type(d.DecodeUint())
+			x.Type = licensecheck.Type(d.DecodeInt())
 		case 2:
-			x.Start = int(d.DecodeInt())
+			x.Percent = d.DecodeFloat()
 		case 3:
-			x.End = int(d.DecodeInt())
+			x.Start = int(d.DecodeInt())
 		case 4:
+			x.End = int(d.DecodeInt())
+		case 5:
 			x.IsURL = d.DecodeBool()
 		default:
 			d.UnknownField("licensecheck.Match", n)
