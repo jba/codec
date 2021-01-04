@@ -6,6 +6,7 @@ package codecapi
 
 import (
 	"bytes"
+	"io"
 	"math"
 	"testing"
 
@@ -46,5 +47,39 @@ func TestEncodeDecode(t *testing.T) {
 		if !cmp.Equal(g, w, cmpopts.EquateNaNs()) {
 			t.Errorf("got %v (%[1]T), want %v (%[2]T)", g, w)
 		}
+	}
+}
+
+func TestDecodeEOF(t *testing.T) {
+	var dopts DecodeOptions
+	got, err := NewDecoder(bytes.NewReader(nil), dopts).Decode()
+	if got != nil || err != io.EOF {
+		t.Errorf("got (%v, %v), want (nil, io.EOF)", got, err)
+	}
+	got, err = NewDecoder(bytes.NewReader(header), dopts).Decode()
+	if got != nil || err != io.EOF {
+		t.Errorf("got (%v, %v), want (nil, io.EOF)", got, err)
+	}
+
+	var buf bytes.Buffer
+	e := NewEncoder(&buf, EncodeOptions{})
+	for i := 0; i < 3; i++ {
+		if err := e.Encode(i); err != nil {
+			t.Fatal(err)
+		}
+	}
+	d := NewDecoder(bytes.NewReader(buf.Bytes()), DecodeOptions{})
+	for i := 0; i < 3; i++ {
+		got, err := d.Decode()
+		if err != nil {
+			t.Fatal(err)
+		}
+		if got != i {
+			t.Fatalf("got %d, want %d", got, i)
+		}
+	}
+	got, err = d.Decode()
+	if got != nil || err != io.EOF {
+		t.Errorf("got (%v, %v), want (nil, io.EOF)", got, err)
 	}
 }
