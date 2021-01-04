@@ -13,6 +13,8 @@ import (
 )
 
 var (
+	// To reconstruct licenses.gob,
+	//     cat licenses-gob-* > licenses.gob
 	Licenses      = licenseBenchmarkData("licenses")
 	LicensesSmall = licenseBenchmarkData("licenses-small")
 )

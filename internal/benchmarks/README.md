@@ -1,7 +1,3 @@
-To reconstruct licenses.gob:
-
-`cat licenses-gob-* > licenses.gob`
-
 # Benchmarks for jba/codec
 
 This module compares some encoders using a collection of real-world and
