@@ -40,7 +40,6 @@ import (
 	"log"
 	"time"
 
-	"github.com/jba/codec/internal/benchmarks/bench"
 	"github.com/jba/codec/internal/benchmarks/data"
 )
 
@@ -160,7 +159,7 @@ func breakEvenThroughput(origCodec, spaceOptCodec Codec, bd data.BenchmarkData) 
 
 func runEncoded(c Codec, data interface{}) ([]byte, time.Duration, error) {
 	var encoded []byte
-	r, err := bench.Run1(newEncodeBenchmark(data, c, 0, &encoded))
+	r, err := newEncodeBenchmark(data, c, 0, &encoded).run()
 	if err != nil {
 		return nil, 0, fmt.Errorf("encoding with %s: %w", c.name, err)
 	}
@@ -168,7 +167,7 @@ func runEncoded(c Codec, data interface{}) ([]byte, time.Duration, error) {
 }
 
 func runDecoded(c Codec, enc []byte, newptr func() interface{}) (time.Duration, error) {
-	r, err := bench.Run1(newDecodeBenchmark(enc, c, 0, newptr))
+	r, err := newDecodeBenchmark(enc, c, 0, newptr).run()
 	if err != nil {
 		return 0, fmt.Errorf("decoding with %s: %w", c.name, err)
 	}

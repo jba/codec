@@ -27,12 +27,13 @@ import (
 	"log"
 	"os"
 	"reflect"
+	"runtime"
 	"runtime/pprof"
 	"testing"
+	"text/tabwriter"
 	"time"
 
 	"github.com/jba/codec/codecapi"
-	"github.com/jba/codec/internal/benchmarks/bench"
 	"github.com/jba/codec/internal/benchmarks/data"
 	"github.com/jba/codec/internal/benchmarks/testio"
 	ucodec "github.com/ugorji/go/codec"
@@ -207,12 +208,12 @@ func runBenchmark(bd data.BenchmarkData) {
 		}
 		fmt.Printf("---- %s at %s Mi/sec ----\n", bd.Name, s)
 		fmt.Println("encode")
-		var bms []bench.Benchmark
+		var bms []benchmark
 		encoded := make([][]byte, len(codecs))
 		for p, c := range codecs {
 			bms = append(bms, newEncodeBenchmark(data, c, tput, &encoded[p]))
 		}
-		bench.Run(bms)
+		runAndReport(bms)
 		fmt.Println()
 
 		fmt.Println("decode")
@@ -221,7 +222,7 @@ func runBenchmark(bd data.BenchmarkData) {
 			c := c
 			bms = append(bms, newDecodeBenchmark(encoded[i], c, tput, bd.Newptr))
 		}
-		bench.Run(bms)
+		runAndReport(bms)
 		fmt.Println()
 	}
 }
@@ -243,13 +244,13 @@ func runBenchmarksJbaOnly(dataNames []string) error {
 
 			var encoded []byte
 			bm := newEncodeBenchmark(data, jbaCodec, tput, &encoded)
-			res, err := bench.Run1(bm)
+			res, err := bm.run()
 			if err != nil {
 				return err
 			}
 			print("encode", res)
 			bm = newDecodeBenchmark(encoded, jbaCodec, tput, bd.Newptr)
-			res, err = bench.Run1(bm)
+			res, err = bm.run()
 			if err != nil {
 				return err
 			}
@@ -304,25 +305,25 @@ func runBenchmarkRefs([]string) error {
 	marked := newJbaCodec("marked refs", codecapi.EncodeOptions{TrackPointers: true})
 	var encodedStandard, encodedMarked []byte
 
-	bms := []bench.Benchmark{
+	bms := []benchmark{
 		newEncodeBenchmark(dat, standard, 0, &encodedStandard),
 		newEncodeBenchmark(dat, marked, 0, &encodedMarked),
 	}
 	fmt.Println("encode:")
-	bench.Run(bms)
+	runAndReport(bms)
 	fmt.Println()
 
-	bms = []bench.Benchmark{
+	bms = []benchmark{
 		newDecodeBenchmark(encodedStandard, standard, 0, newptr),
 		newDecodeBenchmark(encodedMarked, marked, 0, newptr),
 	}
 	fmt.Println("decode:")
-	bench.Run(bms)
+	runAndReport(bms)
 	return nil
 }
 
-func newEncodeBenchmark(data interface{}, c Codec, tput int, out *[]byte) bench.Benchmark {
-	return bench.Benchmark{
+func newEncodeBenchmark(data interface{}, c Codec, tput int, out *[]byte) benchmark {
+	return benchmark{
 		Name: c.name,
 		Func: func(b *testing.B) error {
 			var buf bytes.Buffer
@@ -339,8 +340,8 @@ func newEncodeBenchmark(data interface{}, c Codec, tput int, out *[]byte) bench.
 	}
 }
 
-func newDecodeBenchmark(enc []byte, c Codec, tput int, newptr func() interface{}) bench.Benchmark {
-	return bench.Benchmark{
+func newDecodeBenchmark(enc []byte, c Codec, tput int, newptr func() interface{}) benchmark {
+	return benchmark{
 		Name: c.name,
 		Func: func(b *testing.B) error {
 			br := bytes.NewReader(enc)
@@ -366,4 +367,46 @@ func newDecodeBenchmark(enc []byte, c Codec, tput int, newptr func() interface{}
 			return nil
 		},
 	}
+}
+
+// A benchmark is a named benchmarking function.
+type benchmark struct {
+	Name string
+	Func func(b *testing.B) error
+}
+
+// runAndReport runs the given benchmarks and write a report of the results. The speed of
+// each benchmark after the first is displayed as a multiplier of the first's
+// speed.
+func runAndReport(bms []benchmark) {
+	var r0 testing.BenchmarkResult
+	w := tabwriter.NewWriter(os.Stdout, 6, 8, 2, ' ', tabwriter.AlignRight)
+	for i, bm := range bms {
+		r, err := bm.run()
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "%s: %v\n", bm.Name, err)
+		}
+		if i == 0 {
+			r0 = r
+		}
+		if err == nil {
+			d := time.Duration(r.NsPerOp())
+			fmt.Fprintf(w, "%s\t%d\t%dK/op\t%.2fs/op\t %.2fx\n",
+				bm.Name, r.N, r.AllocedBytesPerOp()/1024, d.Seconds(), float64(r0.NsPerOp())/float64(r.NsPerOp()))
+		}
+	}
+	w.Flush()
+}
+
+func (bm benchmark) run() (testing.BenchmarkResult, error) {
+	var err error
+	runtime.GC()
+	r := testing.Benchmark(func(b *testing.B) {
+		b.ReportAllocs()
+		err = bm.Func(b)
+		if err != nil {
+			b.Fatal(err)
+		}
+	})
+	return r, err
 }
