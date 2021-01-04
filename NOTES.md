@@ -1,12 +1,5 @@
 # Developer Notes
 
-TODO:
-
-- Put benchmarks in separate module to avoid dependencies on GCS, GCP, etc.
-
-- Add EncodeBytes, DecodeBytes?
-
-
 ## Zero-copy DecodeBytes
 
 For DecodeBytes to avoid a copy, we would have to be sure that the underlying
