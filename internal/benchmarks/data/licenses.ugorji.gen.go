@@ -14,28 +14,28 @@ import (
 
 const (
 	// ----- content types ----
-	codecSelferCcUTF81508 = 1
-	codecSelferCcRAW1508  = 255
+	codecSelferCcUTF83603 = 1
+	codecSelferCcRAW3603  = 255
 	// ----- value types used ----
-	codecSelferValueTypeArray1508     = 10
-	codecSelferValueTypeMap1508       = 9
-	codecSelferValueTypeString1508    = 6
-	codecSelferValueTypeInt1508       = 2
-	codecSelferValueTypeUint1508      = 3
-	codecSelferValueTypeFloat1508     = 4
-	codecSelferValueTypeNil1508       = 1
-	codecSelferBitsize1508            = uint8(32 << (^uint(0) >> 63))
-	codecSelferDecContainerLenNil1508 = -2147483648
+	codecSelferValueTypeArray3603     = 10
+	codecSelferValueTypeMap3603       = 9
+	codecSelferValueTypeString3603    = 6
+	codecSelferValueTypeInt3603       = 2
+	codecSelferValueTypeUint3603      = 3
+	codecSelferValueTypeFloat3603     = 4
+	codecSelferValueTypeNil3603       = 1
+	codecSelferBitsize3603            = uint8(32 << (^uint(0) >> 63))
+	codecSelferDecContainerLenNil3603 = -2147483648
 )
 
 var (
-	errCodecSelferOnlyMapOrArrayEncodeToStruct1508 = errors.New(`only encoded map or array can be decoded into a struct`)
+	errCodecSelferOnlyMapOrArrayEncodeToStruct3603 = errors.New(`only encoded map or array can be decoded into a struct`)
 )
 
-type codecSelfer1508 struct{}
+type codecSelfer3603 struct{}
 
-func codecSelfer1508False() bool { return false }
-func codecSelfer1508True() bool  { return true }
+func codecSelfer3603False() bool { return false }
+func codecSelfer3603True() bool  { return true }
 
 func init() {
 	if codec1978.GenVersion != 20 {
@@ -49,7 +49,7 @@ func init() {
 }
 
 func (x *LicenseData) CodecEncodeSelf(e *codec1978.Encoder) {
-	var h codecSelfer1508
+	var h codecSelfer3603
 	z, r := codec1978.GenHelper().Encoder(e)
 	_, _, _ = h, z, r
 	if x == nil {
@@ -105,32 +105,32 @@ func (x *LicenseData) CodecEncodeSelf(e *codec1978.Encoder) {
 }
 
 func (x *LicenseData) CodecDecodeSelf(d *codec1978.Decoder) {
-	var h codecSelfer1508
+	var h codecSelfer3603
 	z, r := codec1978.GenHelper().Decoder(d)
 	_, _, _ = h, z, r
 	yyct2 := r.ContainerType()
-	if yyct2 == codecSelferValueTypeNil1508 {
+	if yyct2 == codecSelferValueTypeNil3603 {
 		*(x) = LicenseData{}
-	} else if yyct2 == codecSelferValueTypeMap1508 {
+	} else if yyct2 == codecSelferValueTypeMap3603 {
 		yyl2 := z.DecReadMapStart()
 		if yyl2 == 0 {
 		} else {
 			x.codecDecodeSelfFromMap(yyl2, d)
 		}
 		z.DecReadMapEnd()
-	} else if yyct2 == codecSelferValueTypeArray1508 {
+	} else if yyct2 == codecSelferValueTypeArray3603 {
 		yyl2 := z.DecReadArrayStart()
 		if yyl2 != 0 {
 			x.codecDecodeSelfFromArray(yyl2, d)
 		}
 		z.DecReadArrayEnd()
 	} else {
-		panic(errCodecSelferOnlyMapOrArrayEncodeToStruct1508)
+		panic(errCodecSelferOnlyMapOrArrayEncodeToStruct3603)
 	}
 }
 
 func (x *LicenseData) codecDecodeSelfFromMap(l int, d *codec1978.Decoder) {
-	var h codecSelfer1508
+	var h codecSelfer3603
 	z, r := codec1978.GenHelper().Decoder(d)
 	_, _, _ = h, z, r
 	var yyhl3 bool = l >= 0
@@ -159,7 +159,7 @@ func (x *LicenseData) codecDecodeSelfFromMap(l int, d *codec1978.Decoder) {
 }
 
 func (x *LicenseData) codecDecodeSelfFromArray(l int, d *codec1978.Decoder) {
-	var h codecSelfer1508
+	var h codecSelfer3603
 	z, r := codec1978.GenHelper().Decoder(d)
 	_, _, _ = h, z, r
 	var yyj8 int
@@ -209,7 +209,7 @@ func (x *LicenseData) IsCodecEmpty() bool {
 }
 
 func (x *LicenseFile) CodecEncodeSelf(e *codec1978.Encoder) {
-	var h codecSelfer1508
+	var h codecSelfer3603
 	z, r := codec1978.GenHelper().Encoder(e)
 	_, _, _ = h, z, r
 	if x == nil {
@@ -269,32 +269,32 @@ func (x *LicenseFile) CodecEncodeSelf(e *codec1978.Encoder) {
 }
 
 func (x *LicenseFile) CodecDecodeSelf(d *codec1978.Decoder) {
-	var h codecSelfer1508
+	var h codecSelfer3603
 	z, r := codec1978.GenHelper().Decoder(d)
 	_, _, _ = h, z, r
 	yyct2 := r.ContainerType()
-	if yyct2 == codecSelferValueTypeNil1508 {
+	if yyct2 == codecSelferValueTypeNil3603 {
 		*(x) = LicenseFile{}
-	} else if yyct2 == codecSelferValueTypeMap1508 {
+	} else if yyct2 == codecSelferValueTypeMap3603 {
 		yyl2 := z.DecReadMapStart()
 		if yyl2 == 0 {
 		} else {
 			x.codecDecodeSelfFromMap(yyl2, d)
 		}
 		z.DecReadMapEnd()
-	} else if yyct2 == codecSelferValueTypeArray1508 {
+	} else if yyct2 == codecSelferValueTypeArray3603 {
 		yyl2 := z.DecReadArrayStart()
 		if yyl2 != 0 {
 			x.codecDecodeSelfFromArray(yyl2, d)
 		}
 		z.DecReadArrayEnd()
 	} else {
-		panic(errCodecSelferOnlyMapOrArrayEncodeToStruct1508)
+		panic(errCodecSelferOnlyMapOrArrayEncodeToStruct3603)
 	}
 }
 
 func (x *LicenseFile) codecDecodeSelfFromMap(l int, d *codec1978.Decoder) {
-	var h codecSelfer1508
+	var h codecSelfer3603
 	z, r := codec1978.GenHelper().Decoder(d)
 	_, _, _ = h, z, r
 	var yyhl3 bool = l >= 0
@@ -319,7 +319,7 @@ func (x *LicenseFile) codecDecodeSelfFromMap(l int, d *codec1978.Decoder) {
 		case "FilePath":
 			x.FilePath = (string)(string(r.DecodeStringAsBytes()))
 		case "Contents":
-			x.Contents = (int)(z.C.IntV(r.DecodeInt64(), codecSelferBitsize1508))
+			x.Contents = (int)(z.C.IntV(r.DecodeInt64(), codecSelferBitsize3603))
 		default:
 			z.DecStructFieldNotFound(-1, yys3)
 		} // end switch yys3
@@ -327,7 +327,7 @@ func (x *LicenseFile) codecDecodeSelfFromMap(l int, d *codec1978.Decoder) {
 }
 
 func (x *LicenseFile) codecDecodeSelfFromArray(l int, d *codec1978.Decoder) {
-	var h codecSelfer1508
+	var h codecSelfer3603
 	z, r := codec1978.GenHelper().Decoder(d)
 	_, _, _ = h, z, r
 	var yyj8 int
@@ -380,7 +380,7 @@ func (x *LicenseFile) codecDecodeSelfFromArray(l int, d *codec1978.Decoder) {
 		return
 	}
 	z.DecReadArrayElem()
-	x.Contents = (int)(z.C.IntV(r.DecodeInt64(), codecSelferBitsize1508))
+	x.Contents = (int)(z.C.IntV(r.DecodeInt64(), codecSelferBitsize3603))
 	for {
 		yyj8++
 		if yyhl8 {
@@ -401,7 +401,7 @@ func (x *LicenseFile) IsCodecEmpty() bool {
 }
 
 func (x *LicenseContents) CodecEncodeSelf(e *codec1978.Encoder) {
-	var h codecSelfer1508
+	var h codecSelfer3603
 	z, r := codec1978.GenHelper().Encoder(e)
 	_, _, _ = h, z, r
 	if x == nil {
@@ -527,32 +527,32 @@ func (x *LicenseContents) CodecEncodeSelf(e *codec1978.Encoder) {
 }
 
 func (x *LicenseContents) CodecDecodeSelf(d *codec1978.Decoder) {
-	var h codecSelfer1508
+	var h codecSelfer3603
 	z, r := codec1978.GenHelper().Decoder(d)
 	_, _, _ = h, z, r
 	yyct2 := r.ContainerType()
-	if yyct2 == codecSelferValueTypeNil1508 {
+	if yyct2 == codecSelferValueTypeNil3603 {
 		*(x) = LicenseContents{}
-	} else if yyct2 == codecSelferValueTypeMap1508 {
+	} else if yyct2 == codecSelferValueTypeMap3603 {
 		yyl2 := z.DecReadMapStart()
 		if yyl2 == 0 {
 		} else {
 			x.codecDecodeSelfFromMap(yyl2, d)
 		}
 		z.DecReadMapEnd()
-	} else if yyct2 == codecSelferValueTypeArray1508 {
+	} else if yyct2 == codecSelferValueTypeArray3603 {
 		yyl2 := z.DecReadArrayStart()
 		if yyl2 != 0 {
 			x.codecDecodeSelfFromArray(yyl2, d)
 		}
 		z.DecReadArrayEnd()
 	} else {
-		panic(errCodecSelferOnlyMapOrArrayEncodeToStruct1508)
+		panic(errCodecSelferOnlyMapOrArrayEncodeToStruct3603)
 	}
 }
 
 func (x *LicenseContents) codecDecodeSelfFromMap(l int, d *codec1978.Decoder) {
-	var h codecSelfer1508
+	var h codecSelfer3603
 	z, r := codec1978.GenHelper().Decoder(d)
 	_, _, _ = h, z, r
 	var yyhl3 bool = l >= 0
@@ -597,7 +597,7 @@ func (x *LicenseContents) codecDecodeSelfFromMap(l int, d *codec1978.Decoder) {
 }
 
 func (x *LicenseContents) codecDecodeSelfFromArray(l int, d *codec1978.Decoder) {
-	var h codecSelfer1508
+	var h codecSelfer3603
 	z, r := codec1978.GenHelper().Decoder(d)
 	_, _, _ = h, z, r
 	var yyj16 int
@@ -702,8 +702,8 @@ func (x *LicenseContents) IsCodecEmpty() bool {
 	return !(len(x.Contents) != 0 || len(x.ContentsHash) != 0 || len(x.OldTypes) != 0 || false || x.OldCoverage.Percent != 0 || len(x.OldCoverage.Match) != 0 || len(x.NewTypes) != 0 || false || x.NewCoverage.Percent != 0 || len(x.NewCoverage.Match) != 0 || false)
 }
 
-func (x codecSelfer1508) encSlicePtrtoLicenseFile(v []*LicenseFile, e *codec1978.Encoder) {
-	var h codecSelfer1508
+func (x codecSelfer3603) encSlicePtrtoLicenseFile(v []*LicenseFile, e *codec1978.Encoder) {
+	var h codecSelfer3603
 	z, r := codec1978.GenHelper().Encoder(e)
 	_, _, _ = h, z, r
 	if v == nil {
@@ -726,8 +726,8 @@ func (x codecSelfer1508) encSlicePtrtoLicenseFile(v []*LicenseFile, e *codec1978
 	z.EncWriteArrayEnd()
 }
 
-func (x codecSelfer1508) decSlicePtrtoLicenseFile(v *[]*LicenseFile, d *codec1978.Decoder) {
-	var h codecSelfer1508
+func (x codecSelfer3603) decSlicePtrtoLicenseFile(v *[]*LicenseFile, d *codec1978.Decoder) {
+	var h codecSelfer3603
 	z, r := codec1978.GenHelper().Decoder(d)
 	_, _, _ = h, z, r
 
@@ -814,8 +814,8 @@ func (x codecSelfer1508) decSlicePtrtoLicenseFile(v *[]*LicenseFile, d *codec197
 	}
 }
 
-func (x codecSelfer1508) encSlicePtrtoLicenseContents(v []*LicenseContents, e *codec1978.Encoder) {
-	var h codecSelfer1508
+func (x codecSelfer3603) encSlicePtrtoLicenseContents(v []*LicenseContents, e *codec1978.Encoder) {
+	var h codecSelfer3603
 	z, r := codec1978.GenHelper().Encoder(e)
 	_, _, _ = h, z, r
 	if v == nil {
@@ -838,8 +838,8 @@ func (x codecSelfer1508) encSlicePtrtoLicenseContents(v []*LicenseContents, e *c
 	z.EncWriteArrayEnd()
 }
 
-func (x codecSelfer1508) decSlicePtrtoLicenseContents(v *[]*LicenseContents, d *codec1978.Decoder) {
-	var h codecSelfer1508
+func (x codecSelfer3603) decSlicePtrtoLicenseContents(v *[]*LicenseContents, d *codec1978.Decoder) {
+	var h codecSelfer3603
 	z, r := codec1978.GenHelper().Decoder(d)
 	_, _, _ = h, z, r
 
@@ -926,8 +926,8 @@ func (x codecSelfer1508) decSlicePtrtoLicenseContents(v *[]*LicenseContents, d *
 	}
 }
 
-func (x codecSelfer1508) encArray32uint8(v *[32]uint8, e *codec1978.Encoder) {
-	var h codecSelfer1508
+func (x codecSelfer3603) encArray32uint8(v *[32]uint8, e *codec1978.Encoder) {
+	var h codecSelfer3603
 	z, r := codec1978.GenHelper().Encoder(e)
 	_, _, _ = h, z, r
 	if v == nil {
@@ -937,8 +937,8 @@ func (x codecSelfer1508) encArray32uint8(v *[32]uint8, e *codec1978.Encoder) {
 	r.EncodeStringBytesRaw(((*[32]byte)(v))[:])
 }
 
-func (x codecSelfer1508) decArray32uint8(v *[32]uint8, d *codec1978.Decoder) {
-	var h codecSelfer1508
+func (x codecSelfer3603) decArray32uint8(v *[32]uint8, d *codec1978.Decoder) {
+	var h codecSelfer3603
 	z, r := codec1978.GenHelper().Decoder(d)
 	_, _, _ = h, z, r
 	r.DecodeBytes(((*[32]byte)(v))[:], true)

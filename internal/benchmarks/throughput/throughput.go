@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // This program measures the throughput of various I/O setups.
-// Run once with -initdb to store data in the databases.
+// Run once with -init to store data.
 
 /*
 
@@ -54,6 +54,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"path/filepath"
 	"runtime"
 	"time"
 
@@ -61,7 +62,7 @@ import (
 	"github.com/jba/codec/internal/benchmarks/config"
 )
 
-var initDB = flag.Bool("initdb", false, "init the DB")
+var initialize = flag.Bool("init", false, "init the DBs and files")
 
 func main() {
 	flag.Parse()
@@ -72,13 +73,13 @@ func main() {
 	memory()
 	file()
 	gcs(cfg.GCSBucket)
-	db(cfg, "local", *initDB)
-	db(cfg, "cloud", *initDB)
+	db(cfg, "local")
+	db(cfg, "cloud")
 }
 
 const (
-	testFileSize = 1053291048
-	testFileName = "testfile.gitignore"
+	testFileSize = 1024 * 1024 * 1024
+	testFileName = "testfile"
 )
 
 func readAll(r io.Reader) (int, time.Duration) {
@@ -96,14 +97,36 @@ func throughput(msg string, size int, dur time.Duration) {
 	fmt.Printf("%6.2f M/sec  %s\n", mbsec, msg)
 }
 
+func makeData() []byte {
+	b := []byte{1, 2, 3, 4}
+	return bytes.Repeat(b, testFileSize/len(b))
+}
+
+func writeData(w io.WriteCloser) {
+	if _, err := w.Write(makeData()); err != nil {
+		log.Fatal(err)
+	}
+	if err := w.Close(); err != nil {
+		log.Fatal(err)
+	}
+}
+
 func memory() {
-	bs := make([]byte, testFileSize)
+	bs := makeData()
 	size, dur := readAll(bytes.NewReader(bs))
 	throughput("read memory", size, dur)
 }
 
 func file() {
-	f, err := os.Open(testFileName)
+	pathname := filepath.Join(os.TempDir(), testFileName)
+	if *initialize {
+		f, err := os.Create(pathname)
+		if err != nil {
+			log.Fatal(err)
+		}
+		writeData(f)
+	}
+	f, err := os.Open(pathname)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -113,12 +136,17 @@ func file() {
 }
 
 func gcs(bucket string) {
+	ctx := context.Background()
 	client, err := storage.NewClient(context.Background())
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer client.Close()
-	r, err := client.Bucket(bucket).Object(testFileName).NewReader(context.Background())
+	obj := client.Bucket(bucket).Object(testFileName)
+	if *initialize {
+		writeData(obj.NewWriter(ctx))
+	}
+	r, err := obj.NewReader(ctx)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -127,13 +155,13 @@ func gcs(bucket string) {
 	throughput("read GCS", size, dur)
 }
 
-func db(cfg *config.Config, kind string, init bool) {
+func db(cfg *config.Config, kind string) {
 	db, err := cfg.Connect(kind)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer db.Close()
-	if init {
+	if *initialize {
 		initializeDB(db)
 	}
 	var data []byte
