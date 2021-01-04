@@ -29,6 +29,11 @@ The benchmarks are:
 Each benchmark is run with a set of simulated throughputs, to mimic real-world
 situations like reading from a storage bucket or database.
 
+## Running the Benchmarks
+
+First, cd to the `data` directory and run `go generate`.
+
+Then, in this directory, run `go run. bm`.
 
 ## Ugorji Code Generation
 
