@@ -83,7 +83,7 @@ func TestGenerate(t *testing.T) {
 	testGenerate(t, "slice", [][]int(nil))
 	testGenerate(t, "islice", []interface{}(nil))
 	testGenerate(t, "map", map[string]bool(nil))
-	testGenerate(t, "struct", genStruct{})
+	testGenerate(t, "struct", genStruct{unexported: 0}) // suppress staticcheck warning
 	testGenerate(t, "binmarsh", time.Time{})
 	testGenerate(t, "textmarsh", net.IP{})
 	testGenerate(t, "defslice", definedSlice{})

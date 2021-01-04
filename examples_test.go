@@ -8,6 +8,7 @@ import (
 	"bytes"
 	"fmt"
 	"log"
+	"os"
 
 	"github.com/jba/codec"
 )
@@ -42,6 +43,7 @@ func ExampleGenerateFile() {
 		log.Fatal(err)
 	}
 	fmt.Println(err)
+	os.Remove("types.gen.go")
 
 	// Output:
 	// <nil>
