@@ -203,7 +203,7 @@ func TestSkipUnknownFields(t *testing.T) {
 	}
 }
 
-func TestFailOnUnknownField(t *testing.T) {
+func TestDisallowUnknownFields(t *testing.T) {
 	v := &Skip{U: 1}
 	var buf bytes.Buffer
 	e := NewEncoder(&buf, nil)
