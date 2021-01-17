@@ -97,7 +97,7 @@ type Decoder struct {
 }
 
 type DecodeOptions struct {
-	FailOnUnknownField bool
+	DisallowUnknownFields bool
 }
 
 func NewDecoder(r io.Reader, opts DecodeOptions) *Decoder {
@@ -521,7 +521,7 @@ func (d *Decoder) NextStructField() int {
 // UnknownField should be called by a struct decoder
 // when it sees a field number that it doesn't know.
 func (d *Decoder) UnknownField(typeName string, num int) {
-	if d.opts.FailOnUnknownField {
+	if d.opts.DisallowUnknownFields {
 		Failf("unknown field number %d for type %s", num, typeName)
 	} else {
 		d.skip()

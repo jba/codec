@@ -57,16 +57,16 @@ type Decoder struct {
 
 // DecodeOptions holds options for Decoding.
 type DecodeOptions struct {
-	// FailOnUnknownField configures whether unknown struct fields are skipped
+	// DisallowUnknownFields configures whether unknown struct fields are skipped
 	// (the default) or cause decoding to fail immediately.
-	FailOnUnknownField bool
+	DisallowUnknownFields bool
 }
 
 // NewDecoder creates a Decoder that reads from r.
 func NewDecoder(r io.Reader, opts *DecodeOptions) *Decoder {
 	aopts := api.DecodeOptions{}
 	if opts != nil {
-		aopts.FailOnUnknownField = opts.FailOnUnknownField
+		aopts.DisallowUnknownFields = opts.DisallowUnknownFields
 	}
 	return &Decoder{state: api.NewDecoder(r, aopts)}
 }

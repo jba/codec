@@ -210,7 +210,7 @@ func TestFailOnUnknownField(t *testing.T) {
 	if err := e.Encode(v); err != nil {
 		t.Fatal(err)
 	}
-	d := NewDecoder(bytes.NewReader(buf.Bytes()), &DecodeOptions{FailOnUnknownField: true})
+	d := NewDecoder(bytes.NewReader(buf.Bytes()), &DecodeOptions{DisallowUnknownFields: true})
 	_, err := d.Decode()
 	if err == nil {
 		t.Fatal("got nil, want error")
