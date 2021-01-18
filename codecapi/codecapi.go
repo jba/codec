@@ -9,6 +9,7 @@ package codecapi
 import (
 	"bytes"
 	"encoding/binary"
+	"errors"
 	"fmt"
 	"io"
 	"math"
@@ -104,22 +105,29 @@ func NewDecoder(r io.Reader, opts DecodeOptions) *Decoder {
 	return &Decoder{r: r, opts: opts}
 }
 
-// Decode decodes a value encoded with Encoder.Encode.
-// It returns (nil, io.EOF) if there are no more values.
-func (d *Decoder) Decode() (_ interface{}, err error) {
+// Decode decodes a value encoded with Encoder.Encode
+// and stores the result in the value pointed to by p.
+// The decoded value must be assignable to the pointee's
+// type; no conversions are performed.
+// Decode returns io.EOF if there are no more values.
+func (d *Decoder) Decode(p interface{}) (err error) {
+	rp := reflect.ValueOf(p)
+	if rp.Kind() != reflect.Ptr {
+		return errors.New("codec.Decode: argument is nil or non-pointer")
+	}
 	if d.buf == nil {
 		// First call to decode: read header.
 		var buf [4]byte
 		if _, err := io.ReadFull(d.r, buf[:]); err != nil {
-			return nil, err
+			return err
 		}
 		if !bytes.Equal(header, buf[:]) {
-			return nil, fmt.Errorf("bad header: got %q, want %q", buf[:], header)
+			return fmt.Errorf("bad header: got %q, want %q", buf[:], header)
 		}
 	}
 	var szbuf [uint64Size]byte
 	if _, err := io.ReadFull(d.r, szbuf[:]); err != nil {
-		return nil, err
+		return err
 	}
 	sz := binary.BigEndian.Uint64(szbuf[:])
 	// We can reuse d.buf because we didn't let slices from it escape previously.
@@ -130,12 +138,25 @@ func (d *Decoder) Decode() (_ interface{}, err error) {
 	}
 	d.i = 0
 	if _, err := io.ReadFull(d.r, d.buf); err != nil {
-		return nil, err
+		return err
 	}
 	defer handlePanic(&err)
 	d.decodeInitial()
 
-	return d.DecodeAny(), nil
+	v := d.DecodeAny()
+	rv := reflect.ValueOf(v)
+	if !rv.IsValid() {
+		// We can't use reflect.Value.Set to set a nil directly, so we
+		// do it in a roundabout way.
+		var z interface{}
+		rv = reflect.ValueOf(&z).Elem()
+	}
+	if !rv.Type().AssignableTo(rp.Elem().Type()) {
+		return fmt.Errorf("codec.Decode: decoded type %s is not assignable to argument type %s",
+			rv.Type(), rp.Elem().Type())
+	}
+	rp.Elem().Set(rv)
+	return nil
 }
 
 //////////////// Reading From and Writing To the Buffer

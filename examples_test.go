@@ -24,7 +24,8 @@ func Example() {
 
 	d := codec.NewDecoder(bytes.NewReader(buf.Bytes()), nil)
 	for i := 0; i < 3; i++ {
-		got, err := d.Decode()
+		var got interface{}
+		err := d.Decode(&got)
 		if err != nil {
 			log.Fatal(err)
 		}

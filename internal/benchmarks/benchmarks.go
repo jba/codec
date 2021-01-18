@@ -26,7 +26,6 @@ import (
 	"io"
 	"log"
 	"os"
-	"reflect"
 	"runtime"
 	"runtime/pprof"
 	"testing"
@@ -110,13 +109,7 @@ func newJbaCodec(suffix string, opts codecapi.EncodeOptions) Codec {
 }
 
 func jbaCodecDecode(r io.Reader, ptr interface{}) error {
-	d := codecapi.NewDecoder(r, codecapi.DecodeOptions{})
-	x, err := d.Decode()
-	if err != nil {
-		return err
-	}
-	reflect.ValueOf(ptr).Elem().Set(reflect.ValueOf(x))
-	return nil
+	return codecapi.NewDecoder(r, codecapi.DecodeOptions{}).Decode(ptr)
 }
 
 var datas = []data.BenchmarkData{

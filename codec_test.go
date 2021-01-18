@@ -117,8 +117,8 @@ func testEncodeDecode(t *testing.T, opts EncodeOptions) {
 	r := bytes.NewReader(buf.Bytes())
 	d := NewDecoder(r, nil)
 	for _, w := range want {
-		g, err := d.Decode()
-		if err != nil {
+		var g interface{}
+		if err := d.Decode(&g); err != nil {
 			t.Fatalf("%#v: %v", w, err)
 		}
 		if !cmp.Equal(g, w, cmpopts.EquateNaNs(), cmp.AllowUnexported(structType{})) {
@@ -137,15 +137,13 @@ func TestSharing(t *testing.T) {
 		t.Fatal(err)
 	}
 	d := NewDecoder(bytes.NewReader(buf.Bytes()), nil)
-	g, err := d.Decode()
-	if err != nil {
+	var g *node
+	if err := d.Decode(&g); err != nil {
 		t.Fatal(err)
 	}
-	_ = g
-	// got := g.(*node)
-	// if !cmp.Equal(got, n) {
-	// 	t.Error("did not preserve cycle")
-	// }
+	if !cmp.Equal(g, n) {
+		t.Error("did not preserve cycle")
+	}
 }
 
 func TestEncodeErrors(t *testing.T) {
@@ -193,7 +191,8 @@ func TestSkipUnknownFields(t *testing.T) {
 
 	d := NewDecoder(bytes.NewReader(buf.Bytes()), nil)
 
-	got, err := d.Decode()
+	var got Skip
+	err := d.Decode(&got)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -211,8 +210,8 @@ func TestDisallowUnknownFields(t *testing.T) {
 		t.Fatal(err)
 	}
 	d := NewDecoder(bytes.NewReader(buf.Bytes()), &DecodeOptions{DisallowUnknownFields: true})
-	_, err := d.Decode()
-	if err == nil {
+	var g interface{}
+	if err := d.Decode(&g); err == nil {
 		t.Fatal("got nil, want error")
 	}
 }

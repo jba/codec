@@ -71,8 +71,11 @@ func NewDecoder(r io.Reader, opts *DecodeOptions) *Decoder {
 	return &Decoder{state: api.NewDecoder(r, aopts)}
 }
 
-// Decode decodes a value encoded with Encoder.Encode.
-// It returns (nil, io.EOF) if there are no more values.
-func (d *Decoder) Decode() (_ interface{}, err error) {
-	return d.state.Decode()
+// Decode decodes a value encoded with Encoder.Encode
+// and stores the result in the value pointed to by p.
+// The decoded value must be assignable to the pointee's
+// type; no conversions are performed.
+// Decode returns io.EOF if there are no more values.
+func (d *Decoder) Decode(p interface{}) error {
+	return d.state.Decode(p)
 }

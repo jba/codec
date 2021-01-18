@@ -40,8 +40,8 @@ func TestEncodeDecode(t *testing.T) {
 	}
 	d := NewDecoder(bytes.NewReader(buf.Bytes()), DecodeOptions{})
 	for _, w := range want {
-		g, err := d.Decode()
-		if err != nil {
+		var g interface{}
+		if err := d.Decode(&g); err != nil {
 			t.Fatalf("%#v: %v", w, err)
 		}
 		if !cmp.Equal(g, w, cmpopts.EquateNaNs()) {
@@ -52,11 +52,12 @@ func TestEncodeDecode(t *testing.T) {
 
 func TestDecodeEOF(t *testing.T) {
 	var dopts DecodeOptions
-	got, err := NewDecoder(bytes.NewReader(nil), dopts).Decode()
+	var got interface{}
+	err := NewDecoder(bytes.NewReader(nil), dopts).Decode(&got)
 	if got != nil || err != io.EOF {
 		t.Errorf("got (%v, %v), want (nil, io.EOF)", got, err)
 	}
-	got, err = NewDecoder(bytes.NewReader(header), dopts).Decode()
+	err = NewDecoder(bytes.NewReader(header), dopts).Decode(&got)
 	if got != nil || err != io.EOF {
 		t.Errorf("got (%v, %v), want (nil, io.EOF)", got, err)
 	}
@@ -68,18 +69,20 @@ func TestDecodeEOF(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
+	var igot int
 	d := NewDecoder(bytes.NewReader(buf.Bytes()), DecodeOptions{})
 	for i := 0; i < 3; i++ {
-		got, err := d.Decode()
+		err := d.Decode(&igot)
 		if err != nil {
 			t.Fatal(err)
 		}
-		if got != i {
-			t.Fatalf("got %d, want %d", got, i)
+		if igot != i {
+			t.Fatalf("got %d, want %d", igot, i)
 		}
 	}
-	got, err = d.Decode()
-	if got != nil || err != io.EOF {
-		t.Errorf("got (%v, %v), want (nil, io.EOF)", got, err)
+	igot = -1
+	err = d.Decode(&igot)
+	if igot != -1 || err != io.EOF {
+		t.Errorf("got (%v, %v), want (-1, io.EOF)", igot, err)
 	}
 }
