@@ -69,7 +69,8 @@ To decode, pass an io.Reader to NewDecoder, and call Decode:
    f, err := os.Open(filename)
    ...
    d := codec.NewDecoder(f, nil)
-   value, err := d.Decode()
+   var value interface{}
+   err := d.Decode(&value)
    ...
 
 
