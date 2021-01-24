@@ -7,6 +7,7 @@ package codecapi
 import (
 	"fmt"
 	"reflect"
+	"strings"
 )
 
 // A typeCodec handles encoding and decoding of a particular type.
@@ -20,12 +21,42 @@ var (
 	typeCodecsByType = map[reflect.Type]typeCodec{}
 )
 
-// typeName returns the full, qualified name for a type.
+// typeName does its best to construct a unique name for a reflect.Type.
+// We can't do anything about types defined inside functions,
+// but we can make sure that types with the same name and package name
+// are distinguished.
 func typeName(t reflect.Type) string {
-	if t.PkgPath() == "" {
+	if n := t.Name(); n != "" {
+		pp := t.PkgPath()
+		if pp == "" {
+			return n
+		}
+		return pp + "." + n
+	}
+	switch t.Kind() {
+	case reflect.Slice:
+		return "[]" + typeName(t.Elem())
+	case reflect.Array:
+		return fmt.Sprintf("[%d]%s", t.Len(), typeName(t.Elem()))
+	case reflect.Map:
+		return fmt.Sprintf("map[%s]%s", typeName(t.Key()), typeName(t.Elem()))
+	case reflect.Ptr:
+		return "*" + typeName(t.Elem())
+	case reflect.Struct:
+		fields := make([]string, t.NumField())
+		for i := 0; i < len(fields); i++ {
+			f := t.Field(i)
+			tn := typeName(f.Type)
+			if f.Anonymous {
+				fields[i] = tn
+			} else {
+				fields[i] = f.Name + " " + tn
+			}
+		}
+		return fmt.Sprintf("struct { %s }", strings.Join(fields, "; "))
+	default:
 		return t.String()
 	}
-	return t.PkgPath() + "." + t.Name()
 }
 
 // Register records the type of x for use by Encoders and Decoders.
