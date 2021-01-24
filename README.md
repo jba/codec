@@ -102,12 +102,12 @@ field is encoded as its number followed by its value.
 
 If a struct's fields are changed, the numbers can change. To avoid this, the
 generator reads the previously assigned numbers from the generated file and
-maintains them in the new file. The advantage of this scheme is that the struct
-decoder can contain a switch with hard-coded cases, resulting in an efficient
-jump table. The disadvantage is that the existing generated files must be kept
-around to preserve the numbering. This isn't typically a problem, because the
-generated files will be checked in to the source code control repository with
-the rest of the code and travel with the repository.
+maintains them in the new file. The advantage of this scheme is that it results
+in a simpler encoder and decoder. The disadvantage is that the existing
+generated files must be kept around to preserve the numbering. This isn't
+typically a problem, because the generated files will be checked in to the
+source code control repository with the rest of the code and travel with the
+repository.
 
 Interface values are encoded as a pair of a type number and the value. The
 type numbers are assigned during encoding and stored at the beginning of the
