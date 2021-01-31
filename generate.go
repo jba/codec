@@ -27,10 +27,15 @@ type GenerateOptions struct {
 	FieldTag string
 }
 
-// GenerateFile writes encoders and decoders to filename.
-// It generates code for the type of each given value, as well
-// as any types they depend on.
+// GenerateFile writes encoders and decoders to filename. It generates code for
+// the type of each given value, as well as any types they depend on.
 // packagePath is the output package path.
+//
+// The encoding assigns numbers to struct fields for efficient decoding.
+// GenerateFile reads filename if it exists to discover the field numbers that
+// have already been assigned, so it can preserve them. So it is important that
+// the existing output file remains available to the generator, or changes to
+// your structs may result in existing encoded data being decoded incorrectly.
 func GenerateFile(filename, packagePath string, opts *GenerateOptions, values ...interface{}) error {
 	if !strings.HasSuffix(filename, ".go") {
 		filename += ".go"
