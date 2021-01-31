@@ -8,12 +8,10 @@ import (
 	"bytes"
 	"io"
 	"math"
-	"reflect"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
-	othercmp "github.com/jba/codec/internal/cmp"
 )
 
 func TestEncodeDecode(t *testing.T) {
@@ -86,29 +84,6 @@ func TestDecodeEOF(t *testing.T) {
 	err = d.Decode(&igot)
 	if igot != -1 || err != io.EOF {
 		t.Errorf("got (%v, %v), want (-1, io.EOF)", igot, err)
-	}
-}
-
-func TestTypeName(t *testing.T) {
-	for _, test := range []struct {
-		value interface{}
-		want  string
-	}{
-		{int(0), "int"},
-		{[]int{}, "[]int"},
-		{new(int), "*int"},
-		{map[string]bool{}, "map[string]bool"},
-		{Decoder{}, "github.com/jba/codec/codecapi.Decoder"},
-		{[]cmp.Option{}, "[]github.com/google/go-cmp/cmp.Option"},
-		{map[cmp.Option]othercmp.Option{}, "map[github.com/google/go-cmp/cmp.Option]github.com/jba/codec/internal/cmp.Option"},
-		{new(cmp.Option), "*github.com/google/go-cmp/cmp.Option"},
-		{new([2]cmp.Option), "*[2]github.com/google/go-cmp/cmp.Option"},
-		{struct{ X cmp.Option }{}, "struct { X github.com/google/go-cmp/cmp.Option }"},
-	} {
-		got := typeName(reflect.TypeOf(test.value))
-		if got != test.want {
-			t.Errorf("%#v:\ngot %q, want %q", test.value, got, test.want)
-		}
 	}
 }
 

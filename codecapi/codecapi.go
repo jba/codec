@@ -656,7 +656,7 @@ func (e *Encoder) encodeInitial() {
 	// assigned numbers to them.
 	names := make([]string, len(e.typeNums))
 	for t, num := range e.typeNums {
-		names[num] = typeName(t)
+		names[num] = TypeString(t, nil)
 	}
 	e.encodeStringSlice(names)
 	// // Encode the field names of each struct we saw, in order of their assigned

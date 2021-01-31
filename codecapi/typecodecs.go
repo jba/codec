@@ -26,32 +26,52 @@ var (
 	nameToType = map[string]reflect.Type{}
 )
 
-// typeName does its best to construct a unique name for a reflect.Type.
-// We can't do anything about types defined inside functions,
-// but we can make sure that types with the same name and package name
-// are distinguished.
-func typeName(t reflect.Type) string {
+// TypeString constructs a string from a reflect.Type.
+//
+// If pkgPaths is nil, then the returned string uses fully qualified package
+// paths, and the result is unique to the the type provided that the type is not
+// defined inside a function. (reflect.Type provides no way to distinguish such
+// a type from another, identically named type at top level.)
+//
+// Otherwise, pkgPaths is used to determine what to emit for a fully-qualified
+// package path. If the path is not found in the map, then its last component is
+// used. In this mode, TypeString generates valid Go type expressions, provided
+// the path mapping corresponds to the context of the generated code: that is,
+// the current package's path is mapped to the empty string, and other packages
+// are mapped to their import identifiers in the file.
+func TypeString(t reflect.Type, pkgPaths map[string]string) string {
 	if n := t.Name(); n != "" {
-		pp := t.PkgPath()
-		if pp == "" {
+		prefix := t.PkgPath()
+		if pkgPaths != nil {
+			if p, ok := pkgPaths[prefix]; ok {
+				prefix = p
+			} else {
+				// TODO: use the code below once the generator constructs the right path map.
+				return t.String()
+			}
+			// } else if i := strings.LastIndexByte(prefix, '/'); i >= 0 {
+			// 	prefix = prefix[i+1:]
+			// }
+		}
+		if prefix == "" {
 			return n
 		}
-		return pp + "." + n
+		return prefix + "." + n
 	}
 	switch t.Kind() {
 	case reflect.Slice:
-		return "[]" + typeName(t.Elem())
+		return "[]" + TypeString(t.Elem(), pkgPaths)
 	case reflect.Array:
-		return fmt.Sprintf("[%d]%s", t.Len(), typeName(t.Elem()))
+		return fmt.Sprintf("[%d]%s", t.Len(), TypeString(t.Elem(), pkgPaths))
 	case reflect.Map:
-		return fmt.Sprintf("map[%s]%s", typeName(t.Key()), typeName(t.Elem()))
+		return fmt.Sprintf("map[%s]%s", TypeString(t.Key(), pkgPaths), TypeString(t.Elem(), pkgPaths))
 	case reflect.Ptr:
-		return "*" + typeName(t.Elem())
+		return "*" + TypeString(t.Elem(), pkgPaths)
 	case reflect.Struct:
 		fields := make([]string, t.NumField())
 		for i := 0; i < len(fields); i++ {
 			f := t.Field(i)
-			tn := typeName(f.Type)
+			tn := TypeString(f.Type, pkgPaths)
 			if f.Anonymous {
 				fields[i] = tn
 			} else {
@@ -59,8 +79,15 @@ func typeName(t reflect.Type) string {
 			}
 		}
 		return fmt.Sprintf("struct { %s }", strings.Join(fields, "; "))
+	case reflect.Interface:
+		// We only support the empty interface.
+		if t.NumMethod() == 0 {
+			return "interface{}"
+		} else {
+			panic(fmt.Sprintf("bad unnamed interface type (only the empty interface is valid): %s", t))
+		}
 	default:
-		return t.String()
+		panic(fmt.Sprintf("bad type: %s", t))
 	}
 }
 
@@ -69,9 +96,9 @@ func typeName(t reflect.Type) string {
 // builtin types.
 func Register(x interface{}, tcb func() TypeCodec) {
 	t := reflect.TypeOf(x)
-	tn := typeName(t)
+	tn := TypeString(t, nil) // create a unique name
 	if _, ok := typeCodecBuildersByName[tn]; ok {
-		panic(fmt.Sprintf("codec.Register: duplicate type %s (typeName=%q)", t, tn))
+		panic(fmt.Sprintf("codec.Register: duplicate type %s (TypeString=%q)", t, tn))
 	}
 	typeCodecBuildersByName[tn] = tcb
 	typeCodecBuildersByType[t] = tcb

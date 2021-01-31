@@ -95,20 +95,21 @@ func TestGenerate(t *testing.T) {
 }
 
 func testGenerate(t *testing.T, name string, x interface{}) {
-	t.Helper()
-	var buf bytes.Buffer
-	if err := generate(&buf, "github.com/jba/codec", nil, "test", x); err != nil {
-		t.Fatal(err)
-	}
-	got := buf.String()
-	if *update {
-		writeGolden(t, name, got)
-	} else {
-		want := readGolden(t, name)
-		if diff := cmp.Diff(want, got); diff != "" {
-			t.Errorf("%s: mismatch (-want, +got):\n%s", name, diff)
+	t.Run(name, func(t *testing.T) {
+		var buf bytes.Buffer
+		if err := generate(&buf, "github.com/jba/codec", nil, "test", x); err != nil {
+			t.Fatal(err)
 		}
-	}
+		got := buf.String()
+		if *update {
+			writeGolden(t, name, got)
+		} else {
+			want := readGolden(t, name)
+			if diff := cmp.Diff(want, got); diff != "" {
+				t.Errorf("%s: mismatch (-want, +got):\n%s", name, diff)
+			}
+		}
+	})
 }
 
 func writeGolden(t *testing.T, name string, data string) {

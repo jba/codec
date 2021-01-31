@@ -573,33 +573,7 @@ func builtinName(t reflect.Type) (suffix string, native reflect.Type) {
 // goName returns the name of t as it should appear in a Go program.
 // E.g. "go/ast.File" => ast.File
 func (g *generator) goName(t reflect.Type) string {
-	if t.Name() != "" {
-		// For a package whose name does not equal the last component of its path,
-		// t.String() will use the name and t.PkgPath() will be the full path.
-		if t.PkgPath() == g.pkgPath {
-			return t.Name()
-		}
-		return t.String()
-	}
-	switch t.Kind() {
-	case reflect.Slice:
-		return fmt.Sprintf("[]%s", g.goName(t.Elem()))
-	case reflect.Array:
-		return fmt.Sprintf("[%d]%s", t.Len(), g.goName(t.Elem()))
-	case reflect.Map:
-		return fmt.Sprintf("map[%s]%s", g.goName(t.Key()), g.goName(t.Elem()))
-	case reflect.Ptr:
-		return fmt.Sprintf("*%s", g.goName(t.Elem()))
-	case reflect.Interface:
-		// We only support the empty interface.
-		if t.NumMethod() == 0 {
-			return "interface{}"
-		} else {
-			panic(fmt.Sprintf("bad interface type (only unnamed empty interface is valid): %s", t))
-		}
-	default:
-		panic(fmt.Sprintf("bad type: %s", t))
-	}
+	return codecapi.TypeString(t, map[string]string{g.pkgPath: ""})
 }
 
 var typeIdentifierReplacer = strings.NewReplacer(
