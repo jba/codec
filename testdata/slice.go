@@ -4,50 +4,67 @@ package codec
 
 import (
 	"github.com/jba/codec/codecapi"
+	"reflect"
 )
 
-type slice_slice_int_codec struct{}
+type slice_slice_int_codec struct {
+	slice_int_codec *slice_int_codec
+}
 
-func (c slice_slice_int_codec) Encode(e *codecapi.Encoder, x interface{}) { c.encode(e, x.([][]int)) }
+func (c *slice_slice_int_codec) Init(tcs map[reflect.Type]codecapi.TypeCodec) {
+	c.slice_int_codec = tcs[reflect.TypeOf((*[]int)(nil)).Elem()].(*slice_int_codec)
 
-func (c slice_slice_int_codec) encode(e *codecapi.Encoder, s [][]int) {
+}
+
+func (c *slice_slice_int_codec) Fields() []string { return nil }
+
+func (c *slice_slice_int_codec) Encode(e *codecapi.Encoder, x interface{}) { c.encode(e, x.([][]int)) }
+
+func (c *slice_slice_int_codec) encode(e *codecapi.Encoder, s [][]int) {
 	if s == nil {
 		e.EncodeNil()
 		return
 	}
 	e.StartList(len(s))
 	for _, x := range s {
-		(slice_int_codec{}).encode(e, x)
+		(&slice_int_codec{}).encode(e, x)
 	}
 }
 
-func (c slice_slice_int_codec) Decode(d *codecapi.Decoder) interface{} {
+func (c *slice_slice_int_codec) Decode(d *codecapi.Decoder) interface{} {
 	var x [][]int
 	c.decode(d, &x)
 	return x
 }
 
-func (c slice_slice_int_codec) decode(d *codecapi.Decoder, p *[][]int) {
+func (c *slice_slice_int_codec) decode(d *codecapi.Decoder, p *[][]int) {
 	n := d.StartList()
 	if n < 0 {
 		return
 	}
 	s := make([][]int, n)
 	for i := 0; i < n; i++ {
-		(slice_int_codec{}).decode(d, &s[i])
+		c.slice_int_codec.decode(d, &s[i])
 	}
 	*p = s
 }
 
 func init() {
-	codecapi.Register([][]int(nil), slice_slice_int_codec{})
+	codecapi.Register([][]int(nil), func() codecapi.TypeCodec { return &slice_slice_int_codec{} })
 }
 
-type slice_int_codec struct{}
+type slice_int_codec struct {
+}
 
-func (c slice_int_codec) Encode(e *codecapi.Encoder, x interface{}) { c.encode(e, x.([]int)) }
+func (c *slice_int_codec) Init(tcs map[reflect.Type]codecapi.TypeCodec) {
 
-func (c slice_int_codec) encode(e *codecapi.Encoder, s []int) {
+}
+
+func (c *slice_int_codec) Fields() []string { return nil }
+
+func (c *slice_int_codec) Encode(e *codecapi.Encoder, x interface{}) { c.encode(e, x.([]int)) }
+
+func (c *slice_int_codec) encode(e *codecapi.Encoder, s []int) {
 	if s == nil {
 		e.EncodeNil()
 		return
@@ -58,13 +75,13 @@ func (c slice_int_codec) encode(e *codecapi.Encoder, s []int) {
 	}
 }
 
-func (c slice_int_codec) Decode(d *codecapi.Decoder) interface{} {
+func (c *slice_int_codec) Decode(d *codecapi.Decoder) interface{} {
 	var x []int
 	c.decode(d, &x)
 	return x
 }
 
-func (c slice_int_codec) decode(d *codecapi.Decoder, p *[]int) {
+func (c *slice_int_codec) decode(d *codecapi.Decoder, p *[]int) {
 	n := d.StartList()
 	if n < 0 {
 		return
@@ -77,5 +94,5 @@ func (c slice_int_codec) decode(d *codecapi.Decoder, p *[]int) {
 }
 
 func init() {
-	codecapi.Register([]int(nil), slice_int_codec{})
+	codecapi.Register([]int(nil), func() codecapi.TypeCodec { return &slice_int_codec{} })
 }

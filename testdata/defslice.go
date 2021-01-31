@@ -4,13 +4,23 @@ package codec
 
 import (
 	"github.com/jba/codec/codecapi"
+	"reflect"
 )
 
-type definedSlice_codec struct{}
+type definedSlice_codec struct {
+}
 
-func (c definedSlice_codec) Encode(e *codecapi.Encoder, x interface{}) { c.encode(e, x.(definedSlice)) }
+func (c *definedSlice_codec) Init(tcs map[reflect.Type]codecapi.TypeCodec) {
 
-func (c definedSlice_codec) encode(e *codecapi.Encoder, s definedSlice) {
+}
+
+func (c *definedSlice_codec) Fields() []string { return nil }
+
+func (c *definedSlice_codec) Encode(e *codecapi.Encoder, x interface{}) {
+	c.encode(e, x.(definedSlice))
+}
+
+func (c *definedSlice_codec) encode(e *codecapi.Encoder, s definedSlice) {
 	if s == nil {
 		e.EncodeNil()
 		return
@@ -21,13 +31,13 @@ func (c definedSlice_codec) encode(e *codecapi.Encoder, s definedSlice) {
 	}
 }
 
-func (c definedSlice_codec) Decode(d *codecapi.Decoder) interface{} {
+func (c *definedSlice_codec) Decode(d *codecapi.Decoder) interface{} {
 	var x definedSlice
 	c.decode(d, &x)
 	return x
 }
 
-func (c definedSlice_codec) decode(d *codecapi.Decoder, p *definedSlice) {
+func (c *definedSlice_codec) decode(d *codecapi.Decoder, p *definedSlice) {
 	n := d.StartList()
 	if n < 0 {
 		return
@@ -40,5 +50,5 @@ func (c definedSlice_codec) decode(d *codecapi.Decoder, p *definedSlice) {
 }
 
 func init() {
-	codecapi.Register(definedSlice(nil), definedSlice_codec{})
+	codecapi.Register(definedSlice(nil), func() codecapi.TypeCodec { return &definedSlice_codec{} })
 }

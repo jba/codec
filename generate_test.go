@@ -74,6 +74,7 @@ type genStruct struct {
 	C64  complex64
 	C128 complex128
 
+	BS         []byte
 	T          foo.T
 	unexported int
 	Omit       int `test:"-"`
@@ -86,6 +87,8 @@ func TestGenerate(t *testing.T) {
 	testGenerate(t, "struct", genStruct{unexported: 0}) // suppress staticcheck warning
 	testGenerate(t, "binmarsh", time.Time{})
 	testGenerate(t, "textmarsh", net.IP{})
+	testGenerate(t, "structslice", []structType(nil))
+	testGenerate(t, "structmap", map[[1]int]structType{})
 	testGenerate(t, "defslice", definedSlice{})
 	testGenerate(t, "defarray", definedArray{})
 	testGenerate(t, "defmap", definedMap{})

@@ -5,11 +5,20 @@ package codec
 import (
 	"github.com/jba/codec/codecapi"
 	"github.com/jba/codec/internal/testpkg"
+	"reflect"
 )
 
-// Fields of genStruct: S B I I8 I16 I32 I64 F32 F64 U8 U16 U32 U64 C64 C128 T unexported
+// Fields of genStruct: S B I I8 I16 I32 I64 F32 F64 U8 U16 U32 U64 C64 C128 BS T unexported
 
-type ptr_genStruct_codec struct{}
+type ptr_genStruct_codec struct {
+	genStruct_codec *genStruct_codec
+}
+
+func (c *ptr_genStruct_codec) Init(tcs map[reflect.Type]codecapi.TypeCodec) {
+	c.genStruct_codec = tcs[reflect.TypeOf((*genStruct)(nil)).Elem()].(*genStruct_codec)
+}
+
+func (c ptr_genStruct_codec) Fields() []string { return nil }
 
 func (c ptr_genStruct_codec) Encode(e *codecapi.Encoder, x interface{}) { c.encode(e, x.(*genStruct)) }
 
@@ -17,7 +26,7 @@ func (c ptr_genStruct_codec) encode(e *codecapi.Encoder, x *genStruct) {
 	if !e.StartPtr(x == nil, x) {
 		return
 	}
-	(genStruct_codec{}).encode(e, x)
+	(&genStruct_codec{}).encode(e, x)
 }
 
 func (c ptr_genStruct_codec) Decode(d *codecapi.Decoder) interface{} {
@@ -37,18 +46,28 @@ func (c ptr_genStruct_codec) decode(d *codecapi.Decoder, p **genStruct) {
 	}
 	var x genStruct
 	d.StoreRef(&x)
-	(genStruct_codec{}).decode(d, &x)
+	c.genStruct_codec.decode(d, &x)
 	*p = &x
 }
 
-type genStruct_codec struct{}
+type genStruct_codec struct {
+	foo_T_codec *foo_T_codec
+}
 
-func (c genStruct_codec) Encode(e *codecapi.Encoder, x interface{}) {
+func (c *genStruct_codec) Init(tcs map[reflect.Type]codecapi.TypeCodec) {
+	c.foo_T_codec = tcs[reflect.TypeOf((*foo.T)(nil)).Elem()].(*foo_T_codec)
+}
+
+func (c *genStruct_codec) Fields() []string {
+	return []string{"S", "B", "I", "I8", "I16", "I32", "I64", "F32", "F64", "U8", "U16", "U32", "U64", "C64", "C128", "BS", "T", "unexported"}
+}
+
+func (c *genStruct_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	s := x.(genStruct)
 	c.encode(e, &s)
 }
 
-func (c genStruct_codec) encode(e *codecapi.Encoder, x *genStruct) {
+func (c *genStruct_codec) encode(e *codecapi.Encoder, x *genStruct) {
 	e.StartStruct()
 	if x.S != "" {
 		e.EncodeUint(0)
@@ -110,24 +129,28 @@ func (c genStruct_codec) encode(e *codecapi.Encoder, x *genStruct) {
 		e.EncodeUint(14)
 		e.EncodeComplex(x.C128)
 	}
-	if x.T != nil {
+	if x.BS != nil {
 		e.EncodeUint(15)
-		(foo_T_codec{}).encode(e, foo.T(x.T))
+		e.EncodeBytes(x.BS)
+	}
+	if x.T != nil {
+		e.EncodeUint(16)
+		(&foo_T_codec{}).encode(e, foo.T(x.T))
 	}
 	if x.unexported != 0 {
-		e.EncodeUint(16)
+		e.EncodeUint(17)
 		e.EncodeInt(int64(x.unexported))
 	}
 	e.EndStruct()
 }
 
-func (c genStruct_codec) Decode(d *codecapi.Decoder) interface{} {
+func (c *genStruct_codec) Decode(d *codecapi.Decoder) interface{} {
 	var x genStruct
 	c.decode(d, &x)
 	return x
 }
 
-func (c genStruct_codec) decode(d *codecapi.Decoder, x *genStruct) {
+func (c *genStruct_codec) decode(d *codecapi.Decoder, x *genStruct) {
 	d.StartStruct()
 	for {
 		n := d.NextStructField()
@@ -166,8 +189,10 @@ func (c genStruct_codec) decode(d *codecapi.Decoder, x *genStruct) {
 		case 14:
 			x.C128 = d.DecodeComplex()
 		case 15:
-			(foo_T_codec{}).decode(d, &x.T)
+			x.BS = d.DecodeBytes()
 		case 16:
+			c.foo_T_codec.decode(d, &x.T)
+		case 17:
 			x.unexported = int(d.DecodeInt())
 		default:
 			d.UnknownField("genStruct", n)
@@ -176,15 +201,22 @@ func (c genStruct_codec) decode(d *codecapi.Decoder, x *genStruct) {
 }
 
 func init() {
-	codecapi.Register(genStruct{}, genStruct_codec{})
-	codecapi.Register(&genStruct{}, ptr_genStruct_codec{})
+	codecapi.Register(genStruct{}, func() codecapi.TypeCodec { return &genStruct_codec{} })
+	codecapi.Register(&genStruct{}, func() codecapi.TypeCodec { return &ptr_genStruct_codec{} })
 }
 
-type foo_T_codec struct{}
+type foo_T_codec struct {
+}
 
-func (c foo_T_codec) Encode(e *codecapi.Encoder, x interface{}) { c.encode(e, x.(foo.T)) }
+func (c *foo_T_codec) Init(tcs map[reflect.Type]codecapi.TypeCodec) {
 
-func (c foo_T_codec) encode(e *codecapi.Encoder, s foo.T) {
+}
+
+func (c *foo_T_codec) Fields() []string { return nil }
+
+func (c *foo_T_codec) Encode(e *codecapi.Encoder, x interface{}) { c.encode(e, x.(foo.T)) }
+
+func (c *foo_T_codec) encode(e *codecapi.Encoder, s foo.T) {
 	if s == nil {
 		e.EncodeNil()
 		return
@@ -195,13 +227,13 @@ func (c foo_T_codec) encode(e *codecapi.Encoder, s foo.T) {
 	}
 }
 
-func (c foo_T_codec) Decode(d *codecapi.Decoder) interface{} {
+func (c *foo_T_codec) Decode(d *codecapi.Decoder) interface{} {
 	var x foo.T
 	c.decode(d, &x)
 	return x
 }
 
-func (c foo_T_codec) decode(d *codecapi.Decoder, p *foo.T) {
+func (c *foo_T_codec) decode(d *codecapi.Decoder, p *foo.T) {
 	n := d.StartList()
 	if n < 0 {
 		return
@@ -214,5 +246,5 @@ func (c foo_T_codec) decode(d *codecapi.Decoder, p *foo.T) {
 }
 
 func init() {
-	codecapi.Register(foo.T(nil), foo_T_codec{})
+	codecapi.Register(foo.T(nil), func() codecapi.TypeCodec { return &foo_T_codec{} })
 }

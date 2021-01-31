@@ -33,18 +33,21 @@ var generateTestCodeFilename = flag.String("generate", "", "generate code for te
 // This struct exists just so we can pass it to GenerateFile and get all the
 // types we need for these tests.
 type generatedTestTypes struct {
-	Node     *node
-	Slice    []int
-	Array    [1]int
-	Map      map[string]bool
-	Struct   structType
-	Time     time.Time
-	IP       net.IP
-	DefSlice definedSlice
-	DefArray definedArray
-	DefMap   definedMap
-	Pos      token.Pos
-	T        foo.T
+	Node        *node
+	Slice       []int
+	Array       [1]int
+	Map         map[string]bool
+	Struct      structType
+	Time        time.Time
+	IP          net.IP
+	StructSlice []structType
+	StructArray [1]structType
+	StructMap   map[[1]int]structType
+	DefSlice    definedSlice
+	DefArray    definedArray
+	DefMap      definedMap
+	Pos         token.Pos
+	T           foo.T
 	//Skip     Skip // add this to re-generate code for TestSkip; see skip_code_test.go
 }
 
@@ -100,8 +103,13 @@ func testEncodeDecode(t *testing.T, opts EncodeOptions) {
 		[]int{1, 2, -3, -4},
 		[]int{1, 2, -3, -4, 5, 6},
 		[]int(nil),
+		[]structType{{B: 3}},
+		[1]structType{{B: 4}},
 		map[string]bool{"a": true, "b": false},
 		map[string]bool(nil),
+		map[[1]int]structType{
+			[1]int{7}: structType{B: 99, unexported: 8},
+		},
 		structType{B: 129, N: node{1, nil}, unexported: 23},
 		definedSlice{1, 2, 3},
 		definedArray{-7},

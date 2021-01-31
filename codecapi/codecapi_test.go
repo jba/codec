@@ -111,3 +111,22 @@ func TestTypeName(t *testing.T) {
 		}
 	}
 }
+
+func TestBuildFieldMap(t *testing.T) {
+	generatedFields := []string{"A", "B", "C"}
+	for _, test := range []struct {
+		encodedFields []string
+		want          []int
+	}{
+		{nil, nil},
+		{[]string{}, []int{}},
+		{[]string{"A", "B", "C"}, []int{0, 1, 2}},
+		{[]string{"B", "A", "C"}, []int{1, 0, 2}},
+		{[]string{"C", "D"}, []int{2, -1}},
+	} {
+		got := buildFieldMap(generatedFields, test.encodedFields)
+		if !cmp.Equal(got, test.want) {
+			t.Errorf("%v: got %v, want %v", test.encodedFields, got, test.want)
+		}
+	}
+}

@@ -9,13 +9,19 @@
 
 package codec
 
-import "github.com/jba/codec/codecapi"
+import (
+	"reflect"
+
+	"github.com/jba/codec/codecapi"
+)
 
 // Fields of Skip: U S1 S2 L
 
 type ptr_Skip_codec struct{}
 
-func (ptr_Skip_codec) Init() {}
+func (ptr_Skip_codec) Init(map[reflect.Type]codecapi.TypeCodec) {}
+
+func (c ptr_Skip_codec) Fields() []string { return nil }
 
 func (c ptr_Skip_codec) Encode(e *codecapi.Encoder, x interface{}) { c.encode(e, x.(*Skip)) }
 
@@ -49,7 +55,9 @@ func (c ptr_Skip_codec) decode(d *codecapi.Decoder, p **Skip) {
 
 type Skip_codec struct{}
 
-func (Skip_codec) Init() {}
+func (Skip_codec) Init(map[reflect.Type]codecapi.TypeCodec) {}
+
+func (Skip_codec) Fields() []string { return []string{"U", "S1", "S2", "L"} }
 
 func (c Skip_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	s := x.(Skip)
@@ -98,13 +106,19 @@ func (c Skip_codec) decode(d *codecapi.Decoder, x *Skip) {
 }
 
 func init() {
-	codecapi.Register(Skip{}, Skip_codec{})
-	codecapi.Register(&Skip{}, ptr_Skip_codec{})
+	codecapi.Register(Skip{}, func() codecapi.TypeCodec {
+		return Skip_codec{}
+	})
+	codecapi.Register(&Skip{}, func() codecapi.TypeCodec {
+		return ptr_Skip_codec{}
+	})
 }
 
 type slice_ptr_Skip_codec struct{}
 
-func (slice_ptr_Skip_codec) Init() {}
+func (slice_ptr_Skip_codec) Fields() []string { return nil }
+
+func (slice_ptr_Skip_codec) Init(map[reflect.Type]codecapi.TypeCodec) {}
 
 func (c slice_ptr_Skip_codec) Encode(e *codecapi.Encoder, x interface{}) { c.encode(e, x.([]*Skip)) }
 
@@ -138,5 +152,7 @@ func (c slice_ptr_Skip_codec) decode(d *codecapi.Decoder, p *[]*Skip) {
 }
 
 func init() {
-	codecapi.Register([]*Skip(nil), slice_ptr_Skip_codec{})
+	codecapi.Register([]*Skip(nil), func() codecapi.TypeCodec {
+		return slice_ptr_Skip_codec{}
+	})
 }

@@ -4,26 +4,34 @@ package codec
 
 import (
 	"github.com/jba/codec/codecapi"
+	"reflect"
 )
 
-type definedArray_codec struct{}
+type definedArray_codec struct {
+}
 
-func (c definedArray_codec) Encode(e *codecapi.Encoder, x interface{}) {
+func (c *definedArray_codec) Init(tcs map[reflect.Type]codecapi.TypeCodec) {
+
+}
+
+func (c *definedArray_codec) Fields() []string { return nil }
+
+func (c *definedArray_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	a := x.(definedArray)
 	c.encode(e, &a)
 }
 
-func (c definedArray_codec) encode(e *codecapi.Encoder, s *definedArray) {
-	(slice_int_codec{}).encode(e, (*s)[:])
+func (c *definedArray_codec) encode(e *codecapi.Encoder, s *definedArray) {
+	(&slice_int_codec{}).encode(e, (*s)[:])
 }
 
-func (c definedArray_codec) Decode(d *codecapi.Decoder) interface{} {
+func (c *definedArray_codec) Decode(d *codecapi.Decoder) interface{} {
 	var x definedArray
 	c.decode(d, &x)
 	return x
 }
 
-func (c definedArray_codec) decode(d *codecapi.Decoder, p *definedArray) {
+func (c *definedArray_codec) decode(d *codecapi.Decoder, p *definedArray) {
 	n := d.StartList()
 	if n < 0 {
 		return
@@ -37,14 +45,21 @@ func (c definedArray_codec) decode(d *codecapi.Decoder, p *definedArray) {
 }
 
 func init() {
-	codecapi.Register(definedArray{}, definedArray_codec{})
+	codecapi.Register(definedArray{}, func() codecapi.TypeCodec { return &definedArray_codec{} })
 }
 
-type slice_int_codec struct{}
+type slice_int_codec struct {
+}
 
-func (c slice_int_codec) Encode(e *codecapi.Encoder, x interface{}) { c.encode(e, x.([]int)) }
+func (c *slice_int_codec) Init(tcs map[reflect.Type]codecapi.TypeCodec) {
 
-func (c slice_int_codec) encode(e *codecapi.Encoder, s []int) {
+}
+
+func (c *slice_int_codec) Fields() []string { return nil }
+
+func (c *slice_int_codec) Encode(e *codecapi.Encoder, x interface{}) { c.encode(e, x.([]int)) }
+
+func (c *slice_int_codec) encode(e *codecapi.Encoder, s []int) {
 	if s == nil {
 		e.EncodeNil()
 		return
@@ -55,13 +70,13 @@ func (c slice_int_codec) encode(e *codecapi.Encoder, s []int) {
 	}
 }
 
-func (c slice_int_codec) Decode(d *codecapi.Decoder) interface{} {
+func (c *slice_int_codec) Decode(d *codecapi.Decoder) interface{} {
 	var x []int
 	c.decode(d, &x)
 	return x
 }
 
-func (c slice_int_codec) decode(d *codecapi.Decoder, p *[]int) {
+func (c *slice_int_codec) decode(d *codecapi.Decoder, p *[]int) {
 	n := d.StartList()
 	if n < 0 {
 		return
@@ -74,5 +89,5 @@ func (c slice_int_codec) decode(d *codecapi.Decoder, p *[]int) {
 }
 
 func init() {
-	codecapi.Register([]int(nil), slice_int_codec{})
+	codecapi.Register([]int(nil), func() codecapi.TypeCodec { return &slice_int_codec{} })
 }

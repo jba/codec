@@ -4,15 +4,22 @@ package codec
 
 import (
 	"github.com/jba/codec/codecapi"
+	"reflect"
 )
 
-type map_string_bool_codec struct{}
+type map_string_bool_codec struct {
+}
 
-func (c map_string_bool_codec) Encode(e *codecapi.Encoder, x interface{}) {
+func (c *map_string_bool_codec) Init(tcs map[reflect.Type]codecapi.TypeCodec) {
+}
+
+func (c *map_string_bool_codec) Fields() []string { return nil }
+
+func (c *map_string_bool_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	c.encode(e, x.(map[string]bool))
 }
 
-func (c map_string_bool_codec) encode(e *codecapi.Encoder, m map[string]bool) {
+func (c *map_string_bool_codec) encode(e *codecapi.Encoder, m map[string]bool) {
 	if m == nil {
 		e.EncodeNil()
 		return
@@ -24,13 +31,13 @@ func (c map_string_bool_codec) encode(e *codecapi.Encoder, m map[string]bool) {
 	}
 }
 
-func (c map_string_bool_codec) Decode(d *codecapi.Decoder) interface{} {
+func (c *map_string_bool_codec) Decode(d *codecapi.Decoder) interface{} {
 	var x map[string]bool
 	c.decode(d, &x)
 	return x
 }
 
-func (c map_string_bool_codec) decode(d *codecapi.Decoder, p *map[string]bool) {
+func (c *map_string_bool_codec) decode(d *codecapi.Decoder, p *map[string]bool) {
 	n2 := d.StartList()
 	if n2 < 0 {
 		return
@@ -47,4 +54,6 @@ func (c map_string_bool_codec) decode(d *codecapi.Decoder, p *map[string]bool) {
 	*p = m
 }
 
-func init() { codecapi.Register(map[string]bool(nil), map_string_bool_codec{}) }
+func init() {
+	codecapi.Register(map[string]bool(nil), func() codecapi.TypeCodec { return &map_string_bool_codec{} })
+}

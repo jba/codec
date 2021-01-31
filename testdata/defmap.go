@@ -4,13 +4,20 @@ package codec
 
 import (
 	"github.com/jba/codec/codecapi"
+	"reflect"
 )
 
-type definedMap_codec struct{}
+type definedMap_codec struct {
+}
 
-func (c definedMap_codec) Encode(e *codecapi.Encoder, x interface{}) { c.encode(e, x.(definedMap)) }
+func (c *definedMap_codec) Init(tcs map[reflect.Type]codecapi.TypeCodec) {
+}
 
-func (c definedMap_codec) encode(e *codecapi.Encoder, m definedMap) {
+func (c *definedMap_codec) Fields() []string { return nil }
+
+func (c *definedMap_codec) Encode(e *codecapi.Encoder, x interface{}) { c.encode(e, x.(definedMap)) }
+
+func (c *definedMap_codec) encode(e *codecapi.Encoder, m definedMap) {
 	if m == nil {
 		e.EncodeNil()
 		return
@@ -22,13 +29,13 @@ func (c definedMap_codec) encode(e *codecapi.Encoder, m definedMap) {
 	}
 }
 
-func (c definedMap_codec) Decode(d *codecapi.Decoder) interface{} {
+func (c *definedMap_codec) Decode(d *codecapi.Decoder) interface{} {
 	var x definedMap
 	c.decode(d, &x)
 	return x
 }
 
-func (c definedMap_codec) decode(d *codecapi.Decoder, p *definedMap) {
+func (c *definedMap_codec) decode(d *codecapi.Decoder, p *definedMap) {
 	n2 := d.StartList()
 	if n2 < 0 {
 		return
@@ -45,4 +52,6 @@ func (c definedMap_codec) decode(d *codecapi.Decoder, p *definedMap) {
 	*p = m
 }
 
-func init() { codecapi.Register(definedMap(nil), definedMap_codec{}) }
+func init() {
+	codecapi.Register(definedMap(nil), func() codecapi.TypeCodec { return &definedMap_codec{} })
+}
