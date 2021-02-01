@@ -118,10 +118,6 @@ func generate(w io.Writer, packagePath string, fieldNames map[string][]string, f
 	g.structTemplate = newTemplate("struct", structBody)
 	g.marshalTemplate = newTemplate("marshaler", marshalBody)
 
-	for _, v := range vs {
-		g.todo = append(g.todo, reflect.TypeOf(v))
-	}
-
 	// Mark the built-in types as done.
 	for _, t := range codecapi.BuiltinTypes {
 		g.done[t] = true
@@ -131,10 +127,9 @@ func generate(w io.Writer, packagePath string, fieldNames map[string][]string, f
 	}
 	// The empty interface doesn't need any additional code. It's tricky to get
 	// its reflect.Type: we need to dereference the pointer type.
-	var iface interface{}
-	g.done[reflect.TypeOf(&iface).Elem()] = true
+	g.done[reflect.TypeOf(new(interface{})).Elem()] = true
 
-	src, err := g.generate()
+	src, err := g.generate(vs)
 	if err != nil {
 		return err
 	}
@@ -148,11 +143,10 @@ func generate(w io.Writer, packagePath string, fieldNames map[string][]string, f
 
 type generator struct {
 	pkgPath         string
-	todo            []reflect.Type
 	done            map[reflect.Type]bool
 	fieldNames      map[string][]string
 	fieldTagKey     string
-	importMap       map[string]bool
+	importMap       map[string]string // import path to import identifier
 	initialTemplate *template.Template
 	sliceTemplate   *template.Template
 	arrayTemplate   *template.Template
@@ -161,19 +155,101 @@ type generator struct {
 	marshalTemplate *template.Template
 }
 
-func (g *generator) generate() ([]byte, error) {
-	g.importMap = map[string]bool{
-		"reflect":                       true,
-		"github.com/jba/codec/codecapi": true,
+func (g *generator) referencedTypeList(typevals []interface{}) []reflect.Type {
+	// Collect all the types referred to, except builtins. We will generate most
+	// of these (not defined types whose underlying type is builtin, for
+	// example), but we need them all to generate the right import statements.
+	types := map[reflect.Type]bool{}
+	for _, v := range typevals {
+		g.referencedTypes(reflect.TypeOf(v), types)
 	}
-	var code []byte
-	for len(g.todo) > 0 {
-		t := g.todo[0]
-		g.todo = g.todo[1:]
-		if !g.done[t] {
-			if t.PkgPath() != "" && t.PkgPath() != g.pkgPath {
-				g.importMap[t.PkgPath()] = true
+	var typeList []reflect.Type
+	for t := range types {
+		typeList = append(typeList, t)
+	}
+	// Sort for determinism.
+	sort.Slice(typeList, func(i, j int) bool {
+		return codecapi.TypeString(typeList[i], nil) < codecapi.TypeString(typeList[j], nil)
+	})
+	return typeList
+}
+
+func (g *generator) referencedTypes(t reflect.Type, m map[reflect.Type]bool) {
+	if m[t] {
+		return
+	}
+	switch t.Kind() {
+	case reflect.Slice:
+		if t.Name() == "" && t.Elem() == byteType {
+			return
+		}
+		m[t] = true
+		g.referencedTypes(t.Elem(), m)
+	case reflect.Ptr:
+		m[t] = true
+		g.referencedTypes(t.Elem(), m)
+	case reflect.Array:
+		m[t] = true
+		g.referencedTypes(t.Elem(), m)
+		g.referencedTypes(reflect.SliceOf(t.Elem()), m)
+	case reflect.Map:
+		m[t] = true
+		g.referencedTypes(t.Key(), m)
+		g.referencedTypes(t.Elem(), m)
+	case reflect.Struct:
+		m[t] = true
+		for i := 0; i < t.NumField(); i++ {
+			f := t.Field(i)
+			if !g.ignoreField(t, f) {
+				g.referencedTypes(f.Type, m)
 			}
+		}
+	default:
+		if t.PkgPath() != "" {
+			m[t] = true
+		}
+	}
+}
+
+func packageName(t reflect.Type) string {
+	if t.PkgPath() == "" {
+		return ""
+	}
+	s := t.String()
+	i := strings.LastIndexByte(s, '.')
+	if i < 0 {
+		panic(fmt.Sprintf("type %s has non-empty PkgPath but no dot in String", t))
+	}
+	return s[:i]
+}
+
+func (g *generator) ignoreField(structType reflect.Type, f reflect.StructField) bool {
+	// Ignore unexported fields for structs in a different package. A field
+	// is exported if its PkgPath is empty.
+	if structType.PkgPath() != g.pkgPath && f.PkgPath != "" {
+		return true
+	}
+	// Ignore fields of function and channel type.
+	if f.Type.Kind() == reflect.Chan || f.Type.Kind() == reflect.Func {
+		return true
+	}
+	// Ignore a field if it has a struct tag with "-", like encoding/json.
+	_, omit, _ := parseTag(g.fieldTagKey, f.Tag)
+	return omit
+}
+
+func (g *generator) generate(typevals []interface{}) ([]byte, error) {
+	todo := g.referencedTypeList(typevals)
+	// Construct the full import map.
+	g.importMap = map[string]string{
+		"reflect":                       "",
+		"github.com/jba/codec/codecapi": "",
+	}
+	populateImportMap(todo, g.pkgPath, g.importMap)
+
+	var code []byte
+	for _, t := range todo {
+		if !g.done[t] {
 			piece, err := g.gen(t)
 			if err != nil {
 				return nil, err
@@ -182,8 +258,13 @@ func (g *generator) generate() ([]byte, error) {
 				code = append(code, piece...)
 			}
 			// We use the same code for T and *T, so both are done.
+			// TODO: fix for non-structs
 			g.done[t] = true
-			g.done[reflect.PtrTo(t)] = true
+			if t.Kind() == reflect.Struct {
+				g.done[reflect.PtrTo(t)] = true
+			} else if t.Kind() == reflect.Ptr && t.Elem().Kind() == reflect.Struct {
+				g.done[t.Elem()] = true
+			}
 		}
 	}
 
@@ -205,11 +286,61 @@ func (g *generator) generate() ([]byte, error) {
 	return append(initial, code...), nil
 }
 
+func populateImportMap(types []reflect.Type, pkgPath string, importMap map[string]string) {
+	// Collect the prefixes in use so far.
+	// For these, assume that the package names are the last components of the
+	// import paths.
+	prefixes := map[string]bool{}
+	for ppath, id := range importMap {
+		if id == "" {
+			prefixes[path.Base(ppath)] = true
+		} else {
+			prefixes[id] = true
+		}
+	}
+	for _, t := range types {
+		ppath := t.PkgPath()
+		if ppath == "" {
+			continue
+		}
+		if ppath == pkgPath {
+			continue
+		}
+		if _, ok := importMap[ppath]; ok {
+			continue
+		}
+		// Determine an import identifier for the path.
+		var id string
+		// The package prefix used in the file will be the package name, unless
+		// we provide an import identifier. Usually, the package name is the
+		// last component of the import path.
+		prefix := path.Base(ppath)
+		// For package names that differ from their path's last component,
+		// provide the name as an import identifier, to simplify code
+		// generation.
+		pname := packageName(t)
+		if pname != prefix {
+			prefix = pname
+			id = pname
+		}
+		// If the prefix is not unique, generate a unique one for the
+		// identifier.
+		orig := prefix
+		for i := 1; prefixes[prefix]; i++ {
+			prefix = fmt.Sprintf("%s%d", orig, i)
+			id = prefix
+		}
+		prefixes[prefix] = true
+		importMap[ppath] = id
+	}
+}
+
 var (
 	binaryMarshalerType   = reflect.TypeOf(new(encoding.BinaryMarshaler)).Elem()
 	binaryUnmarshalerType = reflect.TypeOf(new(encoding.BinaryUnmarshaler)).Elem()
 	textMarshalerType     = reflect.TypeOf(new(encoding.TextMarshaler)).Elem()
 	textUnmarshalerType   = reflect.TypeOf(new(encoding.TextUnmarshaler)).Elem()
+	byteType              = reflect.TypeOf(byte(0))
 )
 
 func (g *generator) gen(t reflect.Type) ([]byte, error) {
@@ -239,7 +370,7 @@ func (g *generator) gen(t reflect.Type) ([]byte, error) {
 func willGenerate(t reflect.Type) bool {
 	switch t.Kind() {
 	case reflect.Slice:
-		return t.Elem() != reflect.TypeOf(byte(0))
+		return t.Elem() != byteType
 	case reflect.Struct, reflect.Array, reflect.Map, reflect.Ptr:
 		return true
 	default:
@@ -249,7 +380,6 @@ func willGenerate(t reflect.Type) bool {
 
 func (g *generator) genSlice(t reflect.Type) ([]byte, error) {
 	et := t.Elem()
-	g.todo = append(g.todo, et)
 	return execute(g.sliceTemplate, struct {
 		Type, ElType reflect.Type
 		ElField      bool
@@ -263,7 +393,6 @@ func (g *generator) genSlice(t reflect.Type) ([]byte, error) {
 func (g *generator) genArray(t reflect.Type) ([]byte, error) {
 	et := t.Elem()
 	st := reflect.SliceOf(et)
-	g.todo = append(g.todo, et, st)
 	return execute(g.arrayTemplate, struct {
 		Type, ElType, SliceType reflect.Type
 		IsBytes                 bool
@@ -272,7 +401,7 @@ func (g *generator) genArray(t reflect.Type) ([]byte, error) {
 		Type:      t,
 		ElType:    et,
 		SliceType: st,
-		IsBytes:   et == reflect.TypeOf(byte(0)),
+		IsBytes:   et == byteType,
 		ElField:   willGenerate(et),
 	})
 }
@@ -280,7 +409,6 @@ func (g *generator) genArray(t reflect.Type) ([]byte, error) {
 func (g *generator) genMap(t reflect.Type) ([]byte, error) {
 	et := t.Elem()
 	kt := t.Key()
-	g.todo = append(g.todo, kt, et)
 	return execute(g.mapTemplate, struct {
 		Type, KeyType, ElType reflect.Type
 		KeyField, ElField     bool
@@ -294,7 +422,6 @@ func (g *generator) genMap(t reflect.Type) ([]byte, error) {
 }
 
 func (g *generator) genMarshaler(t reflect.Type, kind string) ([]byte, error) {
-
 	return execute(g.marshalTemplate, struct {
 		Type reflect.Type
 		Kind string
@@ -321,7 +448,6 @@ func (g *generator) genStruct(t reflect.Type) ([]byte, error) {
 		if ft.Kind() == reflect.Ptr {
 			ft = ft.Elem()
 		}
-		g.todo = append(g.todo, ft)
 	}
 	g.fieldNames[fn] = names // Update list field names.
 	var fieldTypes []reflect.Type
@@ -379,20 +505,11 @@ func (g *generator) structFields(t reflect.Type, oldNames []string) []field {
 	// existing ones.
 	for i := 0; i < t.NumField(); i++ {
 		f := t.Field(i)
-		// Ignore unexported fields for structs in a different package. A field
-		// is exported if its PkgPath is empty.
-		if t.PkgPath() != g.pkgPath && f.PkgPath != "" {
+		if g.ignoreField(t, f) {
 			continue
 		}
-		// Ignore fields of function and channel type.
-		if f.Type.Kind() == reflect.Chan || f.Type.Kind() == reflect.Func {
-			continue
-		}
-		name, omit, _ := parseTag(g.fieldTagKey, f.Tag)
-		// Ignore a field if it has a struct tag with "-", like encoding/json.
-		if omit {
-			continue
-		}
+		// TODO: avoid this extra parseTag call (also happens in ignoreField)
+		name, _, _ := parseTag(g.fieldTagKey, f.Tag)
 		if name == "" {
 			name = f.Name
 		}
@@ -553,7 +670,7 @@ func builtinName(t reflect.Type) (suffix string, native reflect.Type) {
 	case reflect.Bool:
 		return "Bool", reflect.TypeOf(true)
 	case reflect.Int8, reflect.Uint8:
-		return "Byte", reflect.TypeOf(byte(0))
+		return "Byte", byteType
 	case reflect.Int, reflect.Int16, reflect.Int32, reflect.Int64:
 		return "Int", reflect.TypeOf(int64(0))
 	case reflect.Uint, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uintptr:
@@ -563,7 +680,7 @@ func builtinName(t reflect.Type) (suffix string, native reflect.Type) {
 	case reflect.Complex64, reflect.Complex128:
 		return "Complex", reflect.TypeOf(0 + 0i)
 	case reflect.Slice:
-		if t.Elem() == reflect.TypeOf(byte(0)) {
+		if t.Elem() == byteType {
 			return "Bytes", reflect.TypeOf([]byte(nil))
 		}
 	}

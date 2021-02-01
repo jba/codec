@@ -7,6 +7,7 @@ package codec
 import (
 	"bytes"
 	"flag"
+	"fmt"
 	"go/token"
 	"io"
 	"io/ioutil"
@@ -17,6 +18,7 @@ import (
 	"time"
 
 	"github.com/google/go-cmp/cmp"
+	othercmp "github.com/jba/codec/internal/cmp"
 	foo "github.com/jba/codec/internal/testpkg"
 )
 
@@ -80,6 +82,10 @@ type genStruct struct {
 	Omit       int `test:"-"`
 }
 
+// A small struct that doesn't get in the way when
+// it's part of something larger.
+type smallStruct struct{ X int }
+
 func TestGenerate(t *testing.T) {
 	testGenerate(t, "slice", [][]int(nil))
 	testGenerate(t, "islice", []interface{}(nil))
@@ -87,8 +93,8 @@ func TestGenerate(t *testing.T) {
 	testGenerate(t, "struct", genStruct{unexported: 0}) // suppress staticcheck warning
 	testGenerate(t, "binmarsh", time.Time{})
 	testGenerate(t, "textmarsh", net.IP{})
-	testGenerate(t, "structslice", []structType(nil))
-	testGenerate(t, "structmap", map[[1]int]structType{})
+	testGenerate(t, "structslice", []smallStruct(nil))
+	testGenerate(t, "structmap", map[[1]int]smallStruct{})
 	testGenerate(t, "defslice", definedSlice{})
 	testGenerate(t, "defarray", definedArray{})
 	testGenerate(t, "defmap", definedMap{})
@@ -107,9 +113,26 @@ func testGenerate(t *testing.T, name string, x interface{}) {
 			want := readGolden(t, name)
 			if diff := cmp.Diff(want, got); diff != "" {
 				t.Errorf("%s: mismatch (-want, +got):\n%s", name, diff)
+				filename, err := writeTempFile(fmt.Sprintf("generate-%s-*.go", name), got)
+				if err != nil {
+					t.Fatal(err)
+				}
+				t.Logf("wrote got to %s", filename)
 			}
 		}
 	})
+}
+
+func writeTempFile(pattern, contents string) (string, error) {
+	f, err := ioutil.TempFile("", pattern)
+	if err != nil {
+		return "", err
+	}
+	defer f.Close()
+	if _, err := io.WriteString(f, contents); err != nil {
+		return "", err
+	}
+	return f.Name(), nil
 }
 
 func writeGolden(t *testing.T, name string, data string) {
@@ -227,4 +250,64 @@ func TestParseTag(t *testing.T) {
 		}
 	}
 
+}
+
+var (
+	cmpType      = reflect.TypeOf(new(cmp.Option)).Elem()
+	othercmpType = reflect.TypeOf(new(othercmp.Option)).Elem()
+	fooType      = reflect.TypeOf(foo.T(nil))
+)
+
+func TestPackageName(t *testing.T) {
+	for _, test := range []struct {
+		typ  reflect.Type
+		want string
+	}{
+		{reflect.TypeOf(0), ""},               // builtin type
+		{reflect.TypeOf(new(cmp.Option)), ""}, // unnamed type
+		{cmpType, "cmp"},
+		{othercmpType, "cmp"},
+		{fooType, "foo"},
+	} {
+		got := packageName(test.typ)
+		if got != test.want {
+			t.Errorf("%s: got %q, want %q", test.typ, got, test.want)
+		}
+	}
+}
+
+func TestPopulateImportMap(t *testing.T) {
+	got := map[string]string{}
+	types := []reflect.Type{reflect.TypeOf(0), cmpType, othercmpType, fooType, reflect.TypeOf(Decoder{})}
+	populateImportMap(types, "github.com/jba/codec", got)
+	want := map[string]string{
+		"github.com/google/go-cmp/cmp":          "",
+		"github.com/jba/codec/internal/cmp":     "cmp1",
+		"github.com/jba/codec/internal/testpkg": "foo",
+	}
+	if diff := cmp.Diff(want, got); diff != "" {
+		t.Errorf("diff (-want, +got):\n%s", diff)
+	}
+}
+
+func TestReferencedTypeList(t *testing.T) {
+	g := &generator{
+		pkgPath:     "github.com/jba/codec",
+		fieldTagKey: "codec",
+	}
+	got := g.referencedTypeList([]interface{}{0, []*cmp.Option{}, genStruct{}, token.Pos(0), net.IP{}})
+	wantvals := []interface{}{
+		new(cmp.Option), []*cmp.Option{}, cmpType, genStruct{},
+		foo.T{}, token.Pos(0), net.IP{}}
+	var want []reflect.Type
+	for _, v := range wantvals {
+		if t, ok := v.(reflect.Type); ok {
+			want = append(want, t)
+		} else {
+			want = append(want, reflect.TypeOf(v))
+		}
+	}
+	if !cmp.Equal(got, want, cmp.Comparer(func(t1, t2 reflect.Type) bool { return t1 == t2 })) {
+		t.Errorf("\ngot  %v\nwant %v", got, want)
+	}
 }
