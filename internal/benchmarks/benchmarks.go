@@ -132,11 +132,19 @@ var commands = map[string]func([]string) error{
 
 func main() {
 	flag.Parse()
-	cmd := commands[flag.Arg(0)]
+	cmdArg := flag.Arg(0)
+	var otherArgs []string
+	if cmdArg == "" {
+		// Run all benchmarks by default.
+		cmdArg = "bm"
+	} else {
+		otherArgs = flag.Args()[1:]
+	}
+	cmd := commands[cmdArg]
 	if cmd == nil {
 		log.Fatalf("unknown command %q", flag.Arg(0))
 	}
-	if err := cmd(flag.Args()[1:]); err != nil {
+	if err := cmd(otherArgs); err != nil {
 		log.Fatal(err)
 	}
 }
@@ -384,7 +392,7 @@ func runAndReport(bms []benchmark) {
 		}
 		if err == nil {
 			d := time.Duration(r.NsPerOp())
-			fmt.Fprintf(w, "%s\t%d\t%dK/op\t%.2fs/op\t %.2fx\n",
+			fmt.Fprintf(w, "%s\t%d\t%dK/op\t%.3fs/op\t %.2fx\n",
 				bm.Name, r.N, r.AllocedBytesPerOp()/1024, d.Seconds(), float64(r0.NsPerOp())/float64(r.NsPerOp()))
 		}
 	}
