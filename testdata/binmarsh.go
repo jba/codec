@@ -3,9 +3,10 @@
 package codec
 
 import (
-	"github.com/jba/codec/codecapi"
 	"reflect"
 	"time"
+
+	"github.com/jba/codec/codecapi"
 )
 
 type time_Time_codec struct{}

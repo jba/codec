@@ -3,9 +3,10 @@
 package codec
 
 import (
-	"github.com/jba/codec/codecapi"
-	"github.com/jba/codec/internal/testpkg"
 	"reflect"
+
+	"github.com/jba/codec/codecapi"
+	foo "github.com/jba/codec/internal/testpkg"
 )
 
 // Fields of genStruct: S B I I8 I16 I32 I64 F32 F64 U8 U16 U32 U64 C64 C128 BS T unexported

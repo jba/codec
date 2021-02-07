@@ -3,12 +3,13 @@
 package codec
 
 import (
-	"github.com/jba/codec/codecapi"
-	"github.com/jba/codec/internal/testpkg"
 	"go/token"
 	"net"
 	"reflect"
 	"time"
+
+	"github.com/jba/codec/codecapi"
+	foo "github.com/jba/codec/internal/testpkg"
 )
 
 // Fields of node: Value Next

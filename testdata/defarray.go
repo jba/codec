@@ -3,8 +3,9 @@
 package codec
 
 import (
-	"github.com/jba/codec/codecapi"
 	"reflect"
+
+	"github.com/jba/codec/codecapi"
 )
 
 type slice_int_codec struct {

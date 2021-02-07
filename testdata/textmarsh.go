@@ -3,9 +3,10 @@
 package codec
 
 import (
-	"github.com/jba/codec/codecapi"
 	"net"
 	"reflect"
+
+	"github.com/jba/codec/codecapi"
 )
 
 type net_IP_codec struct{}
