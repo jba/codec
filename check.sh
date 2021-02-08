@@ -22,7 +22,9 @@ main() {
   ensure_go_binary mvdan.cc/unparam
   unparam ./... | warnout
 
-  go test ./...
+  go test ./... || err "go test failed"
+
+  cd _skiptest && ./run.sh || err "skip test failed"
 
   exit $EXIT_CODE
 }
