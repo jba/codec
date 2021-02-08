@@ -24,7 +24,8 @@ main() {
 
   go test ./... || err "go test failed"
 
-  cd _skiptest && ./run.sh || err "skip test failed"
+  (cd _skiptest && ./run.sh) || err "skip test failed"
+  (cd _changetest && ./run.sh) || err "change test failed"
 
   exit $EXIT_CODE
 }
