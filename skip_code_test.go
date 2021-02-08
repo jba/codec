@@ -23,6 +23,8 @@ func (ptr_Skip_codec) Init(map[reflect.Type]codecapi.TypeCodec) {}
 
 func (c ptr_Skip_codec) Fields() []string { return nil }
 
+func (ptr_Skip_codec) TypesUsed() []reflect.Type { return nil }
+
 func (c ptr_Skip_codec) Encode(e *codecapi.Encoder, x interface{}) { c.encode(e, x.(*Skip)) }
 
 func (c ptr_Skip_codec) encode(e *codecapi.Encoder, x *Skip) {
@@ -58,6 +60,8 @@ type Skip_codec struct{}
 func (Skip_codec) Init(map[reflect.Type]codecapi.TypeCodec) {}
 
 func (Skip_codec) Fields() []string { return []string{"U", "S1", "S2", "L"} }
+
+func (Skip_codec) TypesUsed() []reflect.Type { return nil }
 
 func (c Skip_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	s := x.(Skip)
@@ -117,6 +121,8 @@ func init() {
 type slice_ptr_Skip_codec struct{}
 
 func (slice_ptr_Skip_codec) Fields() []string { return nil }
+
+func (slice_ptr_Skip_codec) TypesUsed() []reflect.Type { return nil }
 
 func (slice_ptr_Skip_codec) Init(map[reflect.Type]codecapi.TypeCodec) {}
 

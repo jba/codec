@@ -24,16 +24,21 @@ const uint64Size = 8
 var header = []byte("GJC1")
 
 type Encoder struct {
-	opts     EncodeOptions
-	w        io.Writer
-	buf      []byte
-	typeNums map[reflect.Type]int
-	seen     map[uintptr]int // for references; see StartStruct
+	opts      EncodeOptions
+	w         io.Writer
+	buf       []byte
+	typeInfos map[reflect.Type]typeInfo
+	seen      map[uintptr]int // for references; see StartStruct
 }
 
 type EncodeOptions struct {
 	TrackPointers bool
 	Buffer        []byte
+}
+
+type typeInfo struct {
+	tc  TypeCodec
+	num int
 }
 
 func NewEncoder(w io.Writer, opts EncodeOptions) *Encoder {
@@ -50,7 +55,7 @@ func (e *Encoder) Encode(x interface{}) (err error) {
 	// - A size in bytes (uint64)
 	// - Initial metadata
 	// - The encoded value
-	if e.typeNums == nil {
+	if e.typeInfos == nil {
 		// First call to encode: write the header.
 		if _, err := e.w.Write(header); err != nil {
 			return err
@@ -63,7 +68,9 @@ func (e *Encoder) Encode(x interface{}) (err error) {
 	} else {
 		e.buf = make([]byte, 0, 64*1024)
 	}
-	e.typeNums = map[reflect.Type]int{}
+	// Each call to Encode gets a fresh set of types.
+	e.typeInfos = map[reflect.Type]typeInfo{}
+
 	defer handlePanic(&err)
 
 	e.EncodeAny(x)
@@ -501,8 +508,7 @@ func (d *Decoder) StartPtr() (bool, interface{}) {
 
 //////////////// Struct Support
 
-func (e *Encoder) StartStruct( /*t reflect.Type*/ ) {
-	//_ = e.typeNumber(t) // it will be expensive to assign all structs a type number here
+func (e *Encoder) StartStruct() {
 	e.writeByte(startCode)
 }
 
@@ -606,27 +612,32 @@ func (e *Encoder) EncodeAny(x interface{}) {
 		e.writeByte(0)
 		return
 	}
-	// Find the TypeCodec for the type, which has the encoder.
 	t := reflect.TypeOf(x)
+	tc, tnum := e.recordType(t)
+	// Encode a 2-element list of the type number and the encoded value.
+	e.StartList(2)
+	e.EncodeUint(uint64(tnum))
+	tc.Encode(e, x)
+}
+
+// Record the type in the Encoder and assign it a number if we haven't already.
+// Return the TypeCodec for the type and its number.
+// This also records all the types that t depends on, recursively.
+func (e *Encoder) recordType(t reflect.Type) (TypeCodec, int) {
+	if ti, ok := e.typeInfos[t]; ok {
+		return ti.tc, ti.num
+	}
 	tcb := typeCodecBuildersByType[t]
 	if tcb == nil {
 		Failf("unregistered type %q", t)
 	}
-	tc := tcb() // TODO: avoid creating on every call
-	// Encode a 2-element list of the type number and the encoded value.
-	e.StartList(2)
-	e.EncodeUint(uint64(e.typeNumber(t)))
-	tc.Encode(e, x)
-}
-
-// Assign a number to the type if we haven't already.
-func (e *Encoder) typeNumber(t reflect.Type) int {
-	num, ok := e.typeNums[t]
-	if !ok {
-		num = len(e.typeNums)
-		e.typeNums[t] = num
+	tc := tcb()
+	num := len(e.typeInfos)
+	e.typeInfos[t] = typeInfo{tc, num}
+	for _, tu := range tc.TypesUsed() {
+		e.recordType(tu)
 	}
-	return num
+	return tc, num
 }
 
 // DecodeAny decodes a value encoded by EncodeAny.
@@ -654,9 +665,9 @@ func (d *Decoder) DecodeAny() interface{} {
 func (e *Encoder) encodeInitial() {
 	// Encode the list of type names we saw, in the order we
 	// assigned numbers to them.
-	names := make([]string, len(e.typeNums))
-	for t, num := range e.typeNums {
-		names[num] = TypeString(t, nil)
+	names := make([]string, len(e.typeInfos))
+	for t, ti := range e.typeInfos {
+		names[ti.num] = TypeString(t, nil)
 	}
 	e.encodeStringSlice(names)
 	// // Encode the field names of each struct we saw, in order of their assigned
@@ -677,6 +688,8 @@ func (d *Decoder) decodeInitial() {
 	for typ, builder := range typeCodecBuildersByType {
 		localTypeCodecs[typ] = builder()
 	}
+	// Give every TypeCodec the chance to initialize itself by storing
+	// pointers to TypeCodecs it depends on.
 	for _, tc := range localTypeCodecs {
 		tc.Init(localTypeCodecs)
 	}

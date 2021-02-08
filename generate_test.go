@@ -113,7 +113,7 @@ func testGenerate(t *testing.T, name string, x interface{}) {
 			want := readGolden(t, name)
 			if diff := cmp.Diff(want, got); diff != "" {
 				t.Errorf("%s: mismatch (-want, +got):\n%s", name, diff)
-				filename, err := writeTempFile(fmt.Sprintf("generate-%s-*.go", name), got)
+				filename, err := writeTempFile(fmt.Sprintf("generate-%s-*.go", name), []byte(got))
 				if err != nil {
 					t.Fatal(err)
 				}
@@ -121,18 +121,6 @@ func testGenerate(t *testing.T, name string, x interface{}) {
 			}
 		}
 	})
-}
-
-func writeTempFile(pattern, contents string) (string, error) {
-	f, err := ioutil.TempFile("", pattern)
-	if err != nil {
-		return "", err
-	}
-	defer f.Close()
-	if _, err := io.WriteString(f, contents); err != nil {
-		return "", err
-	}
-	return f.Name(), nil
 }
 
 func writeGolden(t *testing.T, name string, data string) {

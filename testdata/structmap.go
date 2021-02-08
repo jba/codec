@@ -8,6 +8,8 @@ import (
 	"github.com/jba/codec/codecapi"
 )
 
+var array_1_int_type = reflect.TypeOf((*[1]int)(nil)).Elem()
+
 type array_1_int_codec struct {
 }
 
@@ -16,6 +18,10 @@ func (c *array_1_int_codec) Init(tcs map[reflect.Type]codecapi.TypeCodec) {
 }
 
 func (c *array_1_int_codec) Fields() []string { return nil }
+
+func (c *array_1_int_codec) TypesUsed() []reflect.Type {
+	return nil
+}
 
 func (c *array_1_int_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	a := x.([1]int)
@@ -49,6 +55,8 @@ func init() {
 	codecapi.Register([1]int{}, func() codecapi.TypeCodec { return &array_1_int_codec{} })
 }
 
+var slice_int_type = reflect.TypeOf((*[]int)(nil)).Elem()
+
 type slice_int_codec struct {
 }
 
@@ -57,6 +65,10 @@ func (c *slice_int_codec) Init(tcs map[reflect.Type]codecapi.TypeCodec) {
 }
 
 func (c *slice_int_codec) Fields() []string { return nil }
+
+func (c *slice_int_codec) TypesUsed() []reflect.Type {
+	return nil
+}
 
 func (c *slice_int_codec) Encode(e *codecapi.Encoder, x interface{}) { c.encode(e, x.([]int)) }
 
@@ -95,6 +107,8 @@ func init() {
 
 // Fields of smallStruct: X
 
+var ptr_smallStruct_type = reflect.TypeOf((*smallStruct)(nil))
+
 type ptr_smallStruct_codec struct {
 	smallStruct_codec *smallStruct_codec
 }
@@ -104,6 +118,8 @@ func (c *ptr_smallStruct_codec) Init(tcs map[reflect.Type]codecapi.TypeCodec) {
 }
 
 func (c ptr_smallStruct_codec) Fields() []string { return nil }
+
+func (c ptr_smallStruct_codec) TypesUsed() []reflect.Type { return []reflect.Type{smallStruct_type} }
 
 func (c ptr_smallStruct_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	c.encode(e, x.(*smallStruct))
@@ -137,6 +153,8 @@ func (c ptr_smallStruct_codec) decode(d *codecapi.Decoder, p **smallStruct) {
 	*p = &x
 }
 
+var smallStruct_type = ptr_smallStruct_type.Elem()
+
 type smallStruct_codec struct {
 }
 
@@ -145,6 +163,10 @@ func (c *smallStruct_codec) Init(tcs map[reflect.Type]codecapi.TypeCodec) {
 
 func (c *smallStruct_codec) Fields() []string {
 	return []string{"X"}
+}
+
+func (c *smallStruct_codec) TypesUsed() []reflect.Type {
+	return []reflect.Type{}
 }
 
 func (c *smallStruct_codec) Encode(e *codecapi.Encoder, x interface{}) {
@@ -188,6 +210,8 @@ func init() {
 	codecapi.Register(&smallStruct{}, func() codecapi.TypeCodec { return &ptr_smallStruct_codec{} })
 }
 
+var map__1_int_smallStruct_type = reflect.TypeOf((*map[[1]int]smallStruct)(nil)).Elem()
+
 type map__1_int_smallStruct_codec struct {
 	array_1_int_codec *array_1_int_codec
 	smallStruct_codec *smallStruct_codec
@@ -199,6 +223,15 @@ func (c *map__1_int_smallStruct_codec) Init(tcs map[reflect.Type]codecapi.TypeCo
 }
 
 func (c *map__1_int_smallStruct_codec) Fields() []string { return nil }
+
+func (c *map__1_int_smallStruct_codec) TypesUsed() []reflect.Type {
+	var types []reflect.Type
+	types = append(types, array_1_int_type)
+
+	types = append(types, smallStruct_type)
+
+	return types
+}
 
 func (c *map__1_int_smallStruct_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	c.encode(e, x.(map[[1]int]smallStruct))

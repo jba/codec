@@ -11,6 +11,8 @@ import (
 
 // Fields of genStruct: S B I I8 I16 I32 I64 F32 F64 U8 U16 U32 U64 C64 C128 BS T unexported
 
+var ptr_genStruct_type = reflect.TypeOf((*genStruct)(nil))
+
 type ptr_genStruct_codec struct {
 	genStruct_codec *genStruct_codec
 }
@@ -20,6 +22,8 @@ func (c *ptr_genStruct_codec) Init(tcs map[reflect.Type]codecapi.TypeCodec) {
 }
 
 func (c ptr_genStruct_codec) Fields() []string { return nil }
+
+func (c ptr_genStruct_codec) TypesUsed() []reflect.Type { return []reflect.Type{genStruct_type} }
 
 func (c ptr_genStruct_codec) Encode(e *codecapi.Encoder, x interface{}) { c.encode(e, x.(*genStruct)) }
 
@@ -51,6 +55,8 @@ func (c ptr_genStruct_codec) decode(d *codecapi.Decoder, p **genStruct) {
 	*p = &x
 }
 
+var genStruct_type = ptr_genStruct_type.Elem()
+
 type genStruct_codec struct {
 	foo_T_codec *foo_T_codec
 }
@@ -61,6 +67,10 @@ func (c *genStruct_codec) Init(tcs map[reflect.Type]codecapi.TypeCodec) {
 
 func (c *genStruct_codec) Fields() []string {
 	return []string{"S", "B", "I", "I8", "I16", "I32", "I64", "F32", "F64", "U8", "U16", "U32", "U64", "C64", "C128", "BS", "T", "unexported"}
+}
+
+func (c *genStruct_codec) TypesUsed() []reflect.Type {
+	return []reflect.Type{foo_T_type}
 }
 
 func (c *genStruct_codec) Encode(e *codecapi.Encoder, x interface{}) {
@@ -206,6 +216,8 @@ func init() {
 	codecapi.Register(&genStruct{}, func() codecapi.TypeCodec { return &ptr_genStruct_codec{} })
 }
 
+var foo_T_type = reflect.TypeOf((*foo.T)(nil)).Elem()
+
 type foo_T_codec struct {
 }
 
@@ -214,6 +226,10 @@ func (c *foo_T_codec) Init(tcs map[reflect.Type]codecapi.TypeCodec) {
 }
 
 func (c *foo_T_codec) Fields() []string { return nil }
+
+func (c *foo_T_codec) TypesUsed() []reflect.Type {
+	return nil
+}
 
 func (c *foo_T_codec) Encode(e *codecapi.Encoder, x interface{}) { c.encode(e, x.(foo.T)) }
 

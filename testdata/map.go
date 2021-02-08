@@ -8,6 +8,8 @@ import (
 	"github.com/jba/codec/codecapi"
 )
 
+var map_string_bool_type = reflect.TypeOf((*map[string]bool)(nil)).Elem()
+
 type map_string_bool_codec struct {
 }
 
@@ -15,6 +17,12 @@ func (c *map_string_bool_codec) Init(tcs map[reflect.Type]codecapi.TypeCodec) {
 }
 
 func (c *map_string_bool_codec) Fields() []string { return nil }
+
+func (c *map_string_bool_codec) TypesUsed() []reflect.Type {
+	var types []reflect.Type
+
+	return types
+}
 
 func (c *map_string_bool_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	c.encode(e, x.(map[string]bool))

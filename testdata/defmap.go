@@ -8,6 +8,8 @@ import (
 	"github.com/jba/codec/codecapi"
 )
 
+var definedMap_type = reflect.TypeOf((*definedMap)(nil)).Elem()
+
 type definedMap_codec struct {
 }
 
@@ -15,6 +17,12 @@ func (c *definedMap_codec) Init(tcs map[reflect.Type]codecapi.TypeCodec) {
 }
 
 func (c *definedMap_codec) Fields() []string { return nil }
+
+func (c *definedMap_codec) TypesUsed() []reflect.Type {
+	var types []reflect.Type
+
+	return types
+}
 
 func (c *definedMap_codec) Encode(e *codecapi.Encoder, x interface{}) { c.encode(e, x.(definedMap)) }
 

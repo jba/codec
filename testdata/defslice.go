@@ -8,6 +8,8 @@ import (
 	"github.com/jba/codec/codecapi"
 )
 
+var definedSlice_type = reflect.TypeOf((*definedSlice)(nil)).Elem()
+
 type definedSlice_codec struct {
 }
 
@@ -16,6 +18,10 @@ func (c *definedSlice_codec) Init(tcs map[reflect.Type]codecapi.TypeCodec) {
 }
 
 func (c *definedSlice_codec) Fields() []string { return nil }
+
+func (c *definedSlice_codec) TypesUsed() []reflect.Type {
+	return nil
+}
 
 func (c *definedSlice_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	c.encode(e, x.(definedSlice))

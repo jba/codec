@@ -8,6 +8,8 @@ import (
 	"github.com/jba/codec/codecapi"
 )
 
+var slice_int_type = reflect.TypeOf((*[]int)(nil)).Elem()
+
 type slice_int_codec struct {
 }
 
@@ -16,6 +18,10 @@ func (c *slice_int_codec) Init(tcs map[reflect.Type]codecapi.TypeCodec) {
 }
 
 func (c *slice_int_codec) Fields() []string { return nil }
+
+func (c *slice_int_codec) TypesUsed() []reflect.Type {
+	return nil
+}
 
 func (c *slice_int_codec) Encode(e *codecapi.Encoder, x interface{}) { c.encode(e, x.([]int)) }
 
@@ -52,6 +58,8 @@ func init() {
 	codecapi.Register([]int(nil), func() codecapi.TypeCodec { return &slice_int_codec{} })
 }
 
+var definedArray_type = reflect.TypeOf((*definedArray)(nil)).Elem()
+
 type definedArray_codec struct {
 }
 
@@ -60,6 +68,10 @@ func (c *definedArray_codec) Init(tcs map[reflect.Type]codecapi.TypeCodec) {
 }
 
 func (c *definedArray_codec) Fields() []string { return nil }
+
+func (c *definedArray_codec) TypesUsed() []reflect.Type {
+	return nil
+}
 
 func (c *definedArray_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	a := x.(definedArray)

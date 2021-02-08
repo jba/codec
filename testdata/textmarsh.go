@@ -9,11 +9,15 @@ import (
 	"github.com/jba/codec/codecapi"
 )
 
+var net_IP_type = reflect.TypeOf((*net.IP)(nil)).Elem()
+
 type net_IP_codec struct{}
 
 func (c *net_IP_codec) Fields() []string { return nil }
 
 func (c *net_IP_codec) Init(map[reflect.Type]codecapi.TypeCodec) {}
+
+func (c *net_IP_codec) TypesUsed() []reflect.Type { return nil }
 
 func (c *net_IP_codec) Encode(e *codecapi.Encoder, x interface{}) { c.encode(e, x.(net.IP)) }
 

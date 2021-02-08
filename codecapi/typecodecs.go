@@ -12,8 +12,8 @@ import (
 
 // A TypeCodec handles encoding and decoding of a particular type.
 type TypeCodec interface {
-	Fields() []string
-	//Type() reflect.Type
+	Fields() []string          // the names of all the struct fields, if this is a struct
+	TypesUsed() []reflect.Type // all the types this codec uses, not including itself
 	Init(typeCodecs map[reflect.Type]TypeCodec)
 	Encode(*Encoder, interface{})
 	Decode(*Decoder) interface{}
@@ -108,6 +108,7 @@ func Register(x interface{}, tcb func() TypeCodec) {
 type prim struct{}
 
 func (prim) Fields() []string                { return nil }
+func (prim) TypesUsed() []reflect.Type       { return nil }
 func (prim) Init(map[reflect.Type]TypeCodec) {}
 
 type boolCodec struct{ prim }

@@ -8,6 +8,8 @@ import (
 	"github.com/jba/codec/codecapi"
 )
 
+var slice_smallStruct_type = reflect.TypeOf((*[]smallStruct)(nil)).Elem()
+
 type slice_smallStruct_codec struct {
 	smallStruct_codec *smallStruct_codec
 }
@@ -18,6 +20,10 @@ func (c *slice_smallStruct_codec) Init(tcs map[reflect.Type]codecapi.TypeCodec) 
 }
 
 func (c *slice_smallStruct_codec) Fields() []string { return nil }
+
+func (c *slice_smallStruct_codec) TypesUsed() []reflect.Type {
+	return []reflect.Type{smallStruct_type}
+}
 
 func (c *slice_smallStruct_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	c.encode(e, x.([]smallStruct))
@@ -58,6 +64,8 @@ func init() {
 
 // Fields of smallStruct: X
 
+var ptr_smallStruct_type = reflect.TypeOf((*smallStruct)(nil))
+
 type ptr_smallStruct_codec struct {
 	smallStruct_codec *smallStruct_codec
 }
@@ -67,6 +75,8 @@ func (c *ptr_smallStruct_codec) Init(tcs map[reflect.Type]codecapi.TypeCodec) {
 }
 
 func (c ptr_smallStruct_codec) Fields() []string { return nil }
+
+func (c ptr_smallStruct_codec) TypesUsed() []reflect.Type { return []reflect.Type{smallStruct_type} }
 
 func (c ptr_smallStruct_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	c.encode(e, x.(*smallStruct))
@@ -100,6 +110,8 @@ func (c ptr_smallStruct_codec) decode(d *codecapi.Decoder, p **smallStruct) {
 	*p = &x
 }
 
+var smallStruct_type = ptr_smallStruct_type.Elem()
+
 type smallStruct_codec struct {
 }
 
@@ -108,6 +120,10 @@ func (c *smallStruct_codec) Init(tcs map[reflect.Type]codecapi.TypeCodec) {
 
 func (c *smallStruct_codec) Fields() []string {
 	return []string{"X"}
+}
+
+func (c *smallStruct_codec) TypesUsed() []reflect.Type {
+	return []reflect.Type{}
 }
 
 func (c *smallStruct_codec) Encode(e *codecapi.Encoder, x interface{}) {
