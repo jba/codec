@@ -97,11 +97,18 @@ func TestBuildFieldMap(t *testing.T) {
 		{[]string{}, []int{}},
 		{[]string{"A", "B", "C"}, []int{0, 1, 2}},
 		{[]string{"B", "A", "C"}, []int{1, 0, 2}},
-		{[]string{"C", "D"}, []int{2, -1}},
+		{[]string{"C", "D"}, []int{2, -2}},
 	} {
 		got := buildFieldMap(generatedFields, test.encodedFields)
 		if !cmp.Equal(got, test.want) {
 			t.Errorf("%v: got %v, want %v", test.encodedFields, got, test.want)
 		}
 	}
+
+	got := buildFieldMap(nil, []string{"A", "B"})
+	want := []int{-2, -2}
+	if !cmp.Equal(got, want) {
+		t.Errorf("got %v, want %v", got, want)
+	}
+
 }

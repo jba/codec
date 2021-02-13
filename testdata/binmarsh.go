@@ -15,7 +15,7 @@ type time_Time_codec struct{}
 
 func (c *time_Time_codec) Fields() []string { return nil }
 
-func (c *time_Time_codec) Init(map[reflect.Type]codecapi.TypeCodec) {}
+func (c *time_Time_codec) Init(map[reflect.Type]codecapi.TypeCodec, []int) {}
 
 func (c *time_Time_codec) TypesUsed() []reflect.Type { return nil }
 

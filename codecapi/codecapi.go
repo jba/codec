@@ -538,17 +538,16 @@ func (e *Encoder) EndStruct() {
 // NextStructField should be called by a struct decoder in a loop.
 // It returns the field number of the next encoded field, or -1
 // if there are no more fields.
-func (d *Decoder) NextStructField( /*fieldMap []int*/ ) int {
+func (d *Decoder) NextStructField(fieldMap []int) int {
 	if d.curByte() == endCode {
 		d.readByte() // consume the end byte
 		return -1
 	}
-	n := d.DecodeUint()
-	return int(n)
-	// if n >= len(fieldMap) {
-	// 	Failf("field number %d >= field map length %d", n, len(fieldMap))
-	// }
-	// return fieldMap[n]
+	n := int(d.DecodeUint())
+	if n >= len(fieldMap) {
+		Failf("field number %d >= field map length %d", n, len(fieldMap))
+	}
+	return fieldMap[n]
 }
 
 // UnknownField should be called by a struct decoder
@@ -663,65 +662,79 @@ func (d *Decoder) DecodeAny() interface{} {
 // encodeInitial encodes metadata that appears at the start of the
 // encoded byte slice.
 func (e *Encoder) encodeInitial() {
+	type fieldInfo struct {
+		num    int
+		fields []string
+	}
+
 	// Encode the list of type names we saw, in the order we
 	// assigned numbers to them.
-	names := make([]string, len(e.typeInfos))
+	// Also encode the field names of each struct we saw, with their field
+	// numbers.
+	typeNames := make([]string, len(e.typeInfos))
+	var fieldNames []fieldInfo
 	for t, ti := range e.typeInfos {
-		names[ti.num] = TypeString(t, nil)
+		typeNames[ti.num] = TypeString(t, nil)
+		fs := ti.tc.Fields()
+		if fs != nil {
+			fieldNames = append(fieldNames, fieldInfo{ti.num, fs})
+		}
 	}
-	e.encodeStringSlice(names)
-	// // Encode the field names of each struct we saw, in order of their assigned
-	// // field numbers.
-	// e.StartList(len(e.structFields))
-	// for num, fieldNames := range e.structFields {
-	// 	e.EncodeUint(num)
-	// 	e.encodeStringSlice(fieldNames)
-	// }
+
+	e.encodeStringSlice(typeNames)
+	e.StartList(len(fieldNames))
+	for _, fi := range fieldNames {
+		e.EncodeUint(uint64(fi.num))
+		e.encodeStringSlice(fi.fields)
+	}
 }
 
 // decodeInitial decodes metadata that appears at the start of the
 // encoded byte slice.
 func (d *Decoder) decodeInitial() {
-	// For now, create a type codec for every registered type.
-	// We will need a fast way to do so for only the types that have been encoded.
-	localTypeCodecs := map[reflect.Type]TypeCodec{}
-	for typ, builder := range typeCodecBuildersByType {
-		localTypeCodecs[typ] = builder()
-	}
-	// Give every TypeCodec the chance to initialize itself by storing
-	// pointers to TypeCodecs it depends on.
-	for _, tc := range localTypeCodecs {
-		tc.Init(localTypeCodecs)
-	}
-
 	// Decode the list of type names. The number of a type is its position in
 	// the list.
 	typeNames := d.decodeStringSlice()
 	d.typeCodecs = make([]TypeCodec, len(typeNames))
+	types := make([]reflect.Type, len(typeNames))
+	tcMap := map[reflect.Type]TypeCodec{}
 	for num, name := range typeNames {
-		tc := localTypeCodecs[nameToType[name]]
-		if tc == nil {
+		t := nameToType[name]
+		if t == nil {
 			Failf("unregistered type: %s", name)
 		}
+		tcb := typeCodecBuildersByType[t]
+		if tcb == nil {
+			panic(fmt.Sprintf("have type for name %q but not builder", name))
+		}
+		tc := tcb()
 		d.typeCodecs[num] = tc
+		tcMap[t] = tc
+		types[num] = t
 	}
-	// d.fieldMaps = map[reflect.Type][]int{}
-	// n := d.StartList()
-	// for i := 0; i < n; i++ {
-	// 	num := d.DecodeUint()
-	// 	if num >= len(d.typeCodecs) {
-	// 		Failf("bad type number: %d", num)
-	// 	}
-	// 	generatedFields := d.typeCodecs[num].Fields()
-	// 	encodedFields := d.decodeStringSlice()
-	// 	d.fieldMaps[tc.Type()] = buildFieldMap(generatedFields, encodedFields)
-	// }
+	n := d.StartList()
+	fieldMaps := make(map[int][]int, n)
+	for i := 0; i < n; i++ {
+		num := d.DecodeUint()
+		if int(num) >= len(d.typeCodecs) {
+			Failf("bad type number: %d", num)
+		}
+		generatedFields := d.typeCodecs[num].Fields()
+		encodedFields := d.decodeStringSlice()
+		fieldMaps[int(num)] = buildFieldMap(generatedFields, encodedFields)
+	}
+
+	// Give each TypeCodec the chance to initialize itself with the other TypeCodecs,
+	// and its own field map.
+	for num, tc := range d.typeCodecs {
+		tc.Init(tcMap, fieldMaps[num])
+	}
 }
 
 // buildFieldMap constructs a mapping from encoded field numbers to generated field numbers.
 // For example, if field F was encoded with number 1 but the generated code uses 2 for it,
 // then mapping[1] == 2. If there is no generated field corresponding to an encoded one, then
-// the mapping value is -1.
+// the mapping value is -2.
 func buildFieldMap(generatedFields, encodedFields []string) []int {
 	if encodedFields == nil {
 		return nil
@@ -735,7 +748,7 @@ func buildFieldMap(generatedFields, encodedFields []string) []int {
 		if j, ok := g[e]; ok {
 			m[i] = j
 		} else {
-			m[i] = -1
+			m[i] = -2
 		}
 	}
 	return m

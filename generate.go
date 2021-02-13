@@ -801,7 +801,7 @@ type «$typeName» struct {
 	«end»
 }
 
-func (c *«$typeName») Init(tcs map[reflect.Type]codecapi.TypeCodec) {
+func (c *«$typeName») Init(tcs map[reflect.Type]codecapi.TypeCodec, _ []int) {
 	«if .ElField -»
 		c.«$elTypeID»_codec = «tcIndex .ElType».(*«$elTypeID»_codec)
 	«end»
@@ -868,7 +868,7 @@ type «$typeName» struct {
 	«end»
 }
 
-func (c *«$typeName») Init(tcs map[reflect.Type]codecapi.TypeCodec) {
+func (c *«$typeName») Init(tcs map[reflect.Type]codecapi.TypeCodec, _ []int) {
 	«if .ElField -»
 		c.«$elTypeCodec» = «tcIndex .ElType».(*«$elTypeCodec»)
 	«end»
@@ -947,7 +947,7 @@ type «$typeName» struct {
 }
 
 
-func (c *«$typeName») Init(tcs map[reflect.Type]codecapi.TypeCodec) {
+func (c *«$typeName») Init(tcs map[reflect.Type]codecapi.TypeCodec, _ []int) {
 	«if .KeyField -»
 		c.«$keyTypeID»_codec = «tcIndex .KeyType».(*«$keyTypeID»_codec)
 	«end -»
@@ -1020,7 +1020,7 @@ type «$typeName» struct{}
 
 func (c *«$typeName») Fields() []string { return nil }
 
-func (c *«$typeName») Init(map[reflect.Type]codecapi.TypeCodec) {}
+func (c *«$typeName») Init(map[reflect.Type]codecapi.TypeCodec, []int) {}
 
 func (c *«$typeName») TypesUsed() []reflect.Type { return nil }
 
@@ -1072,7 +1072,7 @@ type «$ptrTypeName» struct {
 	«$typeName» *«$typeName»
 }
 
-func (c *«$ptrTypeName») Init(tcs map[reflect.Type]codecapi.TypeCodec) {
+func (c *«$ptrTypeName») Init(tcs map[reflect.Type]codecapi.TypeCodec, _ []int) {
 	c.«$typeName» = «tcIndex .Type».(*«$typeName»)
 }
 
@@ -1112,13 +1112,14 @@ type «$typeName» struct{
 	«range .FieldTypes»
 		«typeID .»_codec *«typeID .»_codec
 	«- end»
+	fieldMap []int
 }
 
-func (c *«$typeName») Init(tcs map[reflect.Type]codecapi.TypeCodec) {
+func (c *«$typeName») Init(tcs map[reflect.Type]codecapi.TypeCodec, fieldMap []int) {
 	«- range .FieldTypes»
 		c.«typeID .»_codec = «tcIndex .».(*«typeID .»_codec)
-
 	«- end»
+	c.fieldMap = fieldMap
 }
 
 func (c *«$typeName») Fields() []string {
@@ -1161,8 +1162,8 @@ func (c *«$typeName») Decode(d *codecapi.Decoder) interface{} {
 func (c *«$typeName») decode(d *codecapi.Decoder, x *«$goName») {
 	d.StartStruct()
 	for {
-		n := d.NextStructField()
-		if n < 0 { break }
+		n := d.NextStructField(c.fieldMap)
+		if n == -1 { break }
 		switch n {
 		«range $i, $f := .Fields -»
 			«- if $f.Type -»

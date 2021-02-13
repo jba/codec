@@ -13,7 +13,7 @@ var definedMap_type = reflect.TypeOf((*definedMap)(nil)).Elem()
 type definedMap_codec struct {
 }
 
-func (c *definedMap_codec) Init(tcs map[reflect.Type]codecapi.TypeCodec) {
+func (c *definedMap_codec) Init(tcs map[reflect.Type]codecapi.TypeCodec, _ []int) {
 }
 
 func (c *definedMap_codec) Fields() []string { return nil }

@@ -14,7 +14,7 @@ type slice_slice_int_codec struct {
 	slice_int_codec *slice_int_codec
 }
 
-func (c *slice_slice_int_codec) Init(tcs map[reflect.Type]codecapi.TypeCodec) {
+func (c *slice_slice_int_codec) Init(tcs map[reflect.Type]codecapi.TypeCodec, _ []int) {
 	c.slice_int_codec = tcs[reflect.TypeOf((*[]int)(nil)).Elem()].(*slice_int_codec)
 
 }
@@ -65,7 +65,7 @@ var slice_int_type = reflect.TypeOf((*[]int)(nil)).Elem()
 type slice_int_codec struct {
 }
 
-func (c *slice_int_codec) Init(tcs map[reflect.Type]codecapi.TypeCodec) {
+func (c *slice_int_codec) Init(tcs map[reflect.Type]codecapi.TypeCodec, _ []int) {
 
 }
 

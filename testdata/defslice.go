@@ -13,7 +13,7 @@ var definedSlice_type = reflect.TypeOf((*definedSlice)(nil)).Elem()
 type definedSlice_codec struct {
 }
 
-func (c *definedSlice_codec) Init(tcs map[reflect.Type]codecapi.TypeCodec) {
+func (c *definedSlice_codec) Init(tcs map[reflect.Type]codecapi.TypeCodec, _ []int) {
 
 }
 

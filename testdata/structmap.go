@@ -13,7 +13,7 @@ var array_1_int_type = reflect.TypeOf((*[1]int)(nil)).Elem()
 type array_1_int_codec struct {
 }
 
-func (c *array_1_int_codec) Init(tcs map[reflect.Type]codecapi.TypeCodec) {
+func (c *array_1_int_codec) Init(tcs map[reflect.Type]codecapi.TypeCodec, _ []int) {
 
 }
 
@@ -60,7 +60,7 @@ var slice_int_type = reflect.TypeOf((*[]int)(nil)).Elem()
 type slice_int_codec struct {
 }
 
-func (c *slice_int_codec) Init(tcs map[reflect.Type]codecapi.TypeCodec) {
+func (c *slice_int_codec) Init(tcs map[reflect.Type]codecapi.TypeCodec, _ []int) {
 
 }
 
@@ -113,7 +113,7 @@ type ptr_smallStruct_codec struct {
 	smallStruct_codec *smallStruct_codec
 }
 
-func (c *ptr_smallStruct_codec) Init(tcs map[reflect.Type]codecapi.TypeCodec) {
+func (c *ptr_smallStruct_codec) Init(tcs map[reflect.Type]codecapi.TypeCodec, _ []int) {
 	c.smallStruct_codec = tcs[reflect.TypeOf((*smallStruct)(nil)).Elem()].(*smallStruct_codec)
 }
 
@@ -156,9 +156,11 @@ func (c ptr_smallStruct_codec) decode(d *codecapi.Decoder, p **smallStruct) {
 var smallStruct_type = ptr_smallStruct_type.Elem()
 
 type smallStruct_codec struct {
+	fieldMap []int
 }
 
-func (c *smallStruct_codec) Init(tcs map[reflect.Type]codecapi.TypeCodec) {
+func (c *smallStruct_codec) Init(tcs map[reflect.Type]codecapi.TypeCodec, fieldMap []int) {
+	c.fieldMap = fieldMap
 }
 
 func (c *smallStruct_codec) Fields() []string {
@@ -192,8 +194,8 @@ func (c *smallStruct_codec) Decode(d *codecapi.Decoder) interface{} {
 func (c *smallStruct_codec) decode(d *codecapi.Decoder, x *smallStruct) {
 	d.StartStruct()
 	for {
-		n := d.NextStructField()
-		if n < 0 {
+		n := d.NextStructField(c.fieldMap)
+		if n == -1 {
 			break
 		}
 		switch n {
@@ -217,7 +219,7 @@ type map__1_int_smallStruct_codec struct {
 	smallStruct_codec *smallStruct_codec
 }
 
-func (c *map__1_int_smallStruct_codec) Init(tcs map[reflect.Type]codecapi.TypeCodec) {
+func (c *map__1_int_smallStruct_codec) Init(tcs map[reflect.Type]codecapi.TypeCodec, _ []int) {
 	c.array_1_int_codec = tcs[reflect.TypeOf((*[1]int)(nil)).Elem()].(*array_1_int_codec)
 	c.smallStruct_codec = tcs[reflect.TypeOf((*smallStruct)(nil)).Elem()].(*smallStruct_codec)
 }

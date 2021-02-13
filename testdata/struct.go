@@ -17,7 +17,7 @@ type ptr_genStruct_codec struct {
 	genStruct_codec *genStruct_codec
 }
 
-func (c *ptr_genStruct_codec) Init(tcs map[reflect.Type]codecapi.TypeCodec) {
+func (c *ptr_genStruct_codec) Init(tcs map[reflect.Type]codecapi.TypeCodec, _ []int) {
 	c.genStruct_codec = tcs[reflect.TypeOf((*genStruct)(nil)).Elem()].(*genStruct_codec)
 }
 
@@ -59,10 +59,12 @@ var genStruct_type = ptr_genStruct_type.Elem()
 
 type genStruct_codec struct {
 	foo_T_codec *foo_T_codec
+	fieldMap    []int
 }
 
-func (c *genStruct_codec) Init(tcs map[reflect.Type]codecapi.TypeCodec) {
+func (c *genStruct_codec) Init(tcs map[reflect.Type]codecapi.TypeCodec, fieldMap []int) {
 	c.foo_T_codec = tcs[reflect.TypeOf((*foo.T)(nil)).Elem()].(*foo_T_codec)
+	c.fieldMap = fieldMap
 }
 
 func (c *genStruct_codec) Fields() []string {
@@ -164,8 +166,8 @@ func (c *genStruct_codec) Decode(d *codecapi.Decoder) interface{} {
 func (c *genStruct_codec) decode(d *codecapi.Decoder, x *genStruct) {
 	d.StartStruct()
 	for {
-		n := d.NextStructField()
-		if n < 0 {
+		n := d.NextStructField(c.fieldMap)
+		if n == -1 {
 			break
 		}
 		switch n {
@@ -221,7 +223,7 @@ var foo_T_type = reflect.TypeOf((*foo.T)(nil)).Elem()
 type foo_T_codec struct {
 }
 
-func (c *foo_T_codec) Init(tcs map[reflect.Type]codecapi.TypeCodec) {
+func (c *foo_T_codec) Init(tcs map[reflect.Type]codecapi.TypeCodec, _ []int) {
 
 }
 

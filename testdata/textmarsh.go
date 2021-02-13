@@ -15,7 +15,7 @@ type net_IP_codec struct{}
 
 func (c *net_IP_codec) Fields() []string { return nil }
 
-func (c *net_IP_codec) Init(map[reflect.Type]codecapi.TypeCodec) {}
+func (c *net_IP_codec) Init(map[reflect.Type]codecapi.TypeCodec, []int) {}
 
 func (c *net_IP_codec) TypesUsed() []reflect.Type { return nil }
 

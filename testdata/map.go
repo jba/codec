@@ -13,7 +13,7 @@ var map_string_bool_type = reflect.TypeOf((*map[string]bool)(nil)).Elem()
 type map_string_bool_codec struct {
 }
 
-func (c *map_string_bool_codec) Init(tcs map[reflect.Type]codecapi.TypeCodec) {
+func (c *map_string_bool_codec) Init(tcs map[reflect.Type]codecapi.TypeCodec, _ []int) {
 }
 
 func (c *map_string_bool_codec) Fields() []string { return nil }
