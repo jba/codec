@@ -23,7 +23,8 @@ func (c *definedSlice_codec) TypesUsed() []reflect.Type {
 	return nil
 }
 
-func (c *definedSlice_codec) CodecsUsed([]codecapi.TypeCodec) {}
+func (c *definedSlice_codec) CodecsUsed(tcs []codecapi.TypeCodec) {
+}
 
 func (c *definedSlice_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	c.encode(e, x.(definedSlice))

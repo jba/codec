@@ -11,6 +11,7 @@ import (
 var array_1_int_type = reflect.TypeOf((*[1]int)(nil)).Elem()
 
 type array_1_int_codec struct {
+	slice_int_codec *slice_int_codec
 }
 
 func (c *array_1_int_codec) Init(tcs map[reflect.Type]codecapi.TypeCodec, _ []int) {
@@ -20,10 +21,15 @@ func (c *array_1_int_codec) Init(tcs map[reflect.Type]codecapi.TypeCodec, _ []in
 func (c *array_1_int_codec) Fields() []string { return nil }
 
 func (c *array_1_int_codec) TypesUsed() []reflect.Type {
-	return nil
+	return []reflect.Type{
+
+		slice_int_type,
+	}
 }
 
-func (c *array_1_int_codec) CodecsUsed([]codecapi.TypeCodec) {}
+func (c *array_1_int_codec) CodecsUsed(tcs []codecapi.TypeCodec) {
+	c.slice_int_codec = tcs[0].(*slice_int_codec)
+}
 
 func (c *array_1_int_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	a := x.([1]int)
@@ -31,7 +37,7 @@ func (c *array_1_int_codec) Encode(e *codecapi.Encoder, x interface{}) {
 }
 
 func (c *array_1_int_codec) encode(e *codecapi.Encoder, s *[1]int) {
-	(&slice_int_codec{}).encode(e, (*s)[:])
+	c.slice_int_codec.encode(e, (*s)[:])
 }
 
 func (c *array_1_int_codec) Decode(d *codecapi.Decoder) interface{} {
@@ -72,7 +78,8 @@ func (c *slice_int_codec) TypesUsed() []reflect.Type {
 	return nil
 }
 
-func (c *slice_int_codec) CodecsUsed([]codecapi.TypeCodec) {}
+func (c *slice_int_codec) CodecsUsed(tcs []codecapi.TypeCodec) {
+}
 
 func (c *slice_int_codec) Encode(e *codecapi.Encoder, x interface{}) { c.encode(e, x.([]int)) }
 
@@ -109,8 +116,6 @@ func init() {
 	codecapi.Register([]int(nil), func() codecapi.TypeCodec { return &slice_int_codec{} })
 }
 
-// Fields of smallStruct: X
-
 var ptr_smallStruct_type = reflect.TypeOf((*smallStruct)(nil))
 
 type ptr_smallStruct_codec struct {
@@ -125,7 +130,9 @@ func (c ptr_smallStruct_codec) Fields() []string { return nil }
 
 func (c ptr_smallStruct_codec) TypesUsed() []reflect.Type { return []reflect.Type{smallStruct_type} }
 
-func (c *ptr_smallStruct_codec) CodecsUsed([]codecapi.TypeCodec) {}
+func (c *ptr_smallStruct_codec) CodecsUsed(tcs []codecapi.TypeCodec) {
+	c.smallStruct_codec = tcs[0].(*smallStruct_codec)
+}
 
 func (c ptr_smallStruct_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	c.encode(e, x.(*smallStruct))
@@ -135,7 +142,7 @@ func (c ptr_smallStruct_codec) encode(e *codecapi.Encoder, x *smallStruct) {
 	if !e.StartPtr(x == nil, x) {
 		return
 	}
-	(&smallStruct_codec{}).encode(e, x)
+	c.smallStruct_codec.encode(e, x)
 }
 
 func (c ptr_smallStruct_codec) Decode(d *codecapi.Decoder) interface{} {
@@ -177,7 +184,8 @@ func (c *smallStruct_codec) TypesUsed() []reflect.Type {
 	return []reflect.Type{}
 }
 
-func (c *smallStruct_codec) CodecsUsed([]codecapi.TypeCodec) {}
+func (c *smallStruct_codec) CodecsUsed(tcs []codecapi.TypeCodec) {
+}
 
 func (c *smallStruct_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	s := x.(smallStruct)
@@ -235,15 +243,17 @@ func (c *map__1_int_smallStruct_codec) Init(tcs map[reflect.Type]codecapi.TypeCo
 func (c *map__1_int_smallStruct_codec) Fields() []string { return nil }
 
 func (c *map__1_int_smallStruct_codec) TypesUsed() []reflect.Type {
+	// TODO:  generate a slice literal
 	var types []reflect.Type
 	types = append(types, array_1_int_type)
-
 	types = append(types, smallStruct_type)
-
 	return types
 }
 
-func (c *map__1_int_smallStruct_codec) CodecsUsed([]codecapi.TypeCodec) {}
+func (c *map__1_int_smallStruct_codec) CodecsUsed(tcs []codecapi.TypeCodec) {
+	c.array_1_int_codec = tcs[0].(*array_1_int_codec)
+	c.smallStruct_codec = tcs[1].(*smallStruct_codec)
+}
 
 func (c *map__1_int_smallStruct_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	c.encode(e, x.(map[[1]int]smallStruct))
@@ -256,8 +266,8 @@ func (c *map__1_int_smallStruct_codec) encode(e *codecapi.Encoder, m map[[1]int]
 	}
 	e.StartList(2 * len(m))
 	for k, v := range m {
-		(&array_1_int_codec{}).encode(e, &k)
-		(&smallStruct_codec{}).encode(e, &v)
+		c.array_1_int_codec.encode(e, &k)
+		c.smallStruct_codec.encode(e, &v)
 	}
 }
 

@@ -9,8 +9,6 @@ import (
 	foo "github.com/jba/codec/internal/testpkg"
 )
 
-// Fields of genStruct: S B I I8 I16 I32 I64 F32 F64 U8 U16 U32 U64 C64 C128 BS T unexported
-
 var ptr_genStruct_type = reflect.TypeOf((*genStruct)(nil))
 
 type ptr_genStruct_codec struct {
@@ -25,7 +23,9 @@ func (c ptr_genStruct_codec) Fields() []string { return nil }
 
 func (c ptr_genStruct_codec) TypesUsed() []reflect.Type { return []reflect.Type{genStruct_type} }
 
-func (c *ptr_genStruct_codec) CodecsUsed([]codecapi.TypeCodec) {}
+func (c *ptr_genStruct_codec) CodecsUsed(tcs []codecapi.TypeCodec) {
+	c.genStruct_codec = tcs[0].(*genStruct_codec)
+}
 
 func (c ptr_genStruct_codec) Encode(e *codecapi.Encoder, x interface{}) { c.encode(e, x.(*genStruct)) }
 
@@ -33,7 +33,7 @@ func (c ptr_genStruct_codec) encode(e *codecapi.Encoder, x *genStruct) {
 	if !e.StartPtr(x == nil, x) {
 		return
 	}
-	(&genStruct_codec{}).encode(e, x)
+	c.genStruct_codec.encode(e, x)
 }
 
 func (c ptr_genStruct_codec) Decode(d *codecapi.Decoder) interface{} {
@@ -77,7 +77,9 @@ func (c *genStruct_codec) TypesUsed() []reflect.Type {
 	return []reflect.Type{foo_T_type}
 }
 
-func (c *genStruct_codec) CodecsUsed([]codecapi.TypeCodec) {}
+func (c *genStruct_codec) CodecsUsed(tcs []codecapi.TypeCodec) {
+	c.foo_T_codec = tcs[0].(*foo_T_codec)
+}
 
 func (c *genStruct_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	s := x.(genStruct)
@@ -152,7 +154,7 @@ func (c *genStruct_codec) encode(e *codecapi.Encoder, x *genStruct) {
 	}
 	if x.T != nil {
 		e.EncodeUint(16)
-		(&foo_T_codec{}).encode(e, foo.T(x.T))
+		c.foo_T_codec.encode(e, foo.T(x.T))
 	}
 	if x.unexported != 0 {
 		e.EncodeUint(17)
@@ -237,7 +239,8 @@ func (c *foo_T_codec) TypesUsed() []reflect.Type {
 	return nil
 }
 
-func (c *foo_T_codec) CodecsUsed([]codecapi.TypeCodec) {}
+func (c *foo_T_codec) CodecsUsed(tcs []codecapi.TypeCodec) {
+}
 
 func (c *foo_T_codec) Encode(e *codecapi.Encoder, x interface{}) { c.encode(e, x.(foo.T)) }
 

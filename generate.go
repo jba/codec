@@ -67,7 +67,6 @@ func generate(w io.Writer, packagePath string, fieldTag string, vs ...interface{
 		"encodeStmt": g.encodeStmt,
 		"decodeStmt": g.decodeStmt,
 		"encodeFunc": g.encodeFunc,
-		"decodeFunc": g.decodeFunc,
 		"tcIndex":    g.tcIndex,
 	}
 
@@ -564,26 +563,13 @@ func encodePtrArg(t reflect.Type) bool {
 
 func (g *generator) encodeFunc(t reflect.Type) string {
 	var typeName string
-	bn, native := builtinName(t)
+	bn, _ := builtinName(t)
 	if bn != "" {
-		_ = native // TODO: ???
 		typeName = "codecapi." + bn
 	} else {
 		typeName = g.typeIdentifier(t)
 	}
-	return fmt.Sprintf("(&%s_codec{}).encode", typeName)
-}
-
-func (g *generator) decodeFunc(t reflect.Type) string {
-	var typeName string
-	bn, native := builtinName(t)
-	if bn != "" {
-		_ = native // TODO: ???
-		typeName = "codecapi." + bn
-	} else {
-		typeName = g.typeIdentifier(t)
-	}
-	return fmt.Sprintf("(%s_codec{}).decode", typeName)
+	return fmt.Sprintf("c.%s_codec.encode", typeName)
 }
 
 func (g *generator) decodeStmt(t reflect.Type, arg string) string {
@@ -741,7 +727,11 @@ func (c *«$typeName») TypesUsed() []reflect.Type {
 	«end -»
 }
 
-func (c *«$typeName») CodecsUsed([]codecapi.TypeCodec) {}
+func (c *«$typeName») CodecsUsed(tcs []codecapi.TypeCodec) {
+	«if .ElField -»
+		c.«$elTypeID»_codec = tcs[0].(*«$elTypeID»_codec)
+	«end -»
+}
 
 func (c *«$typeName») Encode(e *codecapi.Encoder, x interface{}) { c.encode(e, x.(«$goName»)) }
 
@@ -784,13 +774,18 @@ const arrayBody = `
 « $goName := goName .Type »
 « $elTypeID := typeID .ElType »
 « $elTypeCodec := print $elTypeID "_codec" »
+« $sliceTypeID := typeID .SliceType »
+« $sliceTypeCodec := print $sliceTypeID "_codec" »
 
 var «$typeID»_type = reflect.TypeOf((*«$goName»)(nil)).Elem()
 
 type «$typeName» struct {
-	«if .ElField»
+	«if .ElField -»
 		«$elTypeCodec» *«$elTypeCodec»
-	«end»
+	«end -»
+	«if not .IsBytes -»
+		«$sliceTypeCodec» *«$sliceTypeCodec»
+	«end -»
 }
 
 func (c *«$typeName») Init(tcs map[reflect.Type]codecapi.TypeCodec, _ []int) {
@@ -802,14 +797,20 @@ func (c *«$typeName») Init(tcs map[reflect.Type]codecapi.TypeCodec, _ []int) {
 func (c *«$typeName») Fields() []string { return nil }
 
 func (c *«$typeName») TypesUsed() []reflect.Type {
-	«if .ElField -»
-		return []reflect.Type{«$elTypeID»_type}
-	«else -»
-		return nil
-	«end -»
+	return []reflect.Type{
+		«if .ElField» «$elTypeID»_type, «end»
+		«if not .IsBytes» «$sliceTypeID»_type, «end»
+	}
 }
 
-func (c *«$typeName») CodecsUsed([]codecapi.TypeCodec) {}
+func (c *«$typeName») CodecsUsed(tcs []codecapi.TypeCodec) {
+	«if .ElField -»
+		c.«$elTypeCodec» = tcs[0].(*«$elTypeCodec»)
+	«end -»
+	«if not .IsBytes -»
+		c.«$sliceTypeID»_codec = tcs[«if .ElField»1«else»0«end»].(*«$sliceTypeID»_codec)
+	«end -»
+}
 
 func (c *«$typeName») Encode(e *codecapi.Encoder, x interface{}) {
 	a := x.(«$goName»)
@@ -886,17 +887,26 @@ func (c *«$typeName») Init(tcs map[reflect.Type]codecapi.TypeCodec, _ []int) {
 func (c *«$typeName») Fields() []string { return nil }
 
 func (c *«$typeName») TypesUsed() []reflect.Type {
+	// TODO:  generate a slice literal
 	var types []reflect.Type
 	«if .KeyField -»
 		types = append(types, «$keyTypeID»_type)
-	«end»
+	«end -»
 	«if .ElField -»
 		types = append(types, «$elTypeID»_type)
-	«end»
+	«end -»
 	return types
 }
 
-func (c *«$typeName») CodecsUsed([]codecapi.TypeCodec) {}
+func (c *«$typeName») CodecsUsed(tcs []codecapi.TypeCodec) {
+	«if .KeyField -»
+		c.«$keyTypeID»_codec = tcs[0].(*«$keyTypeID»_codec)
+	«end -»
+	«if .ElField -»
+		c.«$elTypeID»_codec = tcs[«if .KeyField»1«else»0«end»].(*«$elTypeID»_codec)
+	«end -»
+}
+
 
 func (c *«$typeName») Encode(e *codecapi.Encoder, x interface{}) { c.encode(e, x.(«$goName»)) }
 
@@ -994,8 +1004,6 @@ const structBody = `
 « $ptrTypeName := print "ptr_" $typeName »
 « $goName := goName .Type »
 
-// Fields of «$typeID»:«range .Fields» «.Name»«end»
-
 var ptr_«$typeID»_type = reflect.TypeOf((*«$goName»)(nil))
 
 type «$ptrTypeName» struct {
@@ -1010,13 +1018,15 @@ func (c «$ptrTypeName») Fields() []string { return nil }
 
 func (c «$ptrTypeName») TypesUsed() []reflect.Type { return []reflect.Type{«$typeID»_type} }
 
-func (c *«$ptrTypeName») CodecsUsed([]codecapi.TypeCodec) {}
+func (c *«$ptrTypeName») CodecsUsed(tcs []codecapi.TypeCodec) {
+	c.«$typeName» = tcs[0].(*«$typeName»)
+}
 
 func (c «$ptrTypeName») Encode(e *codecapi.Encoder, x interface{}) { c.encode(e, x.(*«$goName»)) }
 
 func (c «$ptrTypeName») encode(e *codecapi.Encoder, x *«$goName») {
 	if !e.StartPtr(x==nil, x) { return }
-	(&«$typeName»{}).encode(e, x)
+	c.«$typeName».encode(e, x)
 }
 
 func (c «$ptrTypeName») Decode(d *codecapi.Decoder) interface{} {
@@ -1062,7 +1072,11 @@ func (c *«$typeName») TypesUsed() []reflect.Type {
 	return []reflect.Type{«range .FieldTypes» «typeID .»_type, «end»}
 }
 
-func (c *«$typeName») CodecsUsed([]codecapi.TypeCodec) {}
+func (c *«$typeName») CodecsUsed(tcs []codecapi.TypeCodec) {
+	«- range $i, $t := .FieldTypes»
+		c.«typeID .»_codec = tcs[«$i»].(*«typeID $t»_codec)
+	«- end»
+}
 
 func (c *«$typeName») Encode(e *codecapi.Encoder, x interface{}) {
 	s := x.(«$goName»)

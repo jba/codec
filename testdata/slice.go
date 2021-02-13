@@ -25,7 +25,9 @@ func (c *slice_slice_int_codec) TypesUsed() []reflect.Type {
 	return []reflect.Type{slice_int_type}
 }
 
-func (c *slice_slice_int_codec) CodecsUsed([]codecapi.TypeCodec) {}
+func (c *slice_slice_int_codec) CodecsUsed(tcs []codecapi.TypeCodec) {
+	c.slice_int_codec = tcs[0].(*slice_int_codec)
+}
 
 func (c *slice_slice_int_codec) Encode(e *codecapi.Encoder, x interface{}) { c.encode(e, x.([][]int)) }
 
@@ -36,7 +38,7 @@ func (c *slice_slice_int_codec) encode(e *codecapi.Encoder, s [][]int) {
 	}
 	e.StartList(len(s))
 	for _, x := range s {
-		(&slice_int_codec{}).encode(e, x)
+		c.slice_int_codec.encode(e, x)
 	}
 }
 
@@ -77,7 +79,8 @@ func (c *slice_int_codec) TypesUsed() []reflect.Type {
 	return nil
 }
 
-func (c *slice_int_codec) CodecsUsed([]codecapi.TypeCodec) {}
+func (c *slice_int_codec) CodecsUsed(tcs []codecapi.TypeCodec) {
+}
 
 func (c *slice_int_codec) Encode(e *codecapi.Encoder, x interface{}) { c.encode(e, x.([]int)) }
 

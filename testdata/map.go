@@ -19,12 +19,13 @@ func (c *map_string_bool_codec) Init(tcs map[reflect.Type]codecapi.TypeCodec, _ 
 func (c *map_string_bool_codec) Fields() []string { return nil }
 
 func (c *map_string_bool_codec) TypesUsed() []reflect.Type {
+	// TODO:  generate a slice literal
 	var types []reflect.Type
-
 	return types
 }
 
-func (c *map_string_bool_codec) CodecsUsed([]codecapi.TypeCodec) {}
+func (c *map_string_bool_codec) CodecsUsed(tcs []codecapi.TypeCodec) {
+}
 
 func (c *map_string_bool_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	c.encode(e, x.(map[string]bool))
