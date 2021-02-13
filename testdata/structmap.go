@@ -218,11 +218,10 @@ type map__1_int_smallStruct_codec struct {
 }
 
 func (c *map__1_int_smallStruct_codec) TypesUsed() []reflect.Type {
-	// TODO:  generate a slice literal
-	var types []reflect.Type
-	types = append(types, array_1_int_type)
-	types = append(types, smallStruct_type)
-	return types
+	return []reflect.Type{
+		array_1_int_type,
+		smallStruct_type,
+	}
 }
 
 func (c *map__1_int_smallStruct_codec) SetCodecs(tcs []codecapi.TypeCodec) {

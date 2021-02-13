@@ -15,9 +15,7 @@ type map_string_bool_codec struct {
 }
 
 func (c *map_string_bool_codec) TypesUsed() []reflect.Type {
-	// TODO:  generate a slice literal
-	var types []reflect.Type
-	return types
+	return []reflect.Type{}
 }
 
 func (c *map_string_bool_codec) SetCodecs(tcs []codecapi.TypeCodec) {

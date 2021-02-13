@@ -381,9 +381,7 @@ type definedMap_codec struct {
 }
 
 func (c *definedMap_codec) TypesUsed() []reflect.Type {
-	// TODO:  generate a slice literal
-	var types []reflect.Type
-	return types
+	return []reflect.Type{}
 }
 
 func (c *definedMap_codec) SetCodecs(tcs []codecapi.TypeCodec) {
@@ -863,11 +861,10 @@ type map__1_int_structType_codec struct {
 }
 
 func (c *map__1_int_structType_codec) TypesUsed() []reflect.Type {
-	// TODO:  generate a slice literal
-	var types []reflect.Type
-	types = append(types, array_1_int_type)
-	types = append(types, structType_type)
-	return types
+	return []reflect.Type{
+		array_1_int_type,
+		structType_type,
+	}
 }
 
 func (c *map__1_int_structType_codec) SetCodecs(tcs []codecapi.TypeCodec) {
@@ -925,9 +922,7 @@ type map_string_bool_codec struct {
 }
 
 func (c *map_string_bool_codec) TypesUsed() []reflect.Type {
-	// TODO:  generate a slice literal
-	var types []reflect.Type
-	return types
+	return []reflect.Type{}
 }
 
 func (c *map_string_bool_codec) SetCodecs(tcs []codecapi.TypeCodec) {

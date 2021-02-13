@@ -862,15 +862,10 @@ type «$typeName» struct {
 }
 
 func (c *«$typeName») TypesUsed() []reflect.Type {
-	// TODO:  generate a slice literal
-	var types []reflect.Type
-	«if .KeyField -»
-		types = append(types, «$keyTypeID»_type)
-	«end -»
-	«if .ElField -»
-		types = append(types, «$elTypeID»_type)
-	«end -»
-	return types
+	return []reflect.Type{
+		«if .KeyField» «$keyTypeID»_type, «end»
+		«if .ElField»  «$elTypeID»_type,  «end»
+	}
 }
 
 func (c *«$typeName») SetCodecs(tcs []codecapi.TypeCodec) {

@@ -15,9 +15,7 @@ type definedMap_codec struct {
 }
 
 func (c *definedMap_codec) TypesUsed() []reflect.Type {
-	// TODO:  generate a slice literal
-	var types []reflect.Type
-	return types
+	return []reflect.Type{}
 }
 
 func (c *definedMap_codec) SetCodecs(tcs []codecapi.TypeCodec) {
