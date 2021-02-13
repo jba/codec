@@ -19,6 +19,8 @@ func (c *net_IP_codec) Init(map[reflect.Type]codecapi.TypeCodec, []int) {}
 
 func (c *net_IP_codec) TypesUsed() []reflect.Type { return nil }
 
+func (c *net_IP_codec) CodecsUsed([]codecapi.TypeCodec) {}
+
 func (c *net_IP_codec) Encode(e *codecapi.Encoder, x interface{}) { c.encode(e, x.(net.IP)) }
 
 func (c *net_IP_codec) encode(e *codecapi.Encoder, m net.IP) {

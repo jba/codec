@@ -633,9 +633,15 @@ func (e *Encoder) recordType(t reflect.Type) (TypeCodec, int) {
 	tc := tcb()
 	num := len(e.typeInfos)
 	e.typeInfos[t] = typeInfo{tc, num}
-	for _, tu := range tc.TypesUsed() {
-		e.recordType(tu)
+	tus := tc.TypesUsed()
+	tcs := make([]TypeCodec, len(tus))
+	for i, tu := range tus {
+		tc2, _ := e.recordType(tu)
+		tcs[i] = tc2
 	}
+	// Give this TypeCodec the codecs for the types it uses, so it
+	// can set its fields.
+	tc.CodecsUsed(tcs)
 	return tc, num
 }
 

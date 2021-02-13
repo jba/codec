@@ -19,6 +19,8 @@ func (c *time_Time_codec) Init(map[reflect.Type]codecapi.TypeCodec, []int) {}
 
 func (c *time_Time_codec) TypesUsed() []reflect.Type { return nil }
 
+func (c *time_Time_codec) CodecsUsed([]codecapi.TypeCodec) {}
+
 func (c *time_Time_codec) Encode(e *codecapi.Encoder, x interface{}) { c.encode(e, x.(time.Time)) }
 
 func (c *time_Time_codec) encode(e *codecapi.Encoder, m time.Time) {

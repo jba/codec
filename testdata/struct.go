@@ -25,6 +25,8 @@ func (c ptr_genStruct_codec) Fields() []string { return nil }
 
 func (c ptr_genStruct_codec) TypesUsed() []reflect.Type { return []reflect.Type{genStruct_type} }
 
+func (c *ptr_genStruct_codec) CodecsUsed([]codecapi.TypeCodec) {}
+
 func (c ptr_genStruct_codec) Encode(e *codecapi.Encoder, x interface{}) { c.encode(e, x.(*genStruct)) }
 
 func (c ptr_genStruct_codec) encode(e *codecapi.Encoder, x *genStruct) {
@@ -74,6 +76,8 @@ func (c *genStruct_codec) Fields() []string {
 func (c *genStruct_codec) TypesUsed() []reflect.Type {
 	return []reflect.Type{foo_T_type}
 }
+
+func (c *genStruct_codec) CodecsUsed([]codecapi.TypeCodec) {}
 
 func (c *genStruct_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	s := x.(genStruct)
@@ -232,6 +236,8 @@ func (c *foo_T_codec) Fields() []string { return nil }
 func (c *foo_T_codec) TypesUsed() []reflect.Type {
 	return nil
 }
+
+func (c *foo_T_codec) CodecsUsed([]codecapi.TypeCodec) {}
 
 func (c *foo_T_codec) Encode(e *codecapi.Encoder, x interface{}) { c.encode(e, x.(foo.T)) }
 

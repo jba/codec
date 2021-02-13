@@ -28,6 +28,8 @@ func (c ptr_node_codec) Fields() []string { return nil }
 
 func (c ptr_node_codec) TypesUsed() []reflect.Type { return []reflect.Type{node_type} }
 
+func (c *ptr_node_codec) CodecsUsed([]codecapi.TypeCodec) {}
+
 func (c ptr_node_codec) Encode(e *codecapi.Encoder, x interface{}) { c.encode(e, x.(*node)) }
 
 func (c ptr_node_codec) encode(e *codecapi.Encoder, x *node) {
@@ -77,6 +79,8 @@ func (c *node_codec) Fields() []string {
 func (c *node_codec) TypesUsed() []reflect.Type {
 	return []reflect.Type{ptr_node_type}
 }
+
+func (c *node_codec) CodecsUsed([]codecapi.TypeCodec) {}
 
 func (c *node_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	s := x.(node)
@@ -142,6 +146,8 @@ func (c *array_1_structType_codec) TypesUsed() []reflect.Type {
 	return []reflect.Type{structType_type}
 }
 
+func (c *array_1_structType_codec) CodecsUsed([]codecapi.TypeCodec) {}
+
 func (c *array_1_structType_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	a := x.([1]structType)
 	c.encode(e, &a)
@@ -188,6 +194,8 @@ func (c *array_1_int_codec) Fields() []string { return nil }
 func (c *array_1_int_codec) TypesUsed() []reflect.Type {
 	return nil
 }
+
+func (c *array_1_int_codec) CodecsUsed([]codecapi.TypeCodec) {}
 
 func (c *array_1_int_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	a := x.([1]int)
@@ -237,6 +245,8 @@ func (c *slice_structType_codec) Fields() []string { return nil }
 func (c *slice_structType_codec) TypesUsed() []reflect.Type {
 	return []reflect.Type{structType_type}
 }
+
+func (c *slice_structType_codec) CodecsUsed([]codecapi.TypeCodec) {}
 
 func (c *slice_structType_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	c.encode(e, x.([]structType))
@@ -290,6 +300,8 @@ func (c *slice_int_codec) TypesUsed() []reflect.Type {
 	return nil
 }
 
+func (c *slice_int_codec) CodecsUsed([]codecapi.TypeCodec) {}
+
 func (c *slice_int_codec) Encode(e *codecapi.Encoder, x interface{}) { c.encode(e, x.([]int)) }
 
 func (c *slice_int_codec) encode(e *codecapi.Encoder, s []int) {
@@ -340,6 +352,8 @@ func (c *definedArray_codec) TypesUsed() []reflect.Type {
 	return nil
 }
 
+func (c *definedArray_codec) CodecsUsed([]codecapi.TypeCodec) {}
+
 func (c *definedArray_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	a := x.(definedArray)
 	c.encode(e, &a)
@@ -387,6 +401,8 @@ func (c *definedMap_codec) TypesUsed() []reflect.Type {
 
 	return types
 }
+
+func (c *definedMap_codec) CodecsUsed([]codecapi.TypeCodec) {}
 
 func (c *definedMap_codec) Encode(e *codecapi.Encoder, x interface{}) { c.encode(e, x.(definedMap)) }
 
@@ -444,6 +460,8 @@ func (c *definedSlice_codec) TypesUsed() []reflect.Type {
 	return nil
 }
 
+func (c *definedSlice_codec) CodecsUsed([]codecapi.TypeCodec) {}
+
 func (c *definedSlice_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	c.encode(e, x.(definedSlice))
 }
@@ -498,6 +516,8 @@ func (c ptr_generatedTestTypes_codec) Fields() []string { return nil }
 func (c ptr_generatedTestTypes_codec) TypesUsed() []reflect.Type {
 	return []reflect.Type{generatedTestTypes_type}
 }
+
+func (c *ptr_generatedTestTypes_codec) CodecsUsed([]codecapi.TypeCodec) {}
 
 func (c ptr_generatedTestTypes_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	c.encode(e, x.(*generatedTestTypes))
@@ -574,6 +594,8 @@ func (c *generatedTestTypes_codec) Fields() []string {
 func (c *generatedTestTypes_codec) TypesUsed() []reflect.Type {
 	return []reflect.Type{ptr_node_type, array_1_structType_type, array_1_int_type, slice_structType_type, slice_int_type, definedArray_type, definedMap_type, definedSlice_type, structType_type, foo_T_type, map__1_int_structType_type, map_string_bool_type, time_Time_type}
 }
+
+func (c *generatedTestTypes_codec) CodecsUsed([]codecapi.TypeCodec) {}
 
 func (c *generatedTestTypes_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	s := x.(generatedTestTypes)
@@ -711,6 +733,8 @@ func (c ptr_structType_codec) Fields() []string { return nil }
 
 func (c ptr_structType_codec) TypesUsed() []reflect.Type { return []reflect.Type{structType_type} }
 
+func (c *ptr_structType_codec) CodecsUsed([]codecapi.TypeCodec) {}
+
 func (c ptr_structType_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	c.encode(e, x.(*structType))
 }
@@ -762,6 +786,8 @@ func (c *structType_codec) Fields() []string {
 func (c *structType_codec) TypesUsed() []reflect.Type {
 	return []reflect.Type{node_type}
 }
+
+func (c *structType_codec) CodecsUsed([]codecapi.TypeCodec) {}
 
 func (c *structType_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	s := x.(structType)
@@ -830,6 +856,8 @@ func (c *foo_T_codec) TypesUsed() []reflect.Type {
 	return nil
 }
 
+func (c *foo_T_codec) CodecsUsed([]codecapi.TypeCodec) {}
+
 func (c *foo_T_codec) Encode(e *codecapi.Encoder, x interface{}) { c.encode(e, x.(foo.T)) }
 
 func (c *foo_T_codec) encode(e *codecapi.Encoder, s foo.T) {
@@ -887,6 +915,8 @@ func (c *map__1_int_structType_codec) TypesUsed() []reflect.Type {
 
 	return types
 }
+
+func (c *map__1_int_structType_codec) CodecsUsed([]codecapi.TypeCodec) {}
 
 func (c *map__1_int_structType_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	c.encode(e, x.(map[[1]int]structType))
@@ -947,6 +977,8 @@ func (c *map_string_bool_codec) TypesUsed() []reflect.Type {
 	return types
 }
 
+func (c *map_string_bool_codec) CodecsUsed([]codecapi.TypeCodec) {}
+
 func (c *map_string_bool_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	c.encode(e, x.(map[string]bool))
 }
@@ -1000,6 +1032,8 @@ func (c *net_IP_codec) Init(map[reflect.Type]codecapi.TypeCodec, []int) {}
 
 func (c *net_IP_codec) TypesUsed() []reflect.Type { return nil }
 
+func (c *net_IP_codec) CodecsUsed([]codecapi.TypeCodec) {}
+
 func (c *net_IP_codec) Encode(e *codecapi.Encoder, x interface{}) { c.encode(e, x.(net.IP)) }
 
 func (c *net_IP_codec) encode(e *codecapi.Encoder, m net.IP) {
@@ -1034,6 +1068,8 @@ func (c *time_Time_codec) Fields() []string { return nil }
 func (c *time_Time_codec) Init(map[reflect.Type]codecapi.TypeCodec, []int) {}
 
 func (c *time_Time_codec) TypesUsed() []reflect.Type { return nil }
+
+func (c *time_Time_codec) CodecsUsed([]codecapi.TypeCodec) {}
 
 func (c *time_Time_codec) Encode(e *codecapi.Encoder, x interface{}) { c.encode(e, x.(time.Time)) }
 

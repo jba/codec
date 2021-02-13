@@ -24,6 +24,8 @@ func (c *definedMap_codec) TypesUsed() []reflect.Type {
 	return types
 }
 
+func (c *definedMap_codec) CodecsUsed([]codecapi.TypeCodec) {}
+
 func (c *definedMap_codec) Encode(e *codecapi.Encoder, x interface{}) { c.encode(e, x.(definedMap)) }
 
 func (c *definedMap_codec) encode(e *codecapi.Encoder, m definedMap) {

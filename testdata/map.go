@@ -24,6 +24,8 @@ func (c *map_string_bool_codec) TypesUsed() []reflect.Type {
 	return types
 }
 
+func (c *map_string_bool_codec) CodecsUsed([]codecapi.TypeCodec) {}
+
 func (c *map_string_bool_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	c.encode(e, x.(map[string]bool))
 }

@@ -741,6 +741,8 @@ func (c *«$typeName») TypesUsed() []reflect.Type {
 	«end -»
 }
 
+func (c *«$typeName») CodecsUsed([]codecapi.TypeCodec) {}
+
 func (c *«$typeName») Encode(e *codecapi.Encoder, x interface{}) { c.encode(e, x.(«$goName»)) }
 
 func (c *«$typeName») encode(e *codecapi.Encoder, s «$goName») {
@@ -806,6 +808,8 @@ func (c *«$typeName») TypesUsed() []reflect.Type {
 		return nil
 	«end -»
 }
+
+func (c *«$typeName») CodecsUsed([]codecapi.TypeCodec) {}
 
 func (c *«$typeName») Encode(e *codecapi.Encoder, x interface{}) {
 	a := x.(«$goName»)
@@ -892,6 +896,7 @@ func (c *«$typeName») TypesUsed() []reflect.Type {
 	return types
 }
 
+func (c *«$typeName») CodecsUsed([]codecapi.TypeCodec) {}
 
 func (c *«$typeName») Encode(e *codecapi.Encoder, x interface{}) { c.encode(e, x.(«$goName»)) }
 
@@ -946,6 +951,8 @@ func (c *«$typeName») Fields() []string { return nil }
 func (c *«$typeName») Init(map[reflect.Type]codecapi.TypeCodec, []int) {}
 
 func (c *«$typeName») TypesUsed() []reflect.Type { return nil }
+
+func (c *«$typeName») CodecsUsed([]codecapi.TypeCodec) {}
 
 func (c *«$typeName») Encode(e *codecapi.Encoder, x interface{}) { c.encode(e, x.(«$goName»)) }
 
@@ -1003,6 +1010,8 @@ func (c «$ptrTypeName») Fields() []string { return nil }
 
 func (c «$ptrTypeName») TypesUsed() []reflect.Type { return []reflect.Type{«$typeID»_type} }
 
+func (c *«$ptrTypeName») CodecsUsed([]codecapi.TypeCodec) {}
+
 func (c «$ptrTypeName») Encode(e *codecapi.Encoder, x interface{}) { c.encode(e, x.(*«$goName»)) }
 
 func (c «$ptrTypeName») encode(e *codecapi.Encoder, x *«$goName») {
@@ -1053,6 +1062,7 @@ func (c *«$typeName») TypesUsed() []reflect.Type {
 	return []reflect.Type{«range .FieldTypes» «typeID .»_type, «end»}
 }
 
+func (c *«$typeName») CodecsUsed([]codecapi.TypeCodec) {}
 
 func (c *«$typeName») Encode(e *codecapi.Encoder, x interface{}) {
 	s := x.(«$goName»)

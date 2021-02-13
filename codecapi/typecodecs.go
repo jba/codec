@@ -14,6 +14,7 @@ import (
 type TypeCodec interface {
 	Fields() []string          // the names of all the struct fields, if this is a struct
 	TypesUsed() []reflect.Type // all the types this codec uses, not including itself
+	CodecsUsed([]TypeCodec)    // a codec for each element of TypesUsed
 	Init(typeCodecs map[reflect.Type]TypeCodec, fieldMap []int)
 	Encode(*Encoder, interface{})
 	Decode(*Decoder) interface{}
@@ -109,6 +110,7 @@ type prim struct{}
 
 func (prim) Fields() []string                       { return nil }
 func (prim) TypesUsed() []reflect.Type              { return nil }
+func (prim) CodecsUsed([]TypeCodec)                 {}
 func (prim) Init(map[reflect.Type]TypeCodec, []int) {}
 
 type boolCodec struct{ prim }

@@ -25,6 +25,8 @@ func (c *slice_smallStruct_codec) TypesUsed() []reflect.Type {
 	return []reflect.Type{smallStruct_type}
 }
 
+func (c *slice_smallStruct_codec) CodecsUsed([]codecapi.TypeCodec) {}
+
 func (c *slice_smallStruct_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	c.encode(e, x.([]smallStruct))
 }
@@ -78,6 +80,8 @@ func (c ptr_smallStruct_codec) Fields() []string { return nil }
 
 func (c ptr_smallStruct_codec) TypesUsed() []reflect.Type { return []reflect.Type{smallStruct_type} }
 
+func (c *ptr_smallStruct_codec) CodecsUsed([]codecapi.TypeCodec) {}
+
 func (c ptr_smallStruct_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	c.encode(e, x.(*smallStruct))
 }
@@ -127,6 +131,8 @@ func (c *smallStruct_codec) Fields() []string {
 func (c *smallStruct_codec) TypesUsed() []reflect.Type {
 	return []reflect.Type{}
 }
+
+func (c *smallStruct_codec) CodecsUsed([]codecapi.TypeCodec) {}
 
 func (c *smallStruct_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	s := x.(smallStruct)

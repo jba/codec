@@ -23,6 +23,8 @@ func (c *slice_int_codec) TypesUsed() []reflect.Type {
 	return nil
 }
 
+func (c *slice_int_codec) CodecsUsed([]codecapi.TypeCodec) {}
+
 func (c *slice_int_codec) Encode(e *codecapi.Encoder, x interface{}) { c.encode(e, x.([]int)) }
 
 func (c *slice_int_codec) encode(e *codecapi.Encoder, s []int) {
@@ -72,6 +74,8 @@ func (c *definedArray_codec) Fields() []string { return nil }
 func (c *definedArray_codec) TypesUsed() []reflect.Type {
 	return nil
 }
+
+func (c *definedArray_codec) CodecsUsed([]codecapi.TypeCodec) {}
 
 func (c *definedArray_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	a := x.(definedArray)
