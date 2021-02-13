@@ -12,18 +12,13 @@ import (
 var ptr_genStruct_type = reflect.TypeOf((*genStruct)(nil))
 
 type ptr_genStruct_codec struct {
+	codecapi.NonStruct
 	genStruct_codec *genStruct_codec
 }
 
-func (c *ptr_genStruct_codec) Init(tcs map[reflect.Type]codecapi.TypeCodec, _ []int) {
-	c.genStruct_codec = tcs[reflect.TypeOf((*genStruct)(nil)).Elem()].(*genStruct_codec)
-}
-
-func (c ptr_genStruct_codec) Fields() []string { return nil }
-
 func (c ptr_genStruct_codec) TypesUsed() []reflect.Type { return []reflect.Type{genStruct_type} }
 
-func (c *ptr_genStruct_codec) CodecsUsed(tcs []codecapi.TypeCodec) {
+func (c *ptr_genStruct_codec) SetCodecs(tcs []codecapi.TypeCodec) {
 	c.genStruct_codec = tcs[0].(*genStruct_codec)
 }
 
@@ -64,20 +59,19 @@ type genStruct_codec struct {
 	fieldMap    []int
 }
 
-func (c *genStruct_codec) Init(tcs map[reflect.Type]codecapi.TypeCodec, fieldMap []int) {
-	c.foo_T_codec = tcs[reflect.TypeOf((*foo.T)(nil)).Elem()].(*foo_T_codec)
-	c.fieldMap = fieldMap
-}
-
 func (c *genStruct_codec) Fields() []string {
 	return []string{"S", "B", "I", "I8", "I16", "I32", "I64", "F32", "F64", "U8", "U16", "U32", "U64", "C64", "C128", "BS", "T", "unexported"}
+}
+
+func (c *genStruct_codec) SetFieldMap(fm []int) {
+	c.fieldMap = fm
 }
 
 func (c *genStruct_codec) TypesUsed() []reflect.Type {
 	return []reflect.Type{foo_T_type}
 }
 
-func (c *genStruct_codec) CodecsUsed(tcs []codecapi.TypeCodec) {
+func (c *genStruct_codec) SetCodecs(tcs []codecapi.TypeCodec) {
 	c.foo_T_codec = tcs[0].(*foo_T_codec)
 }
 
@@ -227,20 +221,11 @@ func init() {
 var foo_T_type = reflect.TypeOf((*foo.T)(nil)).Elem()
 
 type foo_T_codec struct {
+	codecapi.NonStruct
 }
 
-func (c *foo_T_codec) Init(tcs map[reflect.Type]codecapi.TypeCodec, _ []int) {
-
-}
-
-func (c *foo_T_codec) Fields() []string { return nil }
-
-func (c *foo_T_codec) TypesUsed() []reflect.Type {
-	return nil
-}
-
-func (c *foo_T_codec) CodecsUsed(tcs []codecapi.TypeCodec) {
-}
+func (c *foo_T_codec) TypesUsed() []reflect.Type      { return nil }
+func (c *foo_T_codec) SetCodecs([]codecapi.TypeCodec) {}
 
 func (c *foo_T_codec) Encode(e *codecapi.Encoder, x interface{}) { c.encode(e, x.(foo.T)) }
 

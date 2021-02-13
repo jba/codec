@@ -11,20 +11,11 @@ import (
 var slice_interface_type = reflect.TypeOf((*[]interface{})(nil)).Elem()
 
 type slice_interface_codec struct {
+	codecapi.NonStruct
 }
 
-func (c *slice_interface_codec) Init(tcs map[reflect.Type]codecapi.TypeCodec, _ []int) {
-
-}
-
-func (c *slice_interface_codec) Fields() []string { return nil }
-
-func (c *slice_interface_codec) TypesUsed() []reflect.Type {
-	return nil
-}
-
-func (c *slice_interface_codec) CodecsUsed(tcs []codecapi.TypeCodec) {
-}
+func (c *slice_interface_codec) TypesUsed() []reflect.Type      { return nil }
+func (c *slice_interface_codec) SetCodecs([]codecapi.TypeCodec) {}
 
 func (c *slice_interface_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	c.encode(e, x.([]interface{}))

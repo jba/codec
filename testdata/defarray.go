@@ -11,20 +11,11 @@ import (
 var slice_int_type = reflect.TypeOf((*[]int)(nil)).Elem()
 
 type slice_int_codec struct {
+	codecapi.NonStruct
 }
 
-func (c *slice_int_codec) Init(tcs map[reflect.Type]codecapi.TypeCodec, _ []int) {
-
-}
-
-func (c *slice_int_codec) Fields() []string { return nil }
-
-func (c *slice_int_codec) TypesUsed() []reflect.Type {
-	return nil
-}
-
-func (c *slice_int_codec) CodecsUsed(tcs []codecapi.TypeCodec) {
-}
+func (c *slice_int_codec) TypesUsed() []reflect.Type      { return nil }
+func (c *slice_int_codec) SetCodecs([]codecapi.TypeCodec) {}
 
 func (c *slice_int_codec) Encode(e *codecapi.Encoder, x interface{}) { c.encode(e, x.([]int)) }
 
@@ -64,14 +55,9 @@ func init() {
 var definedArray_type = reflect.TypeOf((*definedArray)(nil)).Elem()
 
 type definedArray_codec struct {
+	codecapi.NonStruct
 	slice_int_codec *slice_int_codec
 }
-
-func (c *definedArray_codec) Init(tcs map[reflect.Type]codecapi.TypeCodec, _ []int) {
-
-}
-
-func (c *definedArray_codec) Fields() []string { return nil }
 
 func (c *definedArray_codec) TypesUsed() []reflect.Type {
 	return []reflect.Type{
@@ -80,7 +66,7 @@ func (c *definedArray_codec) TypesUsed() []reflect.Type {
 	}
 }
 
-func (c *definedArray_codec) CodecsUsed(tcs []codecapi.TypeCodec) {
+func (c *definedArray_codec) SetCodecs(tcs []codecapi.TypeCodec) {
 	c.slice_int_codec = tcs[0].(*slice_int_codec)
 }
 

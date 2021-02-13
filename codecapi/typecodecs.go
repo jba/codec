@@ -12,10 +12,10 @@ import (
 
 // A TypeCodec handles encoding and decoding of a particular type.
 type TypeCodec interface {
-	Fields() []string          // the names of all the struct fields, if this is a struct
-	TypesUsed() []reflect.Type // all the types this codec uses, not including itself
-	CodecsUsed([]TypeCodec)    // a codec for each element of TypesUsed
-	Init(typeCodecs map[reflect.Type]TypeCodec, fieldMap []int)
+	Fields() []string           // the names of all the struct fields, if this is a struct
+	TypesUsed() []reflect.Type  // all the types this codec uses, not including itself
+	SetCodecs([]TypeCodec)      // a codec for each element of TypesUsed
+	SetFieldMap(fieldMap []int) // mapping from from encoded to generated struct fields
 	Encode(*Encoder, interface{})
 	Decode(*Decoder) interface{}
 }
@@ -106,12 +106,19 @@ func Register(x interface{}, tcb func() TypeCodec) {
 	nameToType[tn] = t
 }
 
-type prim struct{}
+// NonStruct defines TypeCodec methods that don't apply to non-struct types.
+// It is intended to be embedded in TypeCodecs for such types.
+type NonStruct struct{}
 
-func (prim) Fields() []string                       { return nil }
-func (prim) TypesUsed() []reflect.Type              { return nil }
-func (prim) CodecsUsed([]TypeCodec)                 {}
-func (prim) Init(map[reflect.Type]TypeCodec, []int) {}
+func (NonStruct) Fields() []string  { return nil }
+func (NonStruct) SetFieldMap([]int) {}
+
+type prim struct {
+	NonStruct
+}
+
+func (prim) TypesUsed() []reflect.Type { return nil }
+func (prim) SetCodecs([]TypeCodec)     {}
 
 type boolCodec struct{ prim }
 

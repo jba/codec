@@ -641,7 +641,7 @@ func (e *Encoder) recordType(t reflect.Type) (TypeCodec, int) {
 	}
 	// Give this TypeCodec the codecs for the types it uses, so it
 	// can set its fields.
-	tc.CodecsUsed(tcs)
+	tc.SetCodecs(tcs)
 	return tc, num
 }
 
@@ -732,8 +732,15 @@ func (d *Decoder) decodeInitial() {
 
 	// Give each TypeCodec the chance to initialize itself with the other TypeCodecs,
 	// and its own field map.
+	var tcs []TypeCodec
 	for num, tc := range d.typeCodecs {
-		tc.Init(tcMap, fieldMaps[num])
+		tus := tc.TypesUsed()
+		for _, tu := range tus {
+			tcs = append(tcs, tcMap[tu])
+		}
+		tc.SetCodecs(tcs)
+		tcs = tcs[:0]
+		tc.SetFieldMap(fieldMaps[num])
 	}
 }
 

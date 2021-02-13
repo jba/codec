@@ -11,21 +11,16 @@ import (
 var slice_smallStruct_type = reflect.TypeOf((*[]smallStruct)(nil)).Elem()
 
 type slice_smallStruct_codec struct {
+	codecapi.NonStruct
+
 	smallStruct_codec *smallStruct_codec
 }
-
-func (c *slice_smallStruct_codec) Init(tcs map[reflect.Type]codecapi.TypeCodec, _ []int) {
-	c.smallStruct_codec = tcs[reflect.TypeOf((*smallStruct)(nil)).Elem()].(*smallStruct_codec)
-
-}
-
-func (c *slice_smallStruct_codec) Fields() []string { return nil }
 
 func (c *slice_smallStruct_codec) TypesUsed() []reflect.Type {
 	return []reflect.Type{smallStruct_type}
 }
 
-func (c *slice_smallStruct_codec) CodecsUsed(tcs []codecapi.TypeCodec) {
+func (c *slice_smallStruct_codec) SetCodecs(tcs []codecapi.TypeCodec) {
 	c.smallStruct_codec = tcs[0].(*smallStruct_codec)
 }
 
@@ -69,18 +64,13 @@ func init() {
 var ptr_smallStruct_type = reflect.TypeOf((*smallStruct)(nil))
 
 type ptr_smallStruct_codec struct {
+	codecapi.NonStruct
 	smallStruct_codec *smallStruct_codec
 }
 
-func (c *ptr_smallStruct_codec) Init(tcs map[reflect.Type]codecapi.TypeCodec, _ []int) {
-	c.smallStruct_codec = tcs[reflect.TypeOf((*smallStruct)(nil)).Elem()].(*smallStruct_codec)
-}
-
-func (c ptr_smallStruct_codec) Fields() []string { return nil }
-
 func (c ptr_smallStruct_codec) TypesUsed() []reflect.Type { return []reflect.Type{smallStruct_type} }
 
-func (c *ptr_smallStruct_codec) CodecsUsed(tcs []codecapi.TypeCodec) {
+func (c *ptr_smallStruct_codec) SetCodecs(tcs []codecapi.TypeCodec) {
 	c.smallStruct_codec = tcs[0].(*smallStruct_codec)
 }
 
@@ -122,19 +112,19 @@ type smallStruct_codec struct {
 	fieldMap []int
 }
 
-func (c *smallStruct_codec) Init(tcs map[reflect.Type]codecapi.TypeCodec, fieldMap []int) {
-	c.fieldMap = fieldMap
-}
-
 func (c *smallStruct_codec) Fields() []string {
 	return []string{"X"}
+}
+
+func (c *smallStruct_codec) SetFieldMap(fm []int) {
+	c.fieldMap = fm
 }
 
 func (c *smallStruct_codec) TypesUsed() []reflect.Type {
 	return []reflect.Type{}
 }
 
-func (c *smallStruct_codec) CodecsUsed(tcs []codecapi.TypeCodec) {
+func (c *smallStruct_codec) SetCodecs(tcs []codecapi.TypeCodec) {
 }
 
 func (c *smallStruct_codec) Encode(e *codecapi.Encoder, x interface{}) {

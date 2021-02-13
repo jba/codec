@@ -11,12 +11,8 @@ import (
 var map_string_bool_type = reflect.TypeOf((*map[string]bool)(nil)).Elem()
 
 type map_string_bool_codec struct {
+	codecapi.NonStruct
 }
-
-func (c *map_string_bool_codec) Init(tcs map[reflect.Type]codecapi.TypeCodec, _ []int) {
-}
-
-func (c *map_string_bool_codec) Fields() []string { return nil }
 
 func (c *map_string_bool_codec) TypesUsed() []reflect.Type {
 	// TODO:  generate a slice literal
@@ -24,7 +20,7 @@ func (c *map_string_bool_codec) TypesUsed() []reflect.Type {
 	return types
 }
 
-func (c *map_string_bool_codec) CodecsUsed(tcs []codecapi.TypeCodec) {
+func (c *map_string_bool_codec) SetCodecs(tcs []codecapi.TypeCodec) {
 }
 
 func (c *map_string_bool_codec) Encode(e *codecapi.Encoder, x interface{}) {

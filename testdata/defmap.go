@@ -11,12 +11,8 @@ import (
 var definedMap_type = reflect.TypeOf((*definedMap)(nil)).Elem()
 
 type definedMap_codec struct {
+	codecapi.NonStruct
 }
-
-func (c *definedMap_codec) Init(tcs map[reflect.Type]codecapi.TypeCodec, _ []int) {
-}
-
-func (c *definedMap_codec) Fields() []string { return nil }
 
 func (c *definedMap_codec) TypesUsed() []reflect.Type {
 	// TODO:  generate a slice literal
@@ -24,7 +20,7 @@ func (c *definedMap_codec) TypesUsed() []reflect.Type {
 	return types
 }
 
-func (c *definedMap_codec) CodecsUsed(tcs []codecapi.TypeCodec) {
+func (c *definedMap_codec) SetCodecs(tcs []codecapi.TypeCodec) {
 }
 
 func (c *definedMap_codec) Encode(e *codecapi.Encoder, x interface{}) { c.encode(e, x.(definedMap)) }

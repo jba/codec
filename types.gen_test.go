@@ -15,18 +15,13 @@ import (
 var ptr_node_type = reflect.TypeOf((*node)(nil))
 
 type ptr_node_codec struct {
+	codecapi.NonStruct
 	node_codec *node_codec
 }
 
-func (c *ptr_node_codec) Init(tcs map[reflect.Type]codecapi.TypeCodec, _ []int) {
-	c.node_codec = tcs[reflect.TypeOf((*node)(nil)).Elem()].(*node_codec)
-}
-
-func (c ptr_node_codec) Fields() []string { return nil }
-
 func (c ptr_node_codec) TypesUsed() []reflect.Type { return []reflect.Type{node_type} }
 
-func (c *ptr_node_codec) CodecsUsed(tcs []codecapi.TypeCodec) {
+func (c *ptr_node_codec) SetCodecs(tcs []codecapi.TypeCodec) {
 	c.node_codec = tcs[0].(*node_codec)
 }
 
@@ -67,20 +62,19 @@ type node_codec struct {
 	fieldMap       []int
 }
 
-func (c *node_codec) Init(tcs map[reflect.Type]codecapi.TypeCodec, fieldMap []int) {
-	c.ptr_node_codec = tcs[reflect.TypeOf((**node)(nil)).Elem()].(*ptr_node_codec)
-	c.fieldMap = fieldMap
-}
-
 func (c *node_codec) Fields() []string {
 	return []string{"Value", "Next"}
+}
+
+func (c *node_codec) SetFieldMap(fm []int) {
+	c.fieldMap = fm
 }
 
 func (c *node_codec) TypesUsed() []reflect.Type {
 	return []reflect.Type{ptr_node_type}
 }
 
-func (c *node_codec) CodecsUsed(tcs []codecapi.TypeCodec) {
+func (c *node_codec) SetCodecs(tcs []codecapi.TypeCodec) {
 	c.ptr_node_codec = tcs[0].(*ptr_node_codec)
 }
 
@@ -134,16 +128,10 @@ func init() {
 var array_1_structType_type = reflect.TypeOf((*[1]structType)(nil)).Elem()
 
 type array_1_structType_codec struct {
+	codecapi.NonStruct
 	structType_codec       *structType_codec
 	slice_structType_codec *slice_structType_codec
 }
-
-func (c *array_1_structType_codec) Init(tcs map[reflect.Type]codecapi.TypeCodec, _ []int) {
-	c.structType_codec = tcs[reflect.TypeOf((*structType)(nil)).Elem()].(*structType_codec)
-
-}
-
-func (c *array_1_structType_codec) Fields() []string { return nil }
 
 func (c *array_1_structType_codec) TypesUsed() []reflect.Type {
 	return []reflect.Type{
@@ -152,7 +140,7 @@ func (c *array_1_structType_codec) TypesUsed() []reflect.Type {
 	}
 }
 
-func (c *array_1_structType_codec) CodecsUsed(tcs []codecapi.TypeCodec) {
+func (c *array_1_structType_codec) SetCodecs(tcs []codecapi.TypeCodec) {
 	c.structType_codec = tcs[0].(*structType_codec)
 	c.slice_structType_codec = tcs[1].(*slice_structType_codec)
 }
@@ -192,14 +180,9 @@ func init() {
 var array_1_int_type = reflect.TypeOf((*[1]int)(nil)).Elem()
 
 type array_1_int_codec struct {
+	codecapi.NonStruct
 	slice_int_codec *slice_int_codec
 }
-
-func (c *array_1_int_codec) Init(tcs map[reflect.Type]codecapi.TypeCodec, _ []int) {
-
-}
-
-func (c *array_1_int_codec) Fields() []string { return nil }
 
 func (c *array_1_int_codec) TypesUsed() []reflect.Type {
 	return []reflect.Type{
@@ -208,7 +191,7 @@ func (c *array_1_int_codec) TypesUsed() []reflect.Type {
 	}
 }
 
-func (c *array_1_int_codec) CodecsUsed(tcs []codecapi.TypeCodec) {
+func (c *array_1_int_codec) SetCodecs(tcs []codecapi.TypeCodec) {
 	c.slice_int_codec = tcs[0].(*slice_int_codec)
 }
 
@@ -247,21 +230,16 @@ func init() {
 var slice_structType_type = reflect.TypeOf((*[]structType)(nil)).Elem()
 
 type slice_structType_codec struct {
+	codecapi.NonStruct
+
 	structType_codec *structType_codec
 }
-
-func (c *slice_structType_codec) Init(tcs map[reflect.Type]codecapi.TypeCodec, _ []int) {
-	c.structType_codec = tcs[reflect.TypeOf((*structType)(nil)).Elem()].(*structType_codec)
-
-}
-
-func (c *slice_structType_codec) Fields() []string { return nil }
 
 func (c *slice_structType_codec) TypesUsed() []reflect.Type {
 	return []reflect.Type{structType_type}
 }
 
-func (c *slice_structType_codec) CodecsUsed(tcs []codecapi.TypeCodec) {
+func (c *slice_structType_codec) SetCodecs(tcs []codecapi.TypeCodec) {
 	c.structType_codec = tcs[0].(*structType_codec)
 }
 
@@ -305,20 +283,11 @@ func init() {
 var slice_int_type = reflect.TypeOf((*[]int)(nil)).Elem()
 
 type slice_int_codec struct {
+	codecapi.NonStruct
 }
 
-func (c *slice_int_codec) Init(tcs map[reflect.Type]codecapi.TypeCodec, _ []int) {
-
-}
-
-func (c *slice_int_codec) Fields() []string { return nil }
-
-func (c *slice_int_codec) TypesUsed() []reflect.Type {
-	return nil
-}
-
-func (c *slice_int_codec) CodecsUsed(tcs []codecapi.TypeCodec) {
-}
+func (c *slice_int_codec) TypesUsed() []reflect.Type      { return nil }
+func (c *slice_int_codec) SetCodecs([]codecapi.TypeCodec) {}
 
 func (c *slice_int_codec) Encode(e *codecapi.Encoder, x interface{}) { c.encode(e, x.([]int)) }
 
@@ -358,14 +327,9 @@ func init() {
 var definedArray_type = reflect.TypeOf((*definedArray)(nil)).Elem()
 
 type definedArray_codec struct {
+	codecapi.NonStruct
 	slice_int_codec *slice_int_codec
 }
-
-func (c *definedArray_codec) Init(tcs map[reflect.Type]codecapi.TypeCodec, _ []int) {
-
-}
-
-func (c *definedArray_codec) Fields() []string { return nil }
 
 func (c *definedArray_codec) TypesUsed() []reflect.Type {
 	return []reflect.Type{
@@ -374,7 +338,7 @@ func (c *definedArray_codec) TypesUsed() []reflect.Type {
 	}
 }
 
-func (c *definedArray_codec) CodecsUsed(tcs []codecapi.TypeCodec) {
+func (c *definedArray_codec) SetCodecs(tcs []codecapi.TypeCodec) {
 	c.slice_int_codec = tcs[0].(*slice_int_codec)
 }
 
@@ -413,12 +377,8 @@ func init() {
 var definedMap_type = reflect.TypeOf((*definedMap)(nil)).Elem()
 
 type definedMap_codec struct {
+	codecapi.NonStruct
 }
-
-func (c *definedMap_codec) Init(tcs map[reflect.Type]codecapi.TypeCodec, _ []int) {
-}
-
-func (c *definedMap_codec) Fields() []string { return nil }
 
 func (c *definedMap_codec) TypesUsed() []reflect.Type {
 	// TODO:  generate a slice literal
@@ -426,7 +386,7 @@ func (c *definedMap_codec) TypesUsed() []reflect.Type {
 	return types
 }
 
-func (c *definedMap_codec) CodecsUsed(tcs []codecapi.TypeCodec) {
+func (c *definedMap_codec) SetCodecs(tcs []codecapi.TypeCodec) {
 }
 
 func (c *definedMap_codec) Encode(e *codecapi.Encoder, x interface{}) { c.encode(e, x.(definedMap)) }
@@ -473,20 +433,11 @@ func init() {
 var definedSlice_type = reflect.TypeOf((*definedSlice)(nil)).Elem()
 
 type definedSlice_codec struct {
+	codecapi.NonStruct
 }
 
-func (c *definedSlice_codec) Init(tcs map[reflect.Type]codecapi.TypeCodec, _ []int) {
-
-}
-
-func (c *definedSlice_codec) Fields() []string { return nil }
-
-func (c *definedSlice_codec) TypesUsed() []reflect.Type {
-	return nil
-}
-
-func (c *definedSlice_codec) CodecsUsed(tcs []codecapi.TypeCodec) {
-}
+func (c *definedSlice_codec) TypesUsed() []reflect.Type      { return nil }
+func (c *definedSlice_codec) SetCodecs([]codecapi.TypeCodec) {}
 
 func (c *definedSlice_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	c.encode(e, x.(definedSlice))
@@ -528,20 +479,15 @@ func init() {
 var ptr_generatedTestTypes_type = reflect.TypeOf((*generatedTestTypes)(nil))
 
 type ptr_generatedTestTypes_codec struct {
+	codecapi.NonStruct
 	generatedTestTypes_codec *generatedTestTypes_codec
 }
-
-func (c *ptr_generatedTestTypes_codec) Init(tcs map[reflect.Type]codecapi.TypeCodec, _ []int) {
-	c.generatedTestTypes_codec = tcs[reflect.TypeOf((*generatedTestTypes)(nil)).Elem()].(*generatedTestTypes_codec)
-}
-
-func (c ptr_generatedTestTypes_codec) Fields() []string { return nil }
 
 func (c ptr_generatedTestTypes_codec) TypesUsed() []reflect.Type {
 	return []reflect.Type{generatedTestTypes_type}
 }
 
-func (c *ptr_generatedTestTypes_codec) CodecsUsed(tcs []codecapi.TypeCodec) {
+func (c *ptr_generatedTestTypes_codec) SetCodecs(tcs []codecapi.TypeCodec) {
 	c.generatedTestTypes_codec = tcs[0].(*generatedTestTypes_codec)
 }
 
@@ -596,32 +542,19 @@ type generatedTestTypes_codec struct {
 	fieldMap                    []int
 }
 
-func (c *generatedTestTypes_codec) Init(tcs map[reflect.Type]codecapi.TypeCodec, fieldMap []int) {
-	c.ptr_node_codec = tcs[reflect.TypeOf((**node)(nil)).Elem()].(*ptr_node_codec)
-	c.array_1_structType_codec = tcs[reflect.TypeOf((*[1]structType)(nil)).Elem()].(*array_1_structType_codec)
-	c.array_1_int_codec = tcs[reflect.TypeOf((*[1]int)(nil)).Elem()].(*array_1_int_codec)
-	c.slice_structType_codec = tcs[reflect.TypeOf((*[]structType)(nil)).Elem()].(*slice_structType_codec)
-	c.slice_int_codec = tcs[reflect.TypeOf((*[]int)(nil)).Elem()].(*slice_int_codec)
-	c.definedArray_codec = tcs[reflect.TypeOf((*definedArray)(nil)).Elem()].(*definedArray_codec)
-	c.definedMap_codec = tcs[reflect.TypeOf((*definedMap)(nil)).Elem()].(*definedMap_codec)
-	c.definedSlice_codec = tcs[reflect.TypeOf((*definedSlice)(nil)).Elem()].(*definedSlice_codec)
-	c.structType_codec = tcs[reflect.TypeOf((*structType)(nil)).Elem()].(*structType_codec)
-	c.foo_T_codec = tcs[reflect.TypeOf((*foo.T)(nil)).Elem()].(*foo_T_codec)
-	c.map__1_int_structType_codec = tcs[reflect.TypeOf((*map[[1]int]structType)(nil)).Elem()].(*map__1_int_structType_codec)
-	c.map_string_bool_codec = tcs[reflect.TypeOf((*map[string]bool)(nil)).Elem()].(*map_string_bool_codec)
-	c.time_Time_codec = tcs[reflect.TypeOf((*time.Time)(nil)).Elem()].(*time_Time_codec)
-	c.fieldMap = fieldMap
-}
-
 func (c *generatedTestTypes_codec) Fields() []string {
 	return []string{"Node", "Slice", "Array", "Map", "Struct", "Time", "IP", "StructSlice", "StructArray", "StructMap", "DefSlice", "DefArray", "DefMap", "Pos", "T"}
+}
+
+func (c *generatedTestTypes_codec) SetFieldMap(fm []int) {
+	c.fieldMap = fm
 }
 
 func (c *generatedTestTypes_codec) TypesUsed() []reflect.Type {
 	return []reflect.Type{ptr_node_type, array_1_structType_type, array_1_int_type, slice_structType_type, slice_int_type, definedArray_type, definedMap_type, definedSlice_type, structType_type, foo_T_type, map__1_int_structType_type, map_string_bool_type, time_Time_type}
 }
 
-func (c *generatedTestTypes_codec) CodecsUsed(tcs []codecapi.TypeCodec) {
+func (c *generatedTestTypes_codec) SetCodecs(tcs []codecapi.TypeCodec) {
 	c.ptr_node_codec = tcs[0].(*ptr_node_codec)
 	c.array_1_structType_codec = tcs[1].(*array_1_structType_codec)
 	c.array_1_int_codec = tcs[2].(*array_1_int_codec)
@@ -760,18 +693,13 @@ func init() {
 var ptr_structType_type = reflect.TypeOf((*structType)(nil))
 
 type ptr_structType_codec struct {
+	codecapi.NonStruct
 	structType_codec *structType_codec
 }
 
-func (c *ptr_structType_codec) Init(tcs map[reflect.Type]codecapi.TypeCodec, _ []int) {
-	c.structType_codec = tcs[reflect.TypeOf((*structType)(nil)).Elem()].(*structType_codec)
-}
-
-func (c ptr_structType_codec) Fields() []string { return nil }
-
 func (c ptr_structType_codec) TypesUsed() []reflect.Type { return []reflect.Type{structType_type} }
 
-func (c *ptr_structType_codec) CodecsUsed(tcs []codecapi.TypeCodec) {
+func (c *ptr_structType_codec) SetCodecs(tcs []codecapi.TypeCodec) {
 	c.structType_codec = tcs[0].(*structType_codec)
 }
 
@@ -814,20 +742,19 @@ type structType_codec struct {
 	fieldMap   []int
 }
 
-func (c *structType_codec) Init(tcs map[reflect.Type]codecapi.TypeCodec, fieldMap []int) {
-	c.node_codec = tcs[reflect.TypeOf((*node)(nil)).Elem()].(*node_codec)
-	c.fieldMap = fieldMap
-}
-
 func (c *structType_codec) Fields() []string {
 	return []string{"N", "B", "unexported"}
+}
+
+func (c *structType_codec) SetFieldMap(fm []int) {
+	c.fieldMap = fm
 }
 
 func (c *structType_codec) TypesUsed() []reflect.Type {
 	return []reflect.Type{node_type}
 }
 
-func (c *structType_codec) CodecsUsed(tcs []codecapi.TypeCodec) {
+func (c *structType_codec) SetCodecs(tcs []codecapi.TypeCodec) {
 	c.node_codec = tcs[0].(*node_codec)
 }
 
@@ -886,20 +813,11 @@ func init() {
 var foo_T_type = reflect.TypeOf((*foo.T)(nil)).Elem()
 
 type foo_T_codec struct {
+	codecapi.NonStruct
 }
 
-func (c *foo_T_codec) Init(tcs map[reflect.Type]codecapi.TypeCodec, _ []int) {
-
-}
-
-func (c *foo_T_codec) Fields() []string { return nil }
-
-func (c *foo_T_codec) TypesUsed() []reflect.Type {
-	return nil
-}
-
-func (c *foo_T_codec) CodecsUsed(tcs []codecapi.TypeCodec) {
-}
+func (c *foo_T_codec) TypesUsed() []reflect.Type      { return nil }
+func (c *foo_T_codec) SetCodecs([]codecapi.TypeCodec) {}
 
 func (c *foo_T_codec) Encode(e *codecapi.Encoder, x interface{}) { c.encode(e, x.(foo.T)) }
 
@@ -939,16 +857,10 @@ func init() {
 var map__1_int_structType_type = reflect.TypeOf((*map[[1]int]structType)(nil)).Elem()
 
 type map__1_int_structType_codec struct {
+	codecapi.NonStruct
 	array_1_int_codec *array_1_int_codec
 	structType_codec  *structType_codec
 }
-
-func (c *map__1_int_structType_codec) Init(tcs map[reflect.Type]codecapi.TypeCodec, _ []int) {
-	c.array_1_int_codec = tcs[reflect.TypeOf((*[1]int)(nil)).Elem()].(*array_1_int_codec)
-	c.structType_codec = tcs[reflect.TypeOf((*structType)(nil)).Elem()].(*structType_codec)
-}
-
-func (c *map__1_int_structType_codec) Fields() []string { return nil }
 
 func (c *map__1_int_structType_codec) TypesUsed() []reflect.Type {
 	// TODO:  generate a slice literal
@@ -958,7 +870,7 @@ func (c *map__1_int_structType_codec) TypesUsed() []reflect.Type {
 	return types
 }
 
-func (c *map__1_int_structType_codec) CodecsUsed(tcs []codecapi.TypeCodec) {
+func (c *map__1_int_structType_codec) SetCodecs(tcs []codecapi.TypeCodec) {
 	c.array_1_int_codec = tcs[0].(*array_1_int_codec)
 	c.structType_codec = tcs[1].(*structType_codec)
 }
@@ -1009,12 +921,8 @@ func init() {
 var map_string_bool_type = reflect.TypeOf((*map[string]bool)(nil)).Elem()
 
 type map_string_bool_codec struct {
+	codecapi.NonStruct
 }
-
-func (c *map_string_bool_codec) Init(tcs map[reflect.Type]codecapi.TypeCodec, _ []int) {
-}
-
-func (c *map_string_bool_codec) Fields() []string { return nil }
 
 func (c *map_string_bool_codec) TypesUsed() []reflect.Type {
 	// TODO:  generate a slice literal
@@ -1022,7 +930,7 @@ func (c *map_string_bool_codec) TypesUsed() []reflect.Type {
 	return types
 }
 
-func (c *map_string_bool_codec) CodecsUsed(tcs []codecapi.TypeCodec) {
+func (c *map_string_bool_codec) SetCodecs(tcs []codecapi.TypeCodec) {
 }
 
 func (c *map_string_bool_codec) Encode(e *codecapi.Encoder, x interface{}) {
@@ -1070,15 +978,13 @@ func init() {
 
 var net_IP_type = reflect.TypeOf((*net.IP)(nil)).Elem()
 
-type net_IP_codec struct{}
-
-func (c *net_IP_codec) Fields() []string { return nil }
-
-func (c *net_IP_codec) Init(map[reflect.Type]codecapi.TypeCodec, []int) {}
+type net_IP_codec struct {
+	codecapi.NonStruct
+}
 
 func (c *net_IP_codec) TypesUsed() []reflect.Type { return nil }
 
-func (c *net_IP_codec) CodecsUsed([]codecapi.TypeCodec) {}
+func (c *net_IP_codec) SetCodecs([]codecapi.TypeCodec) {}
 
 func (c *net_IP_codec) Encode(e *codecapi.Encoder, x interface{}) { c.encode(e, x.(net.IP)) }
 
@@ -1107,15 +1013,13 @@ func init() { codecapi.Register(*new(net.IP), func() codecapi.TypeCodec { return
 
 var time_Time_type = reflect.TypeOf((*time.Time)(nil)).Elem()
 
-type time_Time_codec struct{}
-
-func (c *time_Time_codec) Fields() []string { return nil }
-
-func (c *time_Time_codec) Init(map[reflect.Type]codecapi.TypeCodec, []int) {}
+type time_Time_codec struct {
+	codecapi.NonStruct
+}
 
 func (c *time_Time_codec) TypesUsed() []reflect.Type { return nil }
 
-func (c *time_Time_codec) CodecsUsed([]codecapi.TypeCodec) {}
+func (c *time_Time_codec) SetCodecs([]codecapi.TypeCodec) {}
 
 func (c *time_Time_codec) Encode(e *codecapi.Encoder, x interface{}) { c.encode(e, x.(time.Time)) }
 
