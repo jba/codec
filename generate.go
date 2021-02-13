@@ -5,7 +5,6 @@
 package codec
 
 import (
-	"bufio"
 	"bytes"
 	"encoding"
 	"fmt"
@@ -41,10 +40,6 @@ func GenerateFile(filename, packagePath string, opts *GenerateOptions, values ..
 	if !strings.HasSuffix(filename, ".go") {
 		filename += ".go"
 	}
-	fieldNames, err := readFieldNames(filename)
-	if err != nil {
-		return err
-	}
 	f, err := os.Create(filename)
 	if err != nil {
 		return err
@@ -53,50 +48,18 @@ func GenerateFile(filename, packagePath string, opts *GenerateOptions, values ..
 	if opts != nil && opts.FieldTag != "" {
 		fieldTag = opts.FieldTag
 	}
-	if err := generate(f, packagePath, fieldNames, fieldTag, values...); err != nil {
+	if err := generate(f, packagePath, fieldTag, values...); err != nil {
 		_ = f.Close()
 		return err
 	}
 	return f.Close()
 }
 
-// readFieldNames scan filename, if it exists, to get the previous field names for structs.
-// It returns a map from struct name to list of field names.
-func readFieldNames(filename string) (map[string][]string, error) {
-	f, err := os.Open(filename)
-	if err != nil {
-		if os.IsNotExist(err) {
-			return nil, nil
-		}
-		return nil, err
-	}
-	defer f.Close()
-	m := map[string][]string{}
-	scan := bufio.NewScanner(f)
-	for scan.Scan() {
-		line := scan.Text()
-		if strings.HasPrefix(line, "// Fields of ") {
-			// form of line: // Fields of STRUCTNAME: NAME1 NAME2 ...
-			parts := strings.Fields(line)
-			structName := parts[3][:len(parts[3])-1] // remove final colon
-			m[structName] = parts[4:]
-		}
-	}
-	if err := scan.Err(); err != nil {
-		return nil, err
-	}
-	return m, nil
-}
-
-func generate(w io.Writer, packagePath string, fieldNames map[string][]string, fieldTag string, vs ...interface{}) error {
+func generate(w io.Writer, packagePath string, fieldTag string, vs ...interface{}) error {
 	g := &generator{
 		pkgPath:     packagePath,
 		done:        map[reflect.Type]bool{},
-		fieldNames:  fieldNames,
 		fieldTagKey: fieldTag,
-	}
-	if g.fieldNames == nil {
-		g.fieldNames = map[string][]string{}
 	}
 	funcs := template.FuncMap{
 		"typeID":     g.typeIdentifier,
@@ -164,7 +127,6 @@ func writeTempFile(pattern string, contents []byte) (string, error) {
 type generator struct {
 	pkgPath         string
 	done            map[reflect.Type]bool
-	fieldNames      map[string][]string
 	fieldTagKey     string
 	importMap       map[string]string // import path to import identifier
 	initialTemplate *template.Template
@@ -463,8 +425,7 @@ func (g *generator) genMarshaler(t reflect.Type, kind string) ([]byte, error) {
 }
 
 func (g *generator) genStruct(t reflect.Type) ([]byte, error) {
-	fn := g.typeIdentifier(t)
-	fields := g.structFields(t, g.fieldNames[fn])
+	fields := g.structFields(t)
 	var names []string
 	fieldTypesSet := map[reflect.Type]bool{}
 	for _, f := range fields {
@@ -480,7 +441,6 @@ func (g *generator) genStruct(t reflect.Type) ([]byte, error) {
 			ft = ft.Elem()
 		}
 	}
-	g.fieldNames[fn] = names // Update list field names.
 	var fieldTypes []reflect.Type
 	for t := range fieldTypesSet {
 		fieldTypes = append(fieldTypes, t)
@@ -511,64 +471,27 @@ type field struct {
 	Zero string // representation of the type's zero value
 }
 
-// structFields returns the fields of the struct type t that
-// should be encoded, in the proper order. For structs in a package
-// other than the one being generated into, that includes all direct exported
-// fields, but not exported fields of embedded, unexported types.
-// For structs in the same package, unexported fields are included.
-//
-// If there was a previous ordering, it is preserved, and new fields are added
-// to the end. If a field was removed, we keep its number so as not to break
-// existing encoded values. It will appear in the return value with an empty
-// type. One drawback of this scheme is that it is not possible to rename a
-// field. A rename will look like an addition and a removal.
-func (g *generator) structFields(t reflect.Type, oldNames []string) []field {
-	// Record the positions of the field names previously used for this struct,
-	// so we can preserve them.
-	fieldPos := map[string]int{}
-	for i, n := range oldNames {
-		fieldPos[n] = i
-	}
-	// We will note the names of each current field, by position. Struct tags can alter these.
-	fieldNames := make([]string, t.NumField())
-
-	// If there are any new fields, assign them positions after the
-	// existing ones.
+// structFields returns the fields of the struct type t that should be encoded.
+// For structs in a package other than the one being generated into, that
+// includes all direct exported fields, but not exported fields of embedded,
+// unexported types. For structs in the same package, unexported fields are
+// included.
+func (g *generator) structFields(t reflect.Type) []field {
+	var fields []field
 	for i := 0; i < t.NumField(); i++ {
 		f := t.Field(i)
 		if g.ignoreField(t, f) {
 			continue
 		}
-		// TODO: avoid this extra parseTag call (also happens in ignoreField)
 		name, _, _ := parseTag(g.fieldTagKey, f.Tag)
 		if name == "" {
 			name = f.Name
 		}
-		fieldNames[i] = name
-		if _, ok := fieldPos[name]; !ok {
-			fieldPos[name] = len(fieldPos)
-		}
-	}
-
-	// Populate the field structs, in the right order.
-	fields := make([]field, len(fieldPos))
-	for i := 0; i < t.NumField(); i++ {
-		f := t.Field(i)
-		if pos, ok := fieldPos[fieldNames[i]]; ok {
-			fields[pos] = field{
-				Name: fieldNames[i],
-				Type: f.Type,
-				Zero: zeroValue(f.Type),
-			}
-		}
-	}
-	// Add back in the removed names, so their positions can be preserved in the
-	// future. The Type field will be nil for these, which the genStruct template
-	// will use to avoid generating code for them.
-	for i, n := range oldNames {
-		if fields[i].Name == "" {
-			fields[i].Name = n
-		}
+		fields = append(fields, field{
+			Name: name,
+			Type: f.Type,
+			Zero: zeroValue(f.Type),
+		})
 	}
 	return fields
 }

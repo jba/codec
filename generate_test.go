@@ -103,7 +103,7 @@ func TestGenerate(t *testing.T) {
 func testGenerate(t *testing.T, name string, x interface{}) {
 	t.Run(name, func(t *testing.T) {
 		var buf bytes.Buffer
-		if err := generate(&buf, "github.com/jba/codec", nil, "test", x); err != nil {
+		if err := generate(&buf, "github.com/jba/codec", "test", x); err != nil {
 			t.Fatal(err)
 		}
 		got := buf.String()
@@ -154,49 +154,19 @@ func TestStructFields(t *testing.T) {
 		boolType   = reflect.TypeOf(false)
 	)
 
-	check := func(want, got []field) {
-		t.Helper()
-		diff := cmp.Diff(want, got,
-			cmp.Comparer(func(t1, t2 reflect.Type) bool { return t1 == t2 }))
-		if diff != "" {
-			t.Errorf("mismatch (-want, +got):\n%s", diff)
-		}
-	}
-
-	// First time we see ef, no previous fields.
 	g := &generator{pkgPath: "p", fieldTagKey: "codec"}
-	got := g.structFields(reflect.TypeOf(ef{}), nil)
+	got := g.structFields(reflect.TypeOf(ef{}))
 	want := []field{
 		{"A", intType, "0"},
 		{"B", boolType, "false"},
 		{"C", stringType, `""`},
 		{"N", intType, "0"},
 	}
-	check(want, got)
-
-	// Imagine that the previous definition of ef had fields C and A in that
-	// order, but not B or N. We should preserve the existing ordering and
-	// add B and N at the end.
-	got = g.structFields(reflect.TypeOf(ef{}), []string{"C", "A"})
-	want = []field{
-		{"C", stringType, `""`},
-		{"A", intType, "0"},
-		{"B", boolType, "false"},
-		{"N", intType, "0"},
+	diff := cmp.Diff(want, got,
+		cmp.Comparer(func(t1, t2 reflect.Type) bool { return t1 == t2 }))
+	if diff != "" {
+		t.Errorf("mismatch (-want, +got):\n%s", diff)
 	}
-	check(want, got)
-
-	// Imagine instead that there had been a field D that was removed.
-	// We still keep the names, but the entry for "D" has a nil type.
-	got = g.structFields(reflect.TypeOf(ef{}), []string{"A", "D", "B", "C"})
-	want = []field{
-		{"A", intType, "0"},
-		{"D", nil, ""},
-		{"B", boolType, "false"},
-		{"C", stringType, `""`},
-		{"N", intType, "0"},
-	}
-	check(want, got)
 }
 
 type parseTagStruct struct {
