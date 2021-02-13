@@ -1,0 +1,6 @@
+This test verifies that unknown fields are skipped when decoding.
+
+skip1.go contains a struct, and skip2.go is a different version of that
+struct with a fields removed.
+
+run.sh encodes a value of the first struct, then decodes it into the second.
