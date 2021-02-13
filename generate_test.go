@@ -196,15 +196,12 @@ func TestParseTag(t *testing.T) {
 		if !ok {
 			t.Fatalf("no field %q", test.field)
 		}
-		gotName, gotOmit, gotOpts := parseTag("test", f.Tag)
+		gotName, gotOmit := parseTag("test", f.Tag)
 		if gotName != test.wantName {
 			t.Errorf("name: got %q, want %q", gotName, test.wantName)
 		}
 		if gotOmit != test.wantOmit {
 			t.Errorf("omit: got %t, want %t", gotOmit, test.wantOmit)
-		}
-		if !cmp.Equal(gotOpts, test.wantOpts) {
-			t.Errorf("opts: got %q, want %q", gotOpts, test.wantOpts)
 		}
 	}
 

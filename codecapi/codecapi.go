@@ -99,7 +99,6 @@ type Decoder struct {
 	buf        []byte
 	i          int // offset into buf
 	typeCodecs []TypeCodec
-	fieldMaps  map[reflect.Type][]int
 	storeIndex int                 // for StartPtr to communicate with StoreRef
 	refMap     map[int]interface{} // from buf offset to pointer
 }

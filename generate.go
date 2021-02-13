@@ -274,7 +274,7 @@ func (g *generator) ignoreField(structType reflect.Type, f reflect.StructField) 
 		return true
 	}
 	// Ignore a field if it has a struct tag with "-", like encoding/json.
-	_, omit, _ := parseTag(g.fieldTagKey, f.Tag)
+	_, omit := parseTag(g.fieldTagKey, f.Tag)
 	return omit
 }
 
@@ -425,19 +425,14 @@ func (g *generator) genMarshaler(t reflect.Type, kind string) ([]byte, error) {
 
 func (g *generator) genStruct(t reflect.Type) ([]byte, error) {
 	fields := g.structFields(t)
-	var names []string
 	fieldTypesSet := map[reflect.Type]bool{}
 	for _, f := range fields {
-		names = append(names, f.Name)
 		ft := f.Type
 		if ft == nil {
 			continue
 		}
 		if willGenerate(ft) {
 			fieldTypesSet[ft] = true
-		}
-		if ft.Kind() == reflect.Ptr {
-			ft = ft.Elem()
 		}
 	}
 	var fieldTypes []reflect.Type
@@ -482,7 +477,7 @@ func (g *generator) structFields(t reflect.Type) []field {
 		if g.ignoreField(t, f) {
 			continue
 		}
-		name, _, _ := parseTag(g.fieldTagKey, f.Tag)
+		name, _ := parseTag(g.fieldTagKey, f.Tag)
 		if name == "" {
 			name = f.Name
 		}
@@ -660,17 +655,13 @@ func (g *generator) typeIdentifier(t reflect.Type) string {
 // name: the name given in tag, or "" if there is no name.
 // omit: true if the field should be omitted.
 // options: the list of options.
-func parseTag(key string, t reflect.StructTag) (name string, omit bool, options []string) {
+func parseTag(key string, t reflect.StructTag) (name string, omit bool) {
 	s := t.Get(key)
 	parts := strings.Split(s, ",")
 	if parts[0] == "-" {
-		// Ignore options after "-".
-		return "", true, nil
+		return "", true
 	}
-	if len(parts) > 1 {
-		options = parts[1:]
-	}
-	return parts[0], false, options
+	return parts[0], false
 }
 
 // Template body for the beginning of the file.
