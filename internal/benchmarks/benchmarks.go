@@ -13,6 +13,8 @@ Other possible benchmarks:
 - https://github.com/gocolly/colly/blob/1cd684083cf9bf9a8e33b5dfd6414d8516ae63af/http_backend.go#L161
 */
 
+//go:generate go generate ./data
+
 // A program for benchmarking codecs.
 package main
 

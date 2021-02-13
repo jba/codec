@@ -31,9 +31,8 @@ situations like reading from a storage bucket or database.
 
 ## Running the Benchmarks
 
-First, cd to the `data` directory and run `go generate`.
-
-Then, in this directory, run `go run. bm`.
+1. `go generate`
+2. `go run. bm`
 
 ## Ugorji Code Generation
 
