@@ -28,12 +28,15 @@ import (
 	"io"
 	"log"
 	"os"
+	"reflect"
 	"runtime"
 	"runtime/pprof"
+	"strings"
 	"testing"
 	"text/tabwriter"
 	"time"
 
+	"github.com/google/go-cmp/cmp"
 	"github.com/jba/codec/codecapi"
 	"github.com/jba/codec/internal/benchmarks/data"
 	"github.com/jba/codec/internal/benchmarks/testio"
@@ -57,8 +60,8 @@ var throughputs = []int{
 
 type Codec struct {
 	name   string
-	encode func(io.Writer, interface{}) error
-	decode func(io.Reader, interface{}) error
+	encode func(io.Writer, interface{}) error // encode the data into the io.Writer
+	decode func(io.Reader, interface{}) error // decode from the io.Reader into a pointer
 }
 
 var (
@@ -126,6 +129,7 @@ var datas = []data.BenchmarkData{
 var cpuProfileFile *os.File
 
 var commands = map[string]func([]string) error{
+	"test": runTests,
 	"bm":   runBenchmarks,
 	"bet":  runBreakEvenThroughput,
 	"refs": runBenchmarkRefs,
@@ -149,6 +153,46 @@ func main() {
 	if err := cmd(otherArgs); err != nil {
 		log.Fatal(err)
 	}
+}
+
+// Test github.com/jba/codec on benchmark data by verifying that encoding
+// followed by decoding preserves the data.
+func runTests(dataNames []string) error {
+	bds := datasToRun(dataNames)
+	if len(bds) == 0 {
+		var names []string
+		for _, d := range datas {
+			names = append(names, d.Name)
+		}
+		return fmt.Errorf("no benchmark data specified; select from %s", strings.Join(names, ", "))
+	}
+	for _, bd := range bds {
+		inData, err := bd.Read()
+		if err != nil {
+			return fmt.Errorf("%s: %v", bd.Name, err)
+		}
+		var buf bytes.Buffer
+		if err := jbaCodec.encode(&buf, inData); err != nil {
+			return fmt.Errorf("%s, encoding: %v", bd.Name, err)
+		}
+		r := bytes.NewReader(buf.Bytes())
+		p := bd.Newptr()
+		if err := jbaCodec.decode(r, p); err != nil {
+			return fmt.Errorf("%s, decoding: %v", bd.Name, err)
+		}
+		want := inData
+		got := reflect.ValueOf(p).Elem().Interface()
+		eq := cmp.Equal(got, want,
+			cmp.Comparer((*data.StockData).Equal),
+			cmp.Comparer((*data.LicenseContents).Equal),
+			cmp.Comparer((*data.LicenseFile).Equal))
+		if !eq {
+			return fmt.Errorf("%s: round trip does not produce the same data", bd.Name)
+		} else {
+			fmt.Printf("%s: PASS\n", bd.Name)
+		}
+	}
+	return nil
 }
 
 func runBenchmarks(dataNames []string) error {

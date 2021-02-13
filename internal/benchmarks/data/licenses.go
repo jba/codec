@@ -5,6 +5,7 @@
 package data
 
 import (
+	"bytes"
 	"crypto/sha256"
 	"encoding/gob"
 	"os"
@@ -44,6 +45,10 @@ type LicenseFile struct {
 	Contents int // index into LicenseData.Contents; not a pointer because gob does not dedup
 }
 
+func (f1 *LicenseFile) Equal(f2 *LicenseFile) bool {
+	return *f1 == *f2
+}
+
 // LicenseContents hold the contents of a license file, and information derived from it.
 type LicenseContents struct {
 	Contents     []byte
@@ -52,6 +57,42 @@ type LicenseContents struct {
 	OldCoverage  licensecheck.Coverage // ditto
 	NewTypes     []string              // not populated from the gob
 	NewCoverage  licensecheck.Coverage // ditto
+}
+
+func (c1 *LicenseContents) Equal(c2 *LicenseContents) bool {
+	return bytes.Equal(c1.Contents, c2.Contents) &&
+		c1.ContentsHash == c2.ContentsHash &&
+		stringsEqual(c1.OldTypes, c2.OldTypes) &&
+		coverageEqual(c1.OldCoverage, c2.OldCoverage) &&
+		stringsEqual(c1.NewTypes, c2.NewTypes) &&
+		coverageEqual(c1.NewCoverage, c2.NewCoverage)
+}
+
+func coverageEqual(c1, c2 licensecheck.Coverage) bool {
+	if c1.Percent != c2.Percent {
+		return false
+	}
+	if len(c1.Match) != len(c2.Match) {
+		return false
+	}
+	for i, m1 := range c1.Match {
+		if m1 != c2.Match[i] {
+			return false
+		}
+	}
+	return true
+}
+
+func stringsEqual(s1, s2 []string) bool {
+	if len(s1) != len(s2) {
+		return false
+	}
+	for i, s := range s1 {
+		if s != s2[i] {
+			return false
+		}
+	}
+	return true
 }
 
 // Write licenses-small.gob, which is the same as licenses.gob except

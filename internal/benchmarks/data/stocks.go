@@ -26,9 +26,34 @@ type StockData struct {
 	Intervals []Interval
 }
 
+func (s1 *StockData) Equal(s2 *StockData) bool {
+	if s1.Symbol != s2.Symbol {
+		return false
+	}
+	if len(s1.Intervals) != len(s2.Intervals) {
+		return false
+	}
+	for i, v := range s1.Intervals {
+		if !v.Equal(s2.Intervals[i]) {
+			return false
+		}
+	}
+	return true
+}
+
 type Interval struct {
 	Start, End                     time.Time
 	Open, Close, Low, High, Volume float64
+}
+
+func (i Interval) Equal(j Interval) bool {
+	return i.Start.Equal(j.Start) &&
+		i.End.Equal(j.End) &&
+		i.Open == j.Open &&
+		i.Close == j.Close &&
+		i.Low == j.Low &&
+		i.High == j.High &&
+		i.Volume == j.Volume
 }
 
 func generateStockDataToFile(filename string) error {

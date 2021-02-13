@@ -7,6 +7,7 @@ replace github.com/jba/codec => ../..
 require (
 	cloud.google.com/go/storage v1.10.0
 	github.com/GoogleCloudPlatform/cloudsql-proxy v1.18.0
+	github.com/google/go-cmp v0.5.2 // indirect
 	github.com/google/licensecheck v0.0.0-20200805042302-c54f297c3b57
 	github.com/jackc/pgx/v4 v4.10.0
 	github.com/jba/codec v0.0.0-00010101000000-000000000000
