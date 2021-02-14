@@ -92,11 +92,10 @@ func TypeString(t reflect.Type, pkgPaths map[string]string) string {
 	}
 }
 
-// Register records the type of x for use by Encoders and Decoders.
+// Register records t for use by Encoders and Decoders.
 // All types subject to encoding must be registered, even
 // builtin types.
-func Register(x interface{}, tcb func() TypeCodec) {
-	t := reflect.TypeOf(x)
+func Register(t reflect.Type, tcb func() TypeCodec) {
 	tn := TypeString(t, nil) // create a unique name
 	if _, ok := typeCodecBuildersByName[tn]; ok {
 		panic(fmt.Sprintf("codec.Register: duplicate type %s (TypeString=%q)", t, tn))
@@ -210,25 +209,27 @@ type complex128Codec struct{ prim }
 func (complex128Codec) Encode(e *Encoder, x interface{}) { e.EncodeComplex(x.(complex128)) }
 func (complex128Codec) Decode(d *Decoder) interface{}    { return d.DecodeComplex() }
 
+func reg(x interface{}, tcb func() TypeCodec) { Register(reflect.TypeOf(x), tcb) }
+
 func init() {
-	Register(false, func() TypeCodec { return boolCodec{} })
-	Register("", func() TypeCodec { return stringCodec{} })
-	Register([]byte(nil), func() TypeCodec { return bytesCodec{} })
-	Register(int(0), func() TypeCodec { return intCodec{} })
-	Register(int8(0), func() TypeCodec { return int8Codec{} })
-	Register(int16(0), func() TypeCodec { return int16Codec{} })
-	Register(int32(0), func() TypeCodec { return int32Codec{} })
-	Register(int64(0), func() TypeCodec { return int64Codec{} })
-	Register(float32(0), func() TypeCodec { return float32Codec{} })
-	Register(float64(0), func() TypeCodec { return float64Codec{} })
-	Register(uint(0), func() TypeCodec { return uintCodec{} })
-	Register(uintptr(0), func() TypeCodec { return uintptrCodec{} })
-	Register(uint8(0), func() TypeCodec { return uint8Codec{} })
-	Register(uint16(0), func() TypeCodec { return uint16Codec{} })
-	Register(uint32(0), func() TypeCodec { return uint32Codec{} })
-	Register(uint64(0), func() TypeCodec { return uint64Codec{} })
-	Register(complex64(0), func() TypeCodec { return complex64Codec{} })
-	Register(complex128(0), func() TypeCodec { return complex128Codec{} })
+	reg(false, func() TypeCodec { return boolCodec{} })
+	reg("", func() TypeCodec { return stringCodec{} })
+	reg([]byte(nil), func() TypeCodec { return bytesCodec{} })
+	reg(int(0), func() TypeCodec { return intCodec{} })
+	reg(int8(0), func() TypeCodec { return int8Codec{} })
+	reg(int16(0), func() TypeCodec { return int16Codec{} })
+	reg(int32(0), func() TypeCodec { return int32Codec{} })
+	reg(int64(0), func() TypeCodec { return int64Codec{} })
+	reg(float32(0), func() TypeCodec { return float32Codec{} })
+	reg(float64(0), func() TypeCodec { return float64Codec{} })
+	reg(uint(0), func() TypeCodec { return uintCodec{} })
+	reg(uintptr(0), func() TypeCodec { return uintptrCodec{} })
+	reg(uint8(0), func() TypeCodec { return uint8Codec{} })
+	reg(uint16(0), func() TypeCodec { return uint16Codec{} })
+	reg(uint32(0), func() TypeCodec { return uint32Codec{} })
+	reg(uint64(0), func() TypeCodec { return uint64Codec{} })
+	reg(complex64(0), func() TypeCodec { return complex64Codec{} })
+	reg(complex128(0), func() TypeCodec { return complex128Codec{} })
 }
 
 var BuiltinTypes []reflect.Type

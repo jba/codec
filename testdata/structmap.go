@@ -54,7 +54,7 @@ func (c *array_1_int_codec) decode(d *codecapi.Decoder, p *[1]int) {
 }
 
 func init() {
-	codecapi.Register([1]int{}, func() codecapi.TypeCodec { return &array_1_int_codec{} })
+	codecapi.Register(array_1_int_type, func() codecapi.TypeCodec { return &array_1_int_codec{} })
 }
 
 //// []int
@@ -100,7 +100,7 @@ func (c *slice_int_codec) decode(d *codecapi.Decoder, p *[]int) {
 }
 
 func init() {
-	codecapi.Register([]int(nil), func() codecapi.TypeCodec { return &slice_int_codec{} })
+	codecapi.Register(slice_int_type, func() codecapi.TypeCodec { return &slice_int_codec{} })
 }
 
 //// codec.smallStruct
@@ -163,7 +163,7 @@ func (c *smallStruct_codec) decode(d *codecapi.Decoder, x *smallStruct) {
 }
 
 func init() {
-	codecapi.Register(smallStruct{}, func() codecapi.TypeCodec { return &smallStruct_codec{} })
+	codecapi.Register(smallStruct_type, func() codecapi.TypeCodec { return &smallStruct_codec{} })
 }
 
 //// map[[1]int]codec.smallStruct
@@ -228,5 +228,5 @@ func (c *map_array_1_int__smallStruct_codec) decode(d *codecapi.Decoder, p *map[
 }
 
 func init() {
-	codecapi.Register(map[[1]int]smallStruct(nil), func() codecapi.TypeCodec { return &map_array_1_int__smallStruct_codec{} })
+	codecapi.Register(map_array_1_int__smallStruct_type, func() codecapi.TypeCodec { return &map_array_1_int__smallStruct_codec{} })
 }

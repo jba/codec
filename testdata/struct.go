@@ -173,7 +173,7 @@ func (c *genStruct_codec) decode(d *codecapi.Decoder, x *genStruct) {
 }
 
 func init() {
-	codecapi.Register(genStruct{}, func() codecapi.TypeCodec { return &genStruct_codec{} })
+	codecapi.Register(genStruct_type, func() codecapi.TypeCodec { return &genStruct_codec{} })
 }
 
 //// foo.T
@@ -219,5 +219,5 @@ func (c *foo_T_codec) decode(d *codecapi.Decoder, p *foo.T) {
 }
 
 func init() {
-	codecapi.Register(foo.T(nil), func() codecapi.TypeCodec { return &foo_T_codec{} })
+	codecapi.Register(foo_T_type, func() codecapi.TypeCodec { return &foo_T_codec{} })
 }

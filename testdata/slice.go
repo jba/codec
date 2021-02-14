@@ -58,7 +58,7 @@ func (c *slice_slice_int_codec) decode(d *codecapi.Decoder, p *[][]int) {
 }
 
 func init() {
-	codecapi.Register([][]int(nil), func() codecapi.TypeCodec { return &slice_slice_int_codec{} })
+	codecapi.Register(slice_slice_int_type, func() codecapi.TypeCodec { return &slice_slice_int_codec{} })
 }
 
 //// []int
@@ -104,5 +104,5 @@ func (c *slice_int_codec) decode(d *codecapi.Decoder, p *[]int) {
 }
 
 func init() {
-	codecapi.Register([]int(nil), func() codecapi.TypeCodec { return &slice_int_codec{} })
+	codecapi.Register(slice_int_type, func() codecapi.TypeCodec { return &slice_int_codec{} })
 }

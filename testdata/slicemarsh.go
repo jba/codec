@@ -58,7 +58,7 @@ func (c *slice_marsh_codec) decode(d *codecapi.Decoder, p *[]marsh) {
 }
 
 func init() {
-	codecapi.Register([]marsh(nil), func() codecapi.TypeCodec { return &slice_marsh_codec{} })
+	codecapi.Register(slice_marsh_type, func() codecapi.TypeCodec { return &slice_marsh_codec{} })
 }
 
 //// codec.marsh
@@ -97,5 +97,5 @@ func (c *marsh_codec) decode(d *codecapi.Decoder, p *marsh) {
 }
 
 func init() {
-	codecapi.Register(*new(marsh), func() codecapi.TypeCodec { return &marsh_codec{} })
+	codecapi.Register(marsh_type, func() codecapi.TypeCodec { return &marsh_codec{} })
 }

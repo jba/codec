@@ -63,5 +63,5 @@ func (c *map_string__bool_codec) decode(d *codecapi.Decoder, p *map[string]bool)
 }
 
 func init() {
-	codecapi.Register(map[string]bool(nil), func() codecapi.TypeCodec { return &map_string__bool_codec{} })
+	codecapi.Register(map_string__bool_type, func() codecapi.TypeCodec { return &map_string__bool_codec{} })
 }

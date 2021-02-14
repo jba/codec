@@ -45,5 +45,5 @@ func (c *time_Time_codec) decode(d *codecapi.Decoder, p *time.Time) {
 }
 
 func init() {
-	codecapi.Register(*new(time.Time), func() codecapi.TypeCodec { return &time_Time_codec{} })
+	codecapi.Register(time_Time_type, func() codecapi.TypeCodec { return &time_Time_codec{} })
 }

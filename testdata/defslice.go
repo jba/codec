@@ -53,5 +53,5 @@ func (c *definedSlice_codec) decode(d *codecapi.Decoder, p *definedSlice) {
 }
 
 func init() {
-	codecapi.Register(definedSlice(nil), func() codecapi.TypeCodec { return &definedSlice_codec{} })
+	codecapi.Register(definedSlice_type, func() codecapi.TypeCodec { return &definedSlice_codec{} })
 }

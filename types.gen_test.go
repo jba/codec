@@ -60,7 +60,7 @@ func (c *ptr_array_1_int_codec) decode(d *codecapi.Decoder, p **[1]int) {
 }
 
 func init() {
-	codecapi.Register(new([1]int), func() codecapi.TypeCodec { return &ptr_array_1_int_codec{} })
+	codecapi.Register(ptr_array_1_int_type, func() codecapi.TypeCodec { return &ptr_array_1_int_codec{} })
 }
 
 //// *[]int
@@ -111,7 +111,7 @@ func (c *ptr_slice_int_codec) decode(d *codecapi.Decoder, p **[]int) {
 }
 
 func init() {
-	codecapi.Register(new([]int), func() codecapi.TypeCodec { return &ptr_slice_int_codec{} })
+	codecapi.Register(ptr_slice_int_type, func() codecapi.TypeCodec { return &ptr_slice_int_codec{} })
 }
 
 //// *codec.node
@@ -162,7 +162,7 @@ func (c *ptr_node_codec) decode(d *codecapi.Decoder, p **node) {
 }
 
 func init() {
-	codecapi.Register(new(node), func() codecapi.TypeCodec { return &ptr_node_codec{} })
+	codecapi.Register(ptr_node_type, func() codecapi.TypeCodec { return &ptr_node_codec{} })
 }
 
 //// *int
@@ -207,7 +207,7 @@ func (c *ptr_int_codec) decode(d *codecapi.Decoder, p **int) {
 }
 
 func init() {
-	codecapi.Register(new(int), func() codecapi.TypeCodec { return &ptr_int_codec{} })
+	codecapi.Register(ptr_int_type, func() codecapi.TypeCodec { return &ptr_int_codec{} })
 }
 
 //// *map[int]int
@@ -260,7 +260,7 @@ func (c *ptr_map_int__int_codec) decode(d *codecapi.Decoder, p **map[int]int) {
 }
 
 func init() {
-	codecapi.Register(new(map[int]int), func() codecapi.TypeCodec { return &ptr_map_int__int_codec{} })
+	codecapi.Register(ptr_map_int__int_type, func() codecapi.TypeCodec { return &ptr_map_int__int_codec{} })
 }
 
 //// *time.Time
@@ -311,7 +311,7 @@ func (c *ptr_time_Time_codec) decode(d *codecapi.Decoder, p **time.Time) {
 }
 
 func init() {
-	codecapi.Register(new(time.Time), func() codecapi.TypeCodec { return &ptr_time_Time_codec{} })
+	codecapi.Register(ptr_time_Time_type, func() codecapi.TypeCodec { return &ptr_time_Time_codec{} })
 }
 
 //// [1]codec.structType
@@ -365,7 +365,7 @@ func (c *array_1_structType_codec) decode(d *codecapi.Decoder, p *[1]structType)
 }
 
 func init() {
-	codecapi.Register([1]structType{}, func() codecapi.TypeCodec { return &array_1_structType_codec{} })
+	codecapi.Register(array_1_structType_type, func() codecapi.TypeCodec { return &array_1_structType_codec{} })
 }
 
 //// [1]int
@@ -414,7 +414,7 @@ func (c *array_1_int_codec) decode(d *codecapi.Decoder, p *[1]int) {
 }
 
 func init() {
-	codecapi.Register([1]int{}, func() codecapi.TypeCodec { return &array_1_int_codec{} })
+	codecapi.Register(array_1_int_type, func() codecapi.TypeCodec { return &array_1_int_codec{} })
 }
 
 //// [2]uint8
@@ -453,7 +453,7 @@ func (c *array_2_uint8_codec) decode(d *codecapi.Decoder, p *[2]uint8) {
 }
 
 func init() {
-	codecapi.Register([2]uint8{}, func() codecapi.TypeCodec { return &array_2_uint8_codec{} })
+	codecapi.Register(array_2_uint8_type, func() codecapi.TypeCodec { return &array_2_uint8_codec{} })
 }
 
 //// []*int
@@ -506,7 +506,7 @@ func (c *slice_ptr_int_codec) decode(d *codecapi.Decoder, p *[]*int) {
 }
 
 func init() {
-	codecapi.Register([]*int(nil), func() codecapi.TypeCodec { return &slice_ptr_int_codec{} })
+	codecapi.Register(slice_ptr_int_type, func() codecapi.TypeCodec { return &slice_ptr_int_codec{} })
 }
 
 //// []codec.structType
@@ -561,7 +561,7 @@ func (c *slice_structType_codec) decode(d *codecapi.Decoder, p *[]structType) {
 }
 
 func init() {
-	codecapi.Register([]structType(nil), func() codecapi.TypeCodec { return &slice_structType_codec{} })
+	codecapi.Register(slice_structType_type, func() codecapi.TypeCodec { return &slice_structType_codec{} })
 }
 
 //// []int
@@ -607,7 +607,7 @@ func (c *slice_int_codec) decode(d *codecapi.Decoder, p *[]int) {
 }
 
 func init() {
-	codecapi.Register([]int(nil), func() codecapi.TypeCodec { return &slice_int_codec{} })
+	codecapi.Register(slice_int_type, func() codecapi.TypeCodec { return &slice_int_codec{} })
 }
 
 //// codec.definedArray
@@ -656,7 +656,7 @@ func (c *definedArray_codec) decode(d *codecapi.Decoder, p *definedArray) {
 }
 
 func init() {
-	codecapi.Register(definedArray{}, func() codecapi.TypeCodec { return &definedArray_codec{} })
+	codecapi.Register(definedArray_type, func() codecapi.TypeCodec { return &definedArray_codec{} })
 }
 
 //// codec.definedMap
@@ -712,7 +712,7 @@ func (c *definedMap_codec) decode(d *codecapi.Decoder, p *definedMap) {
 }
 
 func init() {
-	codecapi.Register(definedMap(nil), func() codecapi.TypeCodec { return &definedMap_codec{} })
+	codecapi.Register(definedMap_type, func() codecapi.TypeCodec { return &definedMap_codec{} })
 }
 
 //// codec.definedSlice
@@ -760,7 +760,7 @@ func (c *definedSlice_codec) decode(d *codecapi.Decoder, p *definedSlice) {
 }
 
 func init() {
-	codecapi.Register(definedSlice(nil), func() codecapi.TypeCodec { return &definedSlice_codec{} })
+	codecapi.Register(definedSlice_type, func() codecapi.TypeCodec { return &definedSlice_codec{} })
 }
 
 //// codec.generatedTestTypes
@@ -976,7 +976,7 @@ func (c *generatedTestTypes_codec) decode(d *codecapi.Decoder, x *generatedTestT
 }
 
 func init() {
-	codecapi.Register(generatedTestTypes{}, func() codecapi.TypeCodec { return &generatedTestTypes_codec{} })
+	codecapi.Register(generatedTestTypes_type, func() codecapi.TypeCodec { return &generatedTestTypes_codec{} })
 }
 
 //// codec.node
@@ -1047,7 +1047,7 @@ func (c *node_codec) decode(d *codecapi.Decoder, x *node) {
 }
 
 func init() {
-	codecapi.Register(node{}, func() codecapi.TypeCodec { return &node_codec{} })
+	codecapi.Register(node_type, func() codecapi.TypeCodec { return &node_codec{} })
 }
 
 //// codec.structType
@@ -1123,7 +1123,7 @@ func (c *structType_codec) decode(d *codecapi.Decoder, x *structType) {
 }
 
 func init() {
-	codecapi.Register(structType{}, func() codecapi.TypeCodec { return &structType_codec{} })
+	codecapi.Register(structType_type, func() codecapi.TypeCodec { return &structType_codec{} })
 }
 
 //// foo.T
@@ -1169,7 +1169,7 @@ func (c *foo_T_codec) decode(d *codecapi.Decoder, p *foo.T) {
 }
 
 func init() {
-	codecapi.Register(foo.T(nil), func() codecapi.TypeCodec { return &foo_T_codec{} })
+	codecapi.Register(foo_T_type, func() codecapi.TypeCodec { return &foo_T_codec{} })
 }
 
 //// map[[1]int]codec.structType
@@ -1234,7 +1234,7 @@ func (c *map_array_1_int__structType_codec) decode(d *codecapi.Decoder, p *map[[
 }
 
 func init() {
-	codecapi.Register(map[[1]int]structType(nil), func() codecapi.TypeCodec { return &map_array_1_int__structType_codec{} })
+	codecapi.Register(map_array_1_int__structType_type, func() codecapi.TypeCodec { return &map_array_1_int__structType_codec{} })
 }
 
 //// map[int]int
@@ -1290,7 +1290,7 @@ func (c *map_int__int_codec) decode(d *codecapi.Decoder, p *map[int]int) {
 }
 
 func init() {
-	codecapi.Register(map[int]int(nil), func() codecapi.TypeCodec { return &map_int__int_codec{} })
+	codecapi.Register(map_int__int_type, func() codecapi.TypeCodec { return &map_int__int_codec{} })
 }
 
 //// map[string]bool
@@ -1348,7 +1348,7 @@ func (c *map_string__bool_codec) decode(d *codecapi.Decoder, p *map[string]bool)
 }
 
 func init() {
-	codecapi.Register(map[string]bool(nil), func() codecapi.TypeCodec { return &map_string__bool_codec{} })
+	codecapi.Register(map_string__bool_type, func() codecapi.TypeCodec { return &map_string__bool_codec{} })
 }
 
 //// net.IP
@@ -1387,7 +1387,7 @@ func (c *net_IP_codec) decode(d *codecapi.Decoder, p *net.IP) {
 }
 
 func init() {
-	codecapi.Register(*new(net.IP), func() codecapi.TypeCodec { return &net_IP_codec{} })
+	codecapi.Register(net_IP_type, func() codecapi.TypeCodec { return &net_IP_codec{} })
 }
 
 //// time.Time
@@ -1426,5 +1426,5 @@ func (c *time_Time_codec) decode(d *codecapi.Decoder, p *time.Time) {
 }
 
 func init() {
-	codecapi.Register(*new(time.Time), func() codecapi.TypeCodec { return &time_Time_codec{} })
+	codecapi.Register(time_Time_type, func() codecapi.TypeCodec { return &time_Time_codec{} })
 }

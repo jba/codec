@@ -61,5 +61,5 @@ func (c *definedMap_codec) decode(d *codecapi.Decoder, p *definedMap) {
 }
 
 func init() {
-	codecapi.Register(definedMap(nil), func() codecapi.TypeCodec { return &definedMap_codec{} })
+	codecapi.Register(definedMap_type, func() codecapi.TypeCodec { return &definedMap_codec{} })
 }

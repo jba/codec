@@ -53,5 +53,5 @@ func (c *slice_interface_codec) decode(d *codecapi.Decoder, p *[]interface{}) {
 }
 
 func init() {
-	codecapi.Register([]interface{}(nil), func() codecapi.TypeCodec { return &slice_interface_codec{} })
+	codecapi.Register(slice_interface_type, func() codecapi.TypeCodec { return &slice_interface_codec{} })
 }

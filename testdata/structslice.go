@@ -60,7 +60,7 @@ func (c *slice_smallStruct_codec) decode(d *codecapi.Decoder, p *[]smallStruct) 
 }
 
 func init() {
-	codecapi.Register([]smallStruct(nil), func() codecapi.TypeCodec { return &slice_smallStruct_codec{} })
+	codecapi.Register(slice_smallStruct_type, func() codecapi.TypeCodec { return &slice_smallStruct_codec{} })
 }
 
 //// codec.smallStruct
@@ -123,5 +123,5 @@ func (c *smallStruct_codec) decode(d *codecapi.Decoder, x *smallStruct) {
 }
 
 func init() {
-	codecapi.Register(smallStruct{}, func() codecapi.TypeCodec { return &smallStruct_codec{} })
+	codecapi.Register(smallStruct_type, func() codecapi.TypeCodec { return &smallStruct_codec{} })
 }

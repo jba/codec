@@ -64,6 +64,6 @@ func (c *«$typeName») decode(d *codecapi.Decoder, p *«$goName») {
 }
 
 func init() {
-  codecapi.Register(«$goName»(nil), func() codecapi.TypeCodec { return &«$typeName»{} })
+  codecapi.Register(«$typeID»_type, func() codecapi.TypeCodec { return &«$typeName»{} })
 }
 `
