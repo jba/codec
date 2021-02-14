@@ -371,11 +371,10 @@ func willGenerate(t reflect.Type) bool {
 func (g *generator) genSlice(t reflect.Type) ([]byte, error) {
 	et := t.Elem()
 	return execute(g.sliceTemplate, struct {
-		Type, ElType reflect.Type
-		ElField      bool
+		Type    reflect.Type
+		ElField bool
 	}{
 		Type:    t,
-		ElType:  et, // TODO: remove; template can do .Type.Elem
 		ElField: willGenerate(et),
 	})
 }
@@ -384,12 +383,11 @@ func (g *generator) genArray(t reflect.Type) ([]byte, error) {
 	et := t.Elem()
 	st := reflect.SliceOf(et)
 	return execute(g.arrayTemplate, struct {
-		Type, ElType, SliceType reflect.Type
-		IsBytes                 bool
-		ElField                 bool
+		Type, SliceType reflect.Type
+		IsBytes         bool
+		ElField         bool
 	}{
 		Type:      t,
-		ElType:    et,
 		SliceType: st,
 		IsBytes:   et == byteType,
 		ElField:   willGenerate(et),
@@ -400,12 +398,10 @@ func (g *generator) genMap(t reflect.Type) ([]byte, error) {
 	et := t.Elem()
 	kt := t.Key()
 	return execute(g.mapTemplate, struct {
-		Type, KeyType, ElType reflect.Type
-		KeyField, ElField     bool
+		Type              reflect.Type
+		KeyField, ElField bool
 	}{
 		Type:     t,
-		KeyType:  kt,
-		ElType:   et,
 		KeyField: willGenerate(kt),
 		ElField:  willGenerate(et) && kt != et,
 	})
@@ -715,7 +711,7 @@ const sliceBody = `
 « $typeID := typeID .Type »
 « $typeName := print $typeID "_codec" »
 « $goName := goName .Type »
-« $elTypeID := typeID .ElType »
+« $elTypeID := typeID .Type.Elem »
 
 var «$typeID»_type = reflect.TypeOf((*«$goName»)(nil)).Elem()
 
@@ -748,7 +744,7 @@ func (c *«$typeName») encode(e *codecapi.Encoder, s «$goName») {
 	}
 	e.StartList(len(s))
 	for _, x := range s {
-		«encodeStmt .ElType "x"»
+		«encodeStmt .Type.Elem "x"»
 	}
 }
 
@@ -761,9 +757,9 @@ func (c *«$typeName») Decode(d *codecapi.Decoder) interface{} {
 func (c *«$typeName») decode(d *codecapi.Decoder, p *«$goName») {
 	n := d.StartList()
 	if n < 0 { return }
-	s := make([]«goName .ElType», n)
+	s := make([]«goName .Type.Elem», n)
 	for i := 0; i < n; i++ {
-		«decodeStmt .ElType "s[i]"»
+		«decodeStmt .Type.Elem "s[i]"»
 	}
 	*p = s
 }
@@ -778,7 +774,7 @@ const arrayBody = `
 « $typeID := typeID .Type »
 « $typeName := print $typeID "_codec" »
 « $goName := goName .Type »
-« $elTypeID := typeID .ElType »
+« $elTypeID := typeID .Type.Elem »
 « $elTypeCodec := print $elTypeID "_codec" »
 « $sliceTypeID := typeID .SliceType »
 « $sliceTypeCodec := print $sliceTypeID "_codec" »
@@ -841,7 +837,7 @@ func (c *«$typeName») decode(d *codecapi.Decoder, p *«$goName») {
 			codecapi.Failf("array size mismatch: got %d, want «.Type.Len»", n)
 		}
 		for i := 0; i < n; i++ {
-			«decodeStmt .ElType "(*p)[i]"»
+			«decodeStmt .Type.Elem "(*p)[i]"»
 		}
 	«end -»
 }
@@ -863,8 +859,8 @@ const mapBody = `
 « $typeID := typeID .Type »
 « $typeName := print $typeID "_codec" »
 « $goName := goName .Type »
-« $keyTypeID := typeID .KeyType »
-« $elTypeID := typeID .ElType »
+« $keyTypeID := typeID .Type.Key »
+« $elTypeID := typeID .Type.Elem »
 
 var «$typeID»_type = reflect.TypeOf((*«$goName»)(nil)).Elem()
 
@@ -903,8 +899,8 @@ func (c *«$typeName») encode(e *codecapi.Encoder, m «$goName») {
 	}
 	e.StartList(2*len(m))
 	for k, v := range m {
-		«encodeStmt .KeyType "k"»
-		«encodeStmt .ElType "v"»
+		«encodeStmt .Type.Key "k"»
+		«encodeStmt .Type.Elem "v"»
 	}
 }
 
@@ -919,11 +915,11 @@ func (c *«$typeName») decode(d *codecapi.Decoder, p *«$goName») {
 	if n2 < 0 { return }
 	n := n2/2
 	m := make(«$goName», n)
-	var k «goName .KeyType»
-	var v «goName .ElType»
+	var k «goName .Type.Key»
+	var v «goName .Type.Elem»
 	for i := 0; i < n; i++ {
-		«decodeStmt .KeyType "k"»
-		«decodeStmt .ElType "v"»
+		«decodeStmt .Type.Key "k"»
+		«decodeStmt .Type.Elem "v"»
 		m[k] = v
 	}
 	*p = m
