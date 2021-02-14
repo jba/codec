@@ -368,13 +368,12 @@ func willGenerate(t reflect.Type) bool {
 }
 
 func (g *generator) genSlice(t reflect.Type) ([]byte, error) {
-	et := t.Elem()
 	return execute(g.sliceTemplate, struct {
 		Type    reflect.Type
 		ElField bool
 	}{
 		Type:    t,
-		ElField: willGenerate(et),
+		ElField: willGenerate(t.Elem()),
 	})
 }
 
