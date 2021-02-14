@@ -560,9 +560,6 @@ func (g *generator) encodeStmt(t reflect.Type, arg string) string {
 			arg = "&" + arg
 		}
 	}
-	if t.Name() != "" && t.Kind() != reflect.Struct && t.Kind() != reflect.Array {
-		arg = fmt.Sprintf("%s(%s)", g.goName(t), arg)
-	}
 	return fmt.Sprintf("%s(e, %s)", g.encodeFunc(t), arg)
 }
 

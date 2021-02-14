@@ -786,6 +786,7 @@ type generatedTestTypes_codec struct {
 	foo_T_codec                       *foo_T_codec
 	map_array_1_int__structType_codec *map_array_1_int__structType_codec
 	map_string__bool_codec            *map_string__bool_codec
+	net_IP_codec                      *net_IP_codec
 	fieldMap                          []int
 }
 
@@ -798,7 +799,7 @@ func (c *generatedTestTypes_codec) SetFieldMap(fm []int) {
 }
 
 func (c *generatedTestTypes_codec) TypesUsed() []reflect.Type {
-	return []reflect.Type{ptr_array_1_int_type, ptr_slice_int_type, ptr_node_type, ptr_map_int__int_type, ptr_time_Time_type, array_1_structType_type, array_1_int_type, array_2_uint8_type, slice_ptr_int_type, slice_structType_type, slice_int_type, definedArray_type, definedMap_type, definedSlice_type, structType_type, foo_T_type, map_array_1_int__structType_type, map_string__bool_type}
+	return []reflect.Type{ptr_array_1_int_type, ptr_slice_int_type, ptr_node_type, ptr_map_int__int_type, ptr_time_Time_type, array_1_structType_type, array_1_int_type, array_2_uint8_type, slice_ptr_int_type, slice_structType_type, slice_int_type, definedArray_type, definedMap_type, definedSlice_type, structType_type, foo_T_type, map_array_1_int__structType_type, map_string__bool_type, net_IP_type}
 }
 
 func (c *generatedTestTypes_codec) SetCodecs(tcs []codecapi.TypeCodec) {
@@ -820,6 +821,7 @@ func (c *generatedTestTypes_codec) SetCodecs(tcs []codecapi.TypeCodec) {
 	c.foo_T_codec = tcs[15].(*foo_T_codec)
 	c.map_array_1_int__structType_codec = tcs[16].(*map_array_1_int__structType_codec)
 	c.map_string__bool_codec = tcs[17].(*map_string__bool_codec)
+	c.net_IP_codec = tcs[18].(*net_IP_codec)
 }
 
 func (c *generatedTestTypes_codec) Encode(e *codecapi.Encoder, x interface{}) {
@@ -856,7 +858,7 @@ func (c *generatedTestTypes_codec) encode(e *codecapi.Encoder, x *generatedTestT
 	c.structType_codec.encode(e, &x.Struct)
 	if x.IP != nil {
 		e.EncodeUint(7)
-		e.EncodeBytes([]uint8(x.IP))
+		c.net_IP_codec.encode(e, x.IP)
 	}
 	if x.StructSlice != nil {
 		e.EncodeUint(8)
@@ -871,14 +873,14 @@ func (c *generatedTestTypes_codec) encode(e *codecapi.Encoder, x *generatedTestT
 	}
 	if x.DefSlice != nil {
 		e.EncodeUint(11)
-		c.definedSlice_codec.encode(e, definedSlice(x.DefSlice))
+		c.definedSlice_codec.encode(e, x.DefSlice)
 	}
 
 	e.EncodeUint(12)
 	c.definedArray_codec.encode(e, &x.DefArray)
 	if x.DefMap != nil {
 		e.EncodeUint(13)
-		c.definedMap_codec.encode(e, definedMap(x.DefMap))
+		c.definedMap_codec.encode(e, x.DefMap)
 	}
 	if x.Pos != 0 {
 		e.EncodeUint(14)
@@ -886,7 +888,7 @@ func (c *generatedTestTypes_codec) encode(e *codecapi.Encoder, x *generatedTestT
 	}
 	if x.T != nil {
 		e.EncodeUint(15)
-		c.foo_T_codec.encode(e, foo.T(x.T))
+		c.foo_T_codec.encode(e, x.T)
 	}
 	if x.PtrSlice != nil {
 		e.EncodeUint(16)
@@ -940,7 +942,7 @@ func (c *generatedTestTypes_codec) decode(d *codecapi.Decoder, x *generatedTestT
 		case 6:
 			c.structType_codec.decode(d, &x.Struct)
 		case 7:
-			x.IP = net.IP(d.DecodeBytes())
+			c.net_IP_codec.decode(d, &x.IP)
 		case 8:
 			c.slice_structType_codec.decode(d, &x.StructSlice)
 		case 9:

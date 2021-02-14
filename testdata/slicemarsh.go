@@ -35,7 +35,7 @@ func (c *slice_marsh_codec) encode(e *codecapi.Encoder, s []marsh) {
 	}
 	e.StartList(len(s))
 	for _, x := range s {
-		c.marsh_codec.encode(e, marsh(x))
+		c.marsh_codec.encode(e, x)
 	}
 }
 

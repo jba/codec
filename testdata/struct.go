@@ -107,7 +107,7 @@ func (c *genStruct_codec) encode(e *codecapi.Encoder, x *genStruct) {
 	}
 	if x.T != nil {
 		e.EncodeUint(16)
-		c.foo_T_codec.encode(e, foo.T(x.T))
+		c.foo_T_codec.encode(e, x.T)
 	}
 	if x.unexported != 0 {
 		e.EncodeUint(17)
