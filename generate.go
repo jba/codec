@@ -428,6 +428,9 @@ func (g *generator) genPtr(t reflect.Type) ([]byte, error) {
 }
 
 func (g *generator) genStruct(t reflect.Type) ([]byte, error) {
+	if t.Name() == "" {
+		return nil, fmt.Errorf("cannot generate code for unnamed struct type %s", t)
+	}
 	fields := g.structFields(t)
 	fieldTypesSet := map[reflect.Type]bool{}
 	for _, f := range fields {

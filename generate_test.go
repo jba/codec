@@ -14,6 +14,7 @@ import (
 	"net"
 	"path/filepath"
 	"reflect"
+	"strings"
 	"testing"
 	"time"
 
@@ -137,6 +138,15 @@ func readGolden(t *testing.T, name string) string {
 		t.Fatal(err)
 	}
 	return string(data)
+}
+
+func TestGenerateErrors(t *testing.T) {
+	var buf bytes.Buffer
+	err := generate(&buf, "github.com/jba/codec", "test", struct{ X int }{})
+	const want = "unnamed struct"
+	if err == nil || !strings.Contains(err.Error(), want) {
+		t.Errorf("got %v, want error containing %q", err, want)
+	}
 }
 
 func TestStructFields(t *testing.T) {
