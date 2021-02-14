@@ -60,7 +60,6 @@ func GenerateFile(filename, packagePath string, opts *GenerateOptions, values ..
 func generate(w io.Writer, packagePath string, fieldTag string, vs ...interface{}) error {
 	g := &generator{
 		pkgPath:     packagePath,
-		done:        map[reflect.Type]bool{},
 		fieldTagKey: fieldTag,
 	}
 	funcs := template.FuncMap{
@@ -82,17 +81,6 @@ func generate(w io.Writer, packagePath string, fieldTag string, vs ...interface{
 	g.ptrTemplate = newTemplate("ptr", ptrBody)
 	g.structTemplate = newTemplate("struct", structBody)
 	g.marshalTemplate = newTemplate("marshaler", marshalBody)
-
-	// Mark the built-in types as done.
-	for _, t := range codecapi.BuiltinTypes {
-		g.done[t] = true
-		if t.Kind() == reflect.Ptr && t.Elem().Kind() == reflect.Struct {
-			g.done[t.Elem()] = true
-		}
-	}
-	// The empty interface doesn't need any additional code. It's tricky to get
-	// its reflect.Type: we need to dereference the pointer type.
-	g.done[reflect.TypeOf(new(interface{})).Elem()] = true
 
 	src, err := g.generate(vs)
 	if err != nil {
@@ -127,7 +115,6 @@ func writeTempFile(pattern string, contents []byte) (string, error) {
 
 type generator struct {
 	pkgPath         string
-	done            map[reflect.Type]bool
 	fieldTagKey     string
 	importMap       map[string]string // import path to import identifier
 	initialTemplate *template.Template
@@ -154,17 +141,14 @@ func (g *generator) generate(typevals []interface{}) ([]byte, error) {
 
 	var code []byte
 	for _, t := range todo {
-		if !g.done[t] {
-			piece, err := g.gen(t)
-			if err != nil {
-				return nil, err
-			}
-			if piece != nil {
-				header := fmt.Sprintf("//// %s\n\n", t)
-				code = append(code, header...)
-				code = append(code, piece...)
-			}
-			g.done[t] = true
+		piece, err := g.gen(t)
+		if err != nil {
+			return nil, err
+		}
+		if piece != nil {
+			header := fmt.Sprintf("//// %s\n\n", t)
+			code = append(code, header...)
+			code = append(code, piece...)
 		}
 	}
 
