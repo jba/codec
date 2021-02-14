@@ -14,6 +14,7 @@ import (
 	"net"
 	"path/filepath"
 	"reflect"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -87,6 +88,20 @@ type genStruct struct {
 // it's part of something larger.
 type smallStruct struct{ X int }
 
+// A type that is not a slice, array, map, pointer or struct, but does implement a Marshaler interface.
+type marsh int
+
+func (m marsh) MarshalText() ([]byte, error) { return []byte(strconv.Itoa(int(m))), nil }
+
+func (m *marsh) UnmarshalText(d []byte) error {
+	i, err := strconv.Atoi(string(d))
+	if err != nil {
+		return err
+	}
+	*m = marsh(i)
+	return nil
+}
+
 func TestGenerate(t *testing.T) {
 	testGenerate(t, "slice", [][]int(nil))
 	testGenerate(t, "islice", []interface{}(nil))
@@ -99,6 +114,7 @@ func TestGenerate(t *testing.T) {
 	testGenerate(t, "defslice", definedSlice{})
 	testGenerate(t, "defarray", definedArray{})
 	testGenerate(t, "defmap", definedMap{})
+	testGenerate(t, "slicemarsh", []marsh{})
 }
 
 func testGenerate(t *testing.T, name string, x interface{}) {

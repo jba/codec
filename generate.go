@@ -334,13 +334,9 @@ var (
 )
 
 func (g *generator) gen(t reflect.Type) ([]byte, error) {
-	if t.Implements(binaryMarshalerType) && reflect.PtrTo(t).Implements(binaryUnmarshalerType) {
-		return g.genMarshaler(t, "Binary")
+	if m := implementsMarshaler(t); m != "" {
+		return g.genMarshaler(t, m)
 	}
-	if t.Implements(textMarshalerType) && reflect.PtrTo(t).Implements(textUnmarshalerType) {
-		return g.genMarshaler(t, "Text")
-	}
-
 	switch t.Kind() {
 	case reflect.Slice:
 		return g.genSlice(t)
@@ -359,6 +355,9 @@ func (g *generator) gen(t reflect.Type) ([]byte, error) {
 // willGenerate reports whether a codec will be generated for t.
 // TODO: handle XXXMarshalers
 func willGenerate(t reflect.Type) bool {
+	if implementsMarshaler(t) != "" {
+		return true
+	}
 	switch t.Kind() {
 	case reflect.Slice:
 		return t.Elem() != byteType
@@ -367,6 +366,18 @@ func willGenerate(t reflect.Type) bool {
 	default:
 		return false
 	}
+}
+
+// implementsMarshaler returns the kind of Marshaler that t implements ("Binary"
+// or "Text"), or the empty string if it doesn't implement one.
+func implementsMarshaler(t reflect.Type) string {
+	if t.Implements(binaryMarshalerType) && reflect.PtrTo(t).Implements(binaryUnmarshalerType) {
+		return "Binary"
+	}
+	if t.Implements(textMarshalerType) && reflect.PtrTo(t).Implements(textUnmarshalerType) {
+		return "Text"
+	}
+	return ""
 }
 
 func (g *generator) genSlice(t reflect.Type) ([]byte, error) {
@@ -607,6 +618,9 @@ func (g *generator) decodeStmt(t reflect.Type, arg string) string {
 // method: the argument to the Encoder method, and the return value of the
 // Decoder method.
 func builtinName(t reflect.Type) (suffix string, native reflect.Type) {
+	if implementsMarshaler(t) != "" {
+		return "", nil
+	}
 	switch t.Kind() {
 	case reflect.String:
 		return "String", reflect.TypeOf("")

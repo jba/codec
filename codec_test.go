@@ -94,11 +94,13 @@ func TestEncodeDecode(t *testing.T) {
 }
 
 func testEncodeDecode(t *testing.T, opts EncodeOptions) {
+	tm := time.Date(2020, time.March, 20, 0, 0, 0, 0, time.UTC)
 	want := []interface{}{
 		nil, "Luke Luck likes lakes", true,
 		1, -5, 255, 65000, uint64(65000), uint64(1 << 63),
 		0.0, 98.6, 100, 1.23e63, math.NaN(), math.Inf(1), math.Inf(-1),
-		time.Date(2020, time.January, 26, 0, 0, 0, 0, time.UTC),
+		tm,
+		&tm,
 		net.IPv4(10, 128, 2, 18),
 		&node{1, &node{2, &node{3, nil}}},
 		(*node)(nil),
@@ -126,10 +128,6 @@ func testEncodeDecode(t *testing.T, opts EncodeOptions) {
 		&[]int{7, 8},
 		&[1]int{9},
 		&map[int]int{10: 11},
-		func() *time.Time {
-			x := time.Date(2020, time.March, 20, 0, 0, 0, 0, time.UTC)
-			return &x
-		}(),
 	}
 	var buf bytes.Buffer
 	e := NewEncoder(&buf, &opts)
