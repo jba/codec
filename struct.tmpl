@@ -1,0 +1,90 @@
+«/*»
+Template body for a struct type.
+A struct is encoded as the start code, its exported fields, then
+the end code. Each non-zero field is encoded as its field number followed by
+its value. A field that equals its zero value isn't encoded.
+«*/»
+
+« $typeID := typeID .Type »
+« $typeName := print $typeID "_codec" »
+« $ptrTypeName := print "ptr_" $typeName »
+« $goName := goName .Type »
+
+var «$typeID»_type = reflect.TypeOf((*«$goName»)(nil)).Elem()
+
+type «$typeName» struct{
+	«range .FieldTypes»
+		«typeID .»_codec *«typeID .»_codec
+	«- end»
+	fieldMap []int
+}
+
+func (c *«$typeName») Fields() []string {
+	return []string{«range .Fields»"«.Name»", «end»}
+}
+
+func (c *«$typeName») SetFieldMap(fm []int) {
+	c.fieldMap = fm
+}
+
+func (c *«$typeName») TypesUsed() []reflect.Type {
+	return []reflect.Type{«range .FieldTypes» «typeID .»_type, «end»}
+}
+
+func (c *«$typeName») SetCodecs(tcs []codecapi.TypeCodec) {
+	«- range $i, $t := .FieldTypes»
+		c.«typeID .»_codec = tcs[«$i»].(*«typeID $t»_codec)
+	«- end»
+}
+
+func (c *«$typeName») Encode(e *codecapi.Encoder, x interface{}) {
+	s := x.(«$goName»)
+	c.encode(e, &s)
+ }
+
+func (c *«$typeName») encode(e *codecapi.Encoder, x *«$goName») {
+	e.StartStruct()
+	«range $i, $f := .Fields»
+		«- if $f.Type -»
+			«- if $f.Zero -»
+				if x.«$f.Name» != «$f.Zero» {
+			«- end»
+			e.EncodeUint(«$i»)
+			«encodeStmt .Type (print "x." $f.Name)»
+			«- if $f.Zero -»
+			}
+			«- end»
+		«- end»
+	«end -»
+	e.EndStruct()
+}
+
+func (c *«$typeName») Decode(d *codecapi.Decoder) interface{} {
+	var x «$goName»
+	c.decode(d, &x)
+	return x
+}
+
+func (c *«$typeName») decode(d *codecapi.Decoder, x *«$goName») {
+	d.StartStruct()
+	for {
+		n := d.NextStructField(c.fieldMap)
+		if n == -1 { break }
+		switch n {
+		«range $i, $f := .Fields -»
+			«- if $f.Type -»
+				case «$i»:
+		        «decodeStmt $f.Type (print "x." $f.Name)»
+			«end -»
+		«end -»
+		default:
+			d.UnknownField("«$goName»", n)
+		}
+	}
+}
+
+
+
+func init() {
+	codecapi.Register(«$goName»{}, func() codecapi.TypeCodec { return &«$typeName»{} })
+}

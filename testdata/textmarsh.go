@@ -44,4 +44,6 @@ func (c *net_IP_codec) decode(d *codecapi.Decoder, p *net.IP) {
 	}
 }
 
-func init() { codecapi.Register(*new(net.IP), func() codecapi.TypeCodec { return &net_IP_codec{} }) }
+func init() {
+	codecapi.Register(*new(net.IP), func() codecapi.TypeCodec { return &net_IP_codec{} })
+}
