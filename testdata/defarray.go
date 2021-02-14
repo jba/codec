@@ -8,6 +8,8 @@ import (
 	"github.com/jba/codec/codecapi"
 )
 
+//// []int
+
 var slice_int_type = reflect.TypeOf((*[]int)(nil)).Elem()
 
 type slice_int_codec struct {
@@ -52,6 +54,8 @@ func init() {
 	codecapi.Register([]int(nil), func() codecapi.TypeCodec { return &slice_int_codec{} })
 }
 
+//// codec.definedArray
+
 var definedArray_type = reflect.TypeOf((*definedArray)(nil)).Elem()
 
 type definedArray_codec struct {
@@ -60,10 +64,7 @@ type definedArray_codec struct {
 }
 
 func (c *definedArray_codec) TypesUsed() []reflect.Type {
-	return []reflect.Type{
-
-		slice_int_type,
-	}
+	return []reflect.Type{slice_int_type}
 }
 
 func (c *definedArray_codec) SetCodecs(tcs []codecapi.TypeCodec) {

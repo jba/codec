@@ -9,50 +9,9 @@ import (
 	foo "github.com/jba/codec/internal/testpkg"
 )
 
-var ptr_genStruct_type = reflect.TypeOf((*genStruct)(nil))
+//// codec.genStruct
 
-type ptr_genStruct_codec struct {
-	codecapi.NonStruct
-	genStruct_codec *genStruct_codec
-}
-
-func (c ptr_genStruct_codec) TypesUsed() []reflect.Type { return []reflect.Type{genStruct_type} }
-
-func (c *ptr_genStruct_codec) SetCodecs(tcs []codecapi.TypeCodec) {
-	c.genStruct_codec = tcs[0].(*genStruct_codec)
-}
-
-func (c ptr_genStruct_codec) Encode(e *codecapi.Encoder, x interface{}) { c.encode(e, x.(*genStruct)) }
-
-func (c ptr_genStruct_codec) encode(e *codecapi.Encoder, x *genStruct) {
-	if !e.StartPtr(x == nil, x) {
-		return
-	}
-	c.genStruct_codec.encode(e, x)
-}
-
-func (c ptr_genStruct_codec) Decode(d *codecapi.Decoder) interface{} {
-	var x *genStruct
-	c.decode(d, &x)
-	return x
-}
-
-func (c ptr_genStruct_codec) decode(d *codecapi.Decoder, p **genStruct) {
-	proceed, ref := d.StartPtr()
-	if !proceed {
-		return
-	}
-	if ref != nil {
-		*p = ref.(*genStruct)
-		return
-	}
-	var x genStruct
-	d.StoreRef(&x)
-	c.genStruct_codec.decode(d, &x)
-	*p = &x
-}
-
-var genStruct_type = ptr_genStruct_type.Elem()
+var genStruct_type = reflect.TypeOf((*genStruct)(nil)).Elem()
 
 type genStruct_codec struct {
 	foo_T_codec *foo_T_codec
@@ -215,8 +174,9 @@ func (c *genStruct_codec) decode(d *codecapi.Decoder, x *genStruct) {
 
 func init() {
 	codecapi.Register(genStruct{}, func() codecapi.TypeCodec { return &genStruct_codec{} })
-	codecapi.Register(&genStruct{}, func() codecapi.TypeCodec { return &ptr_genStruct_codec{} })
 }
+
+//// foo.T
 
 var foo_T_type = reflect.TypeOf((*foo.T)(nil)).Elem()
 

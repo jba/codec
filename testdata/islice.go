@@ -8,6 +8,8 @@ import (
 	"github.com/jba/codec/codecapi"
 )
 
+//// []interface {}
+
 var slice_interface_type = reflect.TypeOf((*[]interface{})(nil)).Elem()
 
 type slice_interface_codec struct {

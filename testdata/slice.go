@@ -8,6 +8,8 @@ import (
 	"github.com/jba/codec/codecapi"
 )
 
+//// [][]int
+
 var slice_slice_int_type = reflect.TypeOf((*[][]int)(nil)).Elem()
 
 type slice_slice_int_codec struct {
@@ -58,6 +60,8 @@ func (c *slice_slice_int_codec) decode(d *codecapi.Decoder, p *[][]int) {
 func init() {
 	codecapi.Register([][]int(nil), func() codecapi.TypeCodec { return &slice_slice_int_codec{} })
 }
+
+//// []int
 
 var slice_int_type = reflect.TypeOf((*[]int)(nil)).Elem()
 

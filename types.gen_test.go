@@ -12,6 +12,110 @@ import (
 	foo "github.com/jba/codec/internal/testpkg"
 )
 
+//// *[1]int
+
+var ptr_array_1_int_type = reflect.TypeOf((*[1]int)(nil))
+
+type ptr_array_1_int_codec struct {
+	codecapi.NonStruct
+	array_1_int_codec *array_1_int_codec
+}
+
+func (c *ptr_array_1_int_codec) TypesUsed() []reflect.Type {
+	return []reflect.Type{array_1_int_type}
+}
+
+func (c *ptr_array_1_int_codec) SetCodecs(tcs []codecapi.TypeCodec) {
+	c.array_1_int_codec = tcs[0].(*array_1_int_codec)
+}
+
+func (c *ptr_array_1_int_codec) Encode(e *codecapi.Encoder, x interface{}) { c.encode(e, x.(*[1]int)) }
+
+func (c *ptr_array_1_int_codec) encode(e *codecapi.Encoder, x *[1]int) {
+	if !e.StartPtr(x == nil, x) {
+		return
+	}
+	c.array_1_int_codec.encode(e, x)
+}
+
+func (c *ptr_array_1_int_codec) Decode(d *codecapi.Decoder) interface{} {
+	var x *[1]int
+	c.decode(d, &x)
+	return x
+}
+
+func (c *ptr_array_1_int_codec) decode(d *codecapi.Decoder, p **[1]int) {
+	proceed, ref := d.StartPtr()
+	if !proceed {
+		return
+	}
+	if ref != nil {
+		*p = ref.(*[1]int)
+		return
+	}
+	var x [1]int
+	d.StoreRef(&x)
+	c.array_1_int_codec.decode(d, &x)
+	*p = &x
+}
+
+func init() {
+	codecapi.Register(new([1]int), func() codecapi.TypeCodec { return &ptr_array_1_int_codec{} })
+}
+
+//// *[]int
+
+var ptr_slice_int_type = reflect.TypeOf((*[]int)(nil))
+
+type ptr_slice_int_codec struct {
+	codecapi.NonStruct
+	slice_int_codec *slice_int_codec
+}
+
+func (c *ptr_slice_int_codec) TypesUsed() []reflect.Type {
+	return []reflect.Type{slice_int_type}
+}
+
+func (c *ptr_slice_int_codec) SetCodecs(tcs []codecapi.TypeCodec) {
+	c.slice_int_codec = tcs[0].(*slice_int_codec)
+}
+
+func (c *ptr_slice_int_codec) Encode(e *codecapi.Encoder, x interface{}) { c.encode(e, x.(*[]int)) }
+
+func (c *ptr_slice_int_codec) encode(e *codecapi.Encoder, x *[]int) {
+	if !e.StartPtr(x == nil, x) {
+		return
+	}
+	c.slice_int_codec.encode(e, *x)
+}
+
+func (c *ptr_slice_int_codec) Decode(d *codecapi.Decoder) interface{} {
+	var x *[]int
+	c.decode(d, &x)
+	return x
+}
+
+func (c *ptr_slice_int_codec) decode(d *codecapi.Decoder, p **[]int) {
+	proceed, ref := d.StartPtr()
+	if !proceed {
+		return
+	}
+	if ref != nil {
+		*p = ref.(*[]int)
+		return
+	}
+	var x []int
+	d.StoreRef(&x)
+	c.slice_int_codec.decode(d, &x)
+	*p = &x
+}
+
+func init() {
+	codecapi.Register(new([]int), func() codecapi.TypeCodec { return &ptr_slice_int_codec{} })
+}
+
+//// *codec.node
+
 var ptr_node_type = reflect.TypeOf((*node)(nil))
 
 type ptr_node_codec struct {
@@ -19,28 +123,30 @@ type ptr_node_codec struct {
 	node_codec *node_codec
 }
 
-func (c ptr_node_codec) TypesUsed() []reflect.Type { return []reflect.Type{node_type} }
+func (c *ptr_node_codec) TypesUsed() []reflect.Type {
+	return []reflect.Type{node_type}
+}
 
 func (c *ptr_node_codec) SetCodecs(tcs []codecapi.TypeCodec) {
 	c.node_codec = tcs[0].(*node_codec)
 }
 
-func (c ptr_node_codec) Encode(e *codecapi.Encoder, x interface{}) { c.encode(e, x.(*node)) }
+func (c *ptr_node_codec) Encode(e *codecapi.Encoder, x interface{}) { c.encode(e, x.(*node)) }
 
-func (c ptr_node_codec) encode(e *codecapi.Encoder, x *node) {
+func (c *ptr_node_codec) encode(e *codecapi.Encoder, x *node) {
 	if !e.StartPtr(x == nil, x) {
 		return
 	}
 	c.node_codec.encode(e, x)
 }
 
-func (c ptr_node_codec) Decode(d *codecapi.Decoder) interface{} {
+func (c *ptr_node_codec) Decode(d *codecapi.Decoder) interface{} {
 	var x *node
 	c.decode(d, &x)
 	return x
 }
 
-func (c ptr_node_codec) decode(d *codecapi.Decoder, p **node) {
+func (c *ptr_node_codec) decode(d *codecapi.Decoder, p **node) {
 	proceed, ref := d.StartPtr()
 	if !proceed {
 		return
@@ -55,7 +161,825 @@ func (c ptr_node_codec) decode(d *codecapi.Decoder, p **node) {
 	*p = &x
 }
 
-var node_type = ptr_node_type.Elem()
+func init() {
+	codecapi.Register(new(node), func() codecapi.TypeCodec { return &ptr_node_codec{} })
+}
+
+//// *int
+
+var ptr_int_type = reflect.TypeOf((*int)(nil))
+
+type ptr_int_codec struct {
+	codecapi.NonStruct
+}
+
+func (c *ptr_int_codec) TypesUsed() []reflect.Type      { return nil }
+func (c *ptr_int_codec) SetCodecs([]codecapi.TypeCodec) {}
+
+func (c *ptr_int_codec) Encode(e *codecapi.Encoder, x interface{}) { c.encode(e, x.(*int)) }
+
+func (c *ptr_int_codec) encode(e *codecapi.Encoder, x *int) {
+	if !e.StartPtr(x == nil, x) {
+		return
+	}
+	e.EncodeInt(int64(*x))
+}
+
+func (c *ptr_int_codec) Decode(d *codecapi.Decoder) interface{} {
+	var x *int
+	c.decode(d, &x)
+	return x
+}
+
+func (c *ptr_int_codec) decode(d *codecapi.Decoder, p **int) {
+	proceed, ref := d.StartPtr()
+	if !proceed {
+		return
+	}
+	if ref != nil {
+		*p = ref.(*int)
+		return
+	}
+	var x int
+	d.StoreRef(&x)
+	x = int(d.DecodeInt())
+	*p = &x
+}
+
+func init() {
+	codecapi.Register(new(int), func() codecapi.TypeCodec { return &ptr_int_codec{} })
+}
+
+//// *map[int]int
+
+var ptr_map_int__int_type = reflect.TypeOf((*map[int]int)(nil))
+
+type ptr_map_int__int_codec struct {
+	codecapi.NonStruct
+	map_int__int_codec *map_int__int_codec
+}
+
+func (c *ptr_map_int__int_codec) TypesUsed() []reflect.Type {
+	return []reflect.Type{map_int__int_type}
+}
+
+func (c *ptr_map_int__int_codec) SetCodecs(tcs []codecapi.TypeCodec) {
+	c.map_int__int_codec = tcs[0].(*map_int__int_codec)
+}
+
+func (c *ptr_map_int__int_codec) Encode(e *codecapi.Encoder, x interface{}) {
+	c.encode(e, x.(*map[int]int))
+}
+
+func (c *ptr_map_int__int_codec) encode(e *codecapi.Encoder, x *map[int]int) {
+	if !e.StartPtr(x == nil, x) {
+		return
+	}
+	c.map_int__int_codec.encode(e, *x)
+}
+
+func (c *ptr_map_int__int_codec) Decode(d *codecapi.Decoder) interface{} {
+	var x *map[int]int
+	c.decode(d, &x)
+	return x
+}
+
+func (c *ptr_map_int__int_codec) decode(d *codecapi.Decoder, p **map[int]int) {
+	proceed, ref := d.StartPtr()
+	if !proceed {
+		return
+	}
+	if ref != nil {
+		*p = ref.(*map[int]int)
+		return
+	}
+	var x map[int]int
+	d.StoreRef(&x)
+	c.map_int__int_codec.decode(d, &x)
+	*p = &x
+}
+
+func init() {
+	codecapi.Register(new(map[int]int), func() codecapi.TypeCodec { return &ptr_map_int__int_codec{} })
+}
+
+//// *time.Time
+
+var ptr_time_Time_type = reflect.TypeOf((*time.Time)(nil))
+
+type ptr_time_Time_codec struct {
+	codecapi.NonStruct
+	time_Time_codec *time_Time_codec
+}
+
+func (c *ptr_time_Time_codec) TypesUsed() []reflect.Type {
+	return []reflect.Type{time_Time_type}
+}
+
+func (c *ptr_time_Time_codec) SetCodecs(tcs []codecapi.TypeCodec) {
+	c.time_Time_codec = tcs[0].(*time_Time_codec)
+}
+
+func (c *ptr_time_Time_codec) Encode(e *codecapi.Encoder, x interface{}) { c.encode(e, x.(*time.Time)) }
+
+func (c *ptr_time_Time_codec) encode(e *codecapi.Encoder, x *time.Time) {
+	if !e.StartPtr(x == nil, x) {
+		return
+	}
+	c.time_Time_codec.encode(e, *x)
+}
+
+func (c *ptr_time_Time_codec) Decode(d *codecapi.Decoder) interface{} {
+	var x *time.Time
+	c.decode(d, &x)
+	return x
+}
+
+func (c *ptr_time_Time_codec) decode(d *codecapi.Decoder, p **time.Time) {
+	proceed, ref := d.StartPtr()
+	if !proceed {
+		return
+	}
+	if ref != nil {
+		*p = ref.(*time.Time)
+		return
+	}
+	var x time.Time
+	d.StoreRef(&x)
+	c.time_Time_codec.decode(d, &x)
+	*p = &x
+}
+
+func init() {
+	codecapi.Register(new(time.Time), func() codecapi.TypeCodec { return &ptr_time_Time_codec{} })
+}
+
+//// [1]codec.structType
+
+var array_1_structType_type = reflect.TypeOf((*[1]structType)(nil)).Elem()
+
+type array_1_structType_codec struct {
+	codecapi.NonStruct
+	structType_codec       *structType_codec
+	slice_structType_codec *slice_structType_codec
+}
+
+func (c *array_1_structType_codec) TypesUsed() []reflect.Type {
+	return []reflect.Type{
+		structType_type,
+		slice_structType_type,
+	}
+}
+
+func (c *array_1_structType_codec) SetCodecs(tcs []codecapi.TypeCodec) {
+	c.structType_codec = tcs[0].(*structType_codec)
+	c.slice_structType_codec = tcs[1].(*slice_structType_codec)
+}
+
+func (c *array_1_structType_codec) Encode(e *codecapi.Encoder, x interface{}) {
+	a := x.([1]structType)
+	c.encode(e, &a)
+}
+
+func (c *array_1_structType_codec) encode(e *codecapi.Encoder, s *[1]structType) {
+	c.slice_structType_codec.encode(e, (*s)[:])
+}
+
+func (c *array_1_structType_codec) Decode(d *codecapi.Decoder) interface{} {
+	var x [1]structType
+	c.decode(d, &x)
+	return x
+}
+
+func (c *array_1_structType_codec) decode(d *codecapi.Decoder, p *[1]structType) {
+	n := d.StartList()
+	if n < 0 {
+		return
+	}
+	if n != 1 {
+		codecapi.Failf("array size mismatch: got %d, want 1", n)
+	}
+	for i := 0; i < n; i++ {
+		c.structType_codec.decode(d, &(*p)[i])
+	}
+}
+
+func init() {
+	codecapi.Register([1]structType{}, func() codecapi.TypeCodec { return &array_1_structType_codec{} })
+}
+
+//// [1]int
+
+var array_1_int_type = reflect.TypeOf((*[1]int)(nil)).Elem()
+
+type array_1_int_codec struct {
+	codecapi.NonStruct
+	slice_int_codec *slice_int_codec
+}
+
+func (c *array_1_int_codec) TypesUsed() []reflect.Type {
+	return []reflect.Type{slice_int_type}
+}
+
+func (c *array_1_int_codec) SetCodecs(tcs []codecapi.TypeCodec) {
+	c.slice_int_codec = tcs[0].(*slice_int_codec)
+}
+
+func (c *array_1_int_codec) Encode(e *codecapi.Encoder, x interface{}) {
+	a := x.([1]int)
+	c.encode(e, &a)
+}
+
+func (c *array_1_int_codec) encode(e *codecapi.Encoder, s *[1]int) {
+	c.slice_int_codec.encode(e, (*s)[:])
+}
+
+func (c *array_1_int_codec) Decode(d *codecapi.Decoder) interface{} {
+	var x [1]int
+	c.decode(d, &x)
+	return x
+}
+
+func (c *array_1_int_codec) decode(d *codecapi.Decoder, p *[1]int) {
+	n := d.StartList()
+	if n < 0 {
+		return
+	}
+	if n != 1 {
+		codecapi.Failf("array size mismatch: got %d, want 1", n)
+	}
+	for i := 0; i < n; i++ {
+		(*p)[i] = int(d.DecodeInt())
+	}
+}
+
+func init() {
+	codecapi.Register([1]int{}, func() codecapi.TypeCodec { return &array_1_int_codec{} })
+}
+
+//// [2]uint8
+
+var array_2_uint8_type = reflect.TypeOf((*[2]uint8)(nil)).Elem()
+
+type array_2_uint8_codec struct {
+	codecapi.NonStruct
+}
+
+func (c *array_2_uint8_codec) TypesUsed() []reflect.Type {
+	return []reflect.Type{}
+}
+
+func (c *array_2_uint8_codec) SetCodecs(tcs []codecapi.TypeCodec) {
+}
+
+func (c *array_2_uint8_codec) Encode(e *codecapi.Encoder, x interface{}) {
+	a := x.([2]uint8)
+	c.encode(e, &a)
+}
+
+func (c *array_2_uint8_codec) encode(e *codecapi.Encoder, s *[2]uint8) {
+	e.EncodeBytes((*s)[:])
+}
+
+func (c *array_2_uint8_codec) Decode(d *codecapi.Decoder) interface{} {
+	var x [2]uint8
+	c.decode(d, &x)
+	return x
+}
+
+func (c *array_2_uint8_codec) decode(d *codecapi.Decoder, p *[2]uint8) {
+	b := d.DecodeBytes()
+	copy((*p)[:], b)
+}
+
+func init() {
+	codecapi.Register([2]uint8{}, func() codecapi.TypeCodec { return &array_2_uint8_codec{} })
+}
+
+//// []*int
+
+var slice_ptr_int_type = reflect.TypeOf((*[]*int)(nil)).Elem()
+
+type slice_ptr_int_codec struct {
+	codecapi.NonStruct
+
+	ptr_int_codec *ptr_int_codec
+}
+
+func (c *slice_ptr_int_codec) TypesUsed() []reflect.Type {
+	return []reflect.Type{ptr_int_type}
+}
+
+func (c *slice_ptr_int_codec) SetCodecs(tcs []codecapi.TypeCodec) {
+	c.ptr_int_codec = tcs[0].(*ptr_int_codec)
+}
+
+func (c *slice_ptr_int_codec) Encode(e *codecapi.Encoder, x interface{}) { c.encode(e, x.([]*int)) }
+
+func (c *slice_ptr_int_codec) encode(e *codecapi.Encoder, s []*int) {
+	if s == nil {
+		e.EncodeNil()
+		return
+	}
+	e.StartList(len(s))
+	for _, x := range s {
+		c.ptr_int_codec.encode(e, x)
+	}
+}
+
+func (c *slice_ptr_int_codec) Decode(d *codecapi.Decoder) interface{} {
+	var x []*int
+	c.decode(d, &x)
+	return x
+}
+
+func (c *slice_ptr_int_codec) decode(d *codecapi.Decoder, p *[]*int) {
+	n := d.StartList()
+	if n < 0 {
+		return
+	}
+	s := make([]*int, n)
+	for i := 0; i < n; i++ {
+		c.ptr_int_codec.decode(d, &s[i])
+	}
+	*p = s
+}
+
+func init() {
+	codecapi.Register([]*int(nil), func() codecapi.TypeCodec { return &slice_ptr_int_codec{} })
+}
+
+//// []codec.structType
+
+var slice_structType_type = reflect.TypeOf((*[]structType)(nil)).Elem()
+
+type slice_structType_codec struct {
+	codecapi.NonStruct
+
+	structType_codec *structType_codec
+}
+
+func (c *slice_structType_codec) TypesUsed() []reflect.Type {
+	return []reflect.Type{structType_type}
+}
+
+func (c *slice_structType_codec) SetCodecs(tcs []codecapi.TypeCodec) {
+	c.structType_codec = tcs[0].(*structType_codec)
+}
+
+func (c *slice_structType_codec) Encode(e *codecapi.Encoder, x interface{}) {
+	c.encode(e, x.([]structType))
+}
+
+func (c *slice_structType_codec) encode(e *codecapi.Encoder, s []structType) {
+	if s == nil {
+		e.EncodeNil()
+		return
+	}
+	e.StartList(len(s))
+	for _, x := range s {
+		c.structType_codec.encode(e, &x)
+	}
+}
+
+func (c *slice_structType_codec) Decode(d *codecapi.Decoder) interface{} {
+	var x []structType
+	c.decode(d, &x)
+	return x
+}
+
+func (c *slice_structType_codec) decode(d *codecapi.Decoder, p *[]structType) {
+	n := d.StartList()
+	if n < 0 {
+		return
+	}
+	s := make([]structType, n)
+	for i := 0; i < n; i++ {
+		c.structType_codec.decode(d, &s[i])
+	}
+	*p = s
+}
+
+func init() {
+	codecapi.Register([]structType(nil), func() codecapi.TypeCodec { return &slice_structType_codec{} })
+}
+
+//// []int
+
+var slice_int_type = reflect.TypeOf((*[]int)(nil)).Elem()
+
+type slice_int_codec struct {
+	codecapi.NonStruct
+}
+
+func (c *slice_int_codec) TypesUsed() []reflect.Type      { return nil }
+func (c *slice_int_codec) SetCodecs([]codecapi.TypeCodec) {}
+
+func (c *slice_int_codec) Encode(e *codecapi.Encoder, x interface{}) { c.encode(e, x.([]int)) }
+
+func (c *slice_int_codec) encode(e *codecapi.Encoder, s []int) {
+	if s == nil {
+		e.EncodeNil()
+		return
+	}
+	e.StartList(len(s))
+	for _, x := range s {
+		e.EncodeInt(int64(x))
+	}
+}
+
+func (c *slice_int_codec) Decode(d *codecapi.Decoder) interface{} {
+	var x []int
+	c.decode(d, &x)
+	return x
+}
+
+func (c *slice_int_codec) decode(d *codecapi.Decoder, p *[]int) {
+	n := d.StartList()
+	if n < 0 {
+		return
+	}
+	s := make([]int, n)
+	for i := 0; i < n; i++ {
+		s[i] = int(d.DecodeInt())
+	}
+	*p = s
+}
+
+func init() {
+	codecapi.Register([]int(nil), func() codecapi.TypeCodec { return &slice_int_codec{} })
+}
+
+//// codec.definedArray
+
+var definedArray_type = reflect.TypeOf((*definedArray)(nil)).Elem()
+
+type definedArray_codec struct {
+	codecapi.NonStruct
+	slice_int_codec *slice_int_codec
+}
+
+func (c *definedArray_codec) TypesUsed() []reflect.Type {
+	return []reflect.Type{slice_int_type}
+}
+
+func (c *definedArray_codec) SetCodecs(tcs []codecapi.TypeCodec) {
+	c.slice_int_codec = tcs[0].(*slice_int_codec)
+}
+
+func (c *definedArray_codec) Encode(e *codecapi.Encoder, x interface{}) {
+	a := x.(definedArray)
+	c.encode(e, &a)
+}
+
+func (c *definedArray_codec) encode(e *codecapi.Encoder, s *definedArray) {
+	c.slice_int_codec.encode(e, (*s)[:])
+}
+
+func (c *definedArray_codec) Decode(d *codecapi.Decoder) interface{} {
+	var x definedArray
+	c.decode(d, &x)
+	return x
+}
+
+func (c *definedArray_codec) decode(d *codecapi.Decoder, p *definedArray) {
+	n := d.StartList()
+	if n < 0 {
+		return
+	}
+	if n != 1 {
+		codecapi.Failf("array size mismatch: got %d, want 1", n)
+	}
+	for i := 0; i < n; i++ {
+		(*p)[i] = int(d.DecodeInt())
+	}
+}
+
+func init() {
+	codecapi.Register(definedArray{}, func() codecapi.TypeCodec { return &definedArray_codec{} })
+}
+
+//// codec.definedMap
+
+var definedMap_type = reflect.TypeOf((*definedMap)(nil)).Elem()
+
+type definedMap_codec struct {
+	codecapi.NonStruct
+}
+
+func (c *definedMap_codec) TypesUsed() []reflect.Type {
+	return []reflect.Type{}
+}
+
+func (c *definedMap_codec) SetCodecs(tcs []codecapi.TypeCodec) {
+}
+
+func (c *definedMap_codec) Encode(e *codecapi.Encoder, x interface{}) { c.encode(e, x.(definedMap)) }
+
+func (c *definedMap_codec) encode(e *codecapi.Encoder, m definedMap) {
+	if m == nil {
+		e.EncodeNil()
+		return
+	}
+	e.StartList(2 * len(m))
+	for k, v := range m {
+		e.EncodeString(k)
+		e.EncodeBool(v)
+	}
+}
+
+func (c *definedMap_codec) Decode(d *codecapi.Decoder) interface{} {
+	var x definedMap
+	c.decode(d, &x)
+	return x
+}
+
+func (c *definedMap_codec) decode(d *codecapi.Decoder, p *definedMap) {
+	n2 := d.StartList()
+	if n2 < 0 {
+		return
+	}
+	n := n2 / 2
+	m := make(definedMap, n)
+	var k string
+	var v bool
+	for i := 0; i < n; i++ {
+		k = d.DecodeString()
+		v = d.DecodeBool()
+		m[k] = v
+	}
+	*p = m
+}
+
+func init() {
+	codecapi.Register(definedMap(nil), func() codecapi.TypeCodec { return &definedMap_codec{} })
+}
+
+//// codec.definedSlice
+
+var definedSlice_type = reflect.TypeOf((*definedSlice)(nil)).Elem()
+
+type definedSlice_codec struct {
+	codecapi.NonStruct
+}
+
+func (c *definedSlice_codec) TypesUsed() []reflect.Type      { return nil }
+func (c *definedSlice_codec) SetCodecs([]codecapi.TypeCodec) {}
+
+func (c *definedSlice_codec) Encode(e *codecapi.Encoder, x interface{}) {
+	c.encode(e, x.(definedSlice))
+}
+
+func (c *definedSlice_codec) encode(e *codecapi.Encoder, s definedSlice) {
+	if s == nil {
+		e.EncodeNil()
+		return
+	}
+	e.StartList(len(s))
+	for _, x := range s {
+		e.EncodeInt(int64(x))
+	}
+}
+
+func (c *definedSlice_codec) Decode(d *codecapi.Decoder) interface{} {
+	var x definedSlice
+	c.decode(d, &x)
+	return x
+}
+
+func (c *definedSlice_codec) decode(d *codecapi.Decoder, p *definedSlice) {
+	n := d.StartList()
+	if n < 0 {
+		return
+	}
+	s := make([]int, n)
+	for i := 0; i < n; i++ {
+		s[i] = int(d.DecodeInt())
+	}
+	*p = s
+}
+
+func init() {
+	codecapi.Register(definedSlice(nil), func() codecapi.TypeCodec { return &definedSlice_codec{} })
+}
+
+//// codec.generatedTestTypes
+
+var generatedTestTypes_type = reflect.TypeOf((*generatedTestTypes)(nil)).Elem()
+
+type generatedTestTypes_codec struct {
+	ptr_array_1_int_codec             *ptr_array_1_int_codec
+	ptr_slice_int_codec               *ptr_slice_int_codec
+	ptr_node_codec                    *ptr_node_codec
+	ptr_map_int__int_codec            *ptr_map_int__int_codec
+	ptr_time_Time_codec               *ptr_time_Time_codec
+	array_1_structType_codec          *array_1_structType_codec
+	array_1_int_codec                 *array_1_int_codec
+	array_2_uint8_codec               *array_2_uint8_codec
+	slice_ptr_int_codec               *slice_ptr_int_codec
+	slice_structType_codec            *slice_structType_codec
+	slice_int_codec                   *slice_int_codec
+	definedArray_codec                *definedArray_codec
+	definedMap_codec                  *definedMap_codec
+	definedSlice_codec                *definedSlice_codec
+	structType_codec                  *structType_codec
+	foo_T_codec                       *foo_T_codec
+	map_array_1_int__structType_codec *map_array_1_int__structType_codec
+	map_string__bool_codec            *map_string__bool_codec
+	fieldMap                          []int
+}
+
+func (c *generatedTestTypes_codec) Fields() []string {
+	return []string{"Node", "Slice", "Array", "ByteSlice", "ByteArray", "Map", "Struct", "IP", "StructSlice", "StructArray", "StructMap", "DefSlice", "DefArray", "DefMap", "Pos", "T", "PtrSlice", "PtrArray", "PtrMap", "PtrTime", "SlicePtrInt"}
+}
+
+func (c *generatedTestTypes_codec) SetFieldMap(fm []int) {
+	c.fieldMap = fm
+}
+
+func (c *generatedTestTypes_codec) TypesUsed() []reflect.Type {
+	return []reflect.Type{ptr_array_1_int_type, ptr_slice_int_type, ptr_node_type, ptr_map_int__int_type, ptr_time_Time_type, array_1_structType_type, array_1_int_type, array_2_uint8_type, slice_ptr_int_type, slice_structType_type, slice_int_type, definedArray_type, definedMap_type, definedSlice_type, structType_type, foo_T_type, map_array_1_int__structType_type, map_string__bool_type}
+}
+
+func (c *generatedTestTypes_codec) SetCodecs(tcs []codecapi.TypeCodec) {
+	c.ptr_array_1_int_codec = tcs[0].(*ptr_array_1_int_codec)
+	c.ptr_slice_int_codec = tcs[1].(*ptr_slice_int_codec)
+	c.ptr_node_codec = tcs[2].(*ptr_node_codec)
+	c.ptr_map_int__int_codec = tcs[3].(*ptr_map_int__int_codec)
+	c.ptr_time_Time_codec = tcs[4].(*ptr_time_Time_codec)
+	c.array_1_structType_codec = tcs[5].(*array_1_structType_codec)
+	c.array_1_int_codec = tcs[6].(*array_1_int_codec)
+	c.array_2_uint8_codec = tcs[7].(*array_2_uint8_codec)
+	c.slice_ptr_int_codec = tcs[8].(*slice_ptr_int_codec)
+	c.slice_structType_codec = tcs[9].(*slice_structType_codec)
+	c.slice_int_codec = tcs[10].(*slice_int_codec)
+	c.definedArray_codec = tcs[11].(*definedArray_codec)
+	c.definedMap_codec = tcs[12].(*definedMap_codec)
+	c.definedSlice_codec = tcs[13].(*definedSlice_codec)
+	c.structType_codec = tcs[14].(*structType_codec)
+	c.foo_T_codec = tcs[15].(*foo_T_codec)
+	c.map_array_1_int__structType_codec = tcs[16].(*map_array_1_int__structType_codec)
+	c.map_string__bool_codec = tcs[17].(*map_string__bool_codec)
+}
+
+func (c *generatedTestTypes_codec) Encode(e *codecapi.Encoder, x interface{}) {
+	s := x.(generatedTestTypes)
+	c.encode(e, &s)
+}
+
+func (c *generatedTestTypes_codec) encode(e *codecapi.Encoder, x *generatedTestTypes) {
+	e.StartStruct()
+	if x.Node != nil {
+		e.EncodeUint(0)
+		c.ptr_node_codec.encode(e, x.Node)
+	}
+	if x.Slice != nil {
+		e.EncodeUint(1)
+		c.slice_int_codec.encode(e, x.Slice)
+	}
+
+	e.EncodeUint(2)
+	c.array_1_int_codec.encode(e, &x.Array)
+	if x.ByteSlice != nil {
+		e.EncodeUint(3)
+		e.EncodeBytes(x.ByteSlice)
+	}
+
+	e.EncodeUint(4)
+	c.array_2_uint8_codec.encode(e, &x.ByteArray)
+	if x.Map != nil {
+		e.EncodeUint(5)
+		c.map_string__bool_codec.encode(e, x.Map)
+	}
+
+	e.EncodeUint(6)
+	c.structType_codec.encode(e, &x.Struct)
+	if x.IP != nil {
+		e.EncodeUint(7)
+		e.EncodeBytes([]uint8(x.IP))
+	}
+	if x.StructSlice != nil {
+		e.EncodeUint(8)
+		c.slice_structType_codec.encode(e, x.StructSlice)
+	}
+
+	e.EncodeUint(9)
+	c.array_1_structType_codec.encode(e, &x.StructArray)
+	if x.StructMap != nil {
+		e.EncodeUint(10)
+		c.map_array_1_int__structType_codec.encode(e, x.StructMap)
+	}
+	if x.DefSlice != nil {
+		e.EncodeUint(11)
+		c.definedSlice_codec.encode(e, definedSlice(x.DefSlice))
+	}
+
+	e.EncodeUint(12)
+	c.definedArray_codec.encode(e, &x.DefArray)
+	if x.DefMap != nil {
+		e.EncodeUint(13)
+		c.definedMap_codec.encode(e, definedMap(x.DefMap))
+	}
+	if x.Pos != 0 {
+		e.EncodeUint(14)
+		e.EncodeInt(int64(x.Pos))
+	}
+	if x.T != nil {
+		e.EncodeUint(15)
+		c.foo_T_codec.encode(e, foo.T(x.T))
+	}
+	if x.PtrSlice != nil {
+		e.EncodeUint(16)
+		c.ptr_slice_int_codec.encode(e, x.PtrSlice)
+	}
+	if x.PtrArray != nil {
+		e.EncodeUint(17)
+		c.ptr_array_1_int_codec.encode(e, x.PtrArray)
+	}
+	if x.PtrMap != nil {
+		e.EncodeUint(18)
+		c.ptr_map_int__int_codec.encode(e, x.PtrMap)
+	}
+	if x.PtrTime != nil {
+		e.EncodeUint(19)
+		c.ptr_time_Time_codec.encode(e, x.PtrTime)
+	}
+	if x.SlicePtrInt != nil {
+		e.EncodeUint(20)
+		c.slice_ptr_int_codec.encode(e, x.SlicePtrInt)
+	}
+	e.EndStruct()
+}
+
+func (c *generatedTestTypes_codec) Decode(d *codecapi.Decoder) interface{} {
+	var x generatedTestTypes
+	c.decode(d, &x)
+	return x
+}
+
+func (c *generatedTestTypes_codec) decode(d *codecapi.Decoder, x *generatedTestTypes) {
+	d.StartStruct()
+	for {
+		n := d.NextStructField(c.fieldMap)
+		if n == -1 {
+			break
+		}
+		switch n {
+		case 0:
+			c.ptr_node_codec.decode(d, &x.Node)
+		case 1:
+			c.slice_int_codec.decode(d, &x.Slice)
+		case 2:
+			c.array_1_int_codec.decode(d, &x.Array)
+		case 3:
+			x.ByteSlice = d.DecodeBytes()
+		case 4:
+			c.array_2_uint8_codec.decode(d, &x.ByteArray)
+		case 5:
+			c.map_string__bool_codec.decode(d, &x.Map)
+		case 6:
+			c.structType_codec.decode(d, &x.Struct)
+		case 7:
+			x.IP = net.IP(d.DecodeBytes())
+		case 8:
+			c.slice_structType_codec.decode(d, &x.StructSlice)
+		case 9:
+			c.array_1_structType_codec.decode(d, &x.StructArray)
+		case 10:
+			c.map_array_1_int__structType_codec.decode(d, &x.StructMap)
+		case 11:
+			c.definedSlice_codec.decode(d, &x.DefSlice)
+		case 12:
+			c.definedArray_codec.decode(d, &x.DefArray)
+		case 13:
+			c.definedMap_codec.decode(d, &x.DefMap)
+		case 14:
+			x.Pos = token.Pos(d.DecodeInt())
+		case 15:
+			c.foo_T_codec.decode(d, &x.T)
+		case 16:
+			c.ptr_slice_int_codec.decode(d, &x.PtrSlice)
+		case 17:
+			c.ptr_array_1_int_codec.decode(d, &x.PtrArray)
+		case 18:
+			c.ptr_map_int__int_codec.decode(d, &x.PtrMap)
+		case 19:
+			c.ptr_time_Time_codec.decode(d, &x.PtrTime)
+		case 20:
+			c.slice_ptr_int_codec.decode(d, &x.SlicePtrInt)
+		default:
+			d.UnknownField("generatedTestTypes", n)
+		}
+	}
+}
+
+func init() {
+	codecapi.Register(generatedTestTypes{}, func() codecapi.TypeCodec { return &generatedTestTypes_codec{} })
+}
+
+//// codec.node
+
+var node_type = reflect.TypeOf((*node)(nil)).Elem()
 
 type node_codec struct {
 	ptr_node_codec *ptr_node_codec
@@ -122,618 +1046,11 @@ func (c *node_codec) decode(d *codecapi.Decoder, x *node) {
 
 func init() {
 	codecapi.Register(node{}, func() codecapi.TypeCodec { return &node_codec{} })
-	codecapi.Register(&node{}, func() codecapi.TypeCodec { return &ptr_node_codec{} })
 }
 
-var array_1_structType_type = reflect.TypeOf((*[1]structType)(nil)).Elem()
+//// codec.structType
 
-type array_1_structType_codec struct {
-	codecapi.NonStruct
-	structType_codec       *structType_codec
-	slice_structType_codec *slice_structType_codec
-}
-
-func (c *array_1_structType_codec) TypesUsed() []reflect.Type {
-	return []reflect.Type{
-		structType_type,
-		slice_structType_type,
-	}
-}
-
-func (c *array_1_structType_codec) SetCodecs(tcs []codecapi.TypeCodec) {
-	c.structType_codec = tcs[0].(*structType_codec)
-	c.slice_structType_codec = tcs[1].(*slice_structType_codec)
-}
-
-func (c *array_1_structType_codec) Encode(e *codecapi.Encoder, x interface{}) {
-	a := x.([1]structType)
-	c.encode(e, &a)
-}
-
-func (c *array_1_structType_codec) encode(e *codecapi.Encoder, s *[1]structType) {
-	c.slice_structType_codec.encode(e, (*s)[:])
-}
-
-func (c *array_1_structType_codec) Decode(d *codecapi.Decoder) interface{} {
-	var x [1]structType
-	c.decode(d, &x)
-	return x
-}
-
-func (c *array_1_structType_codec) decode(d *codecapi.Decoder, p *[1]structType) {
-	n := d.StartList()
-	if n < 0 {
-		return
-	}
-	if n != 1 {
-		codecapi.Failf("array size mismatch: got %d, want 1", n)
-	}
-	for i := 0; i < n; i++ {
-		c.structType_codec.decode(d, &(*p)[i])
-	}
-}
-
-func init() {
-	codecapi.Register([1]structType{}, func() codecapi.TypeCodec { return &array_1_structType_codec{} })
-}
-
-var array_1_int_type = reflect.TypeOf((*[1]int)(nil)).Elem()
-
-type array_1_int_codec struct {
-	codecapi.NonStruct
-	slice_int_codec *slice_int_codec
-}
-
-func (c *array_1_int_codec) TypesUsed() []reflect.Type {
-	return []reflect.Type{
-
-		slice_int_type,
-	}
-}
-
-func (c *array_1_int_codec) SetCodecs(tcs []codecapi.TypeCodec) {
-	c.slice_int_codec = tcs[0].(*slice_int_codec)
-}
-
-func (c *array_1_int_codec) Encode(e *codecapi.Encoder, x interface{}) {
-	a := x.([1]int)
-	c.encode(e, &a)
-}
-
-func (c *array_1_int_codec) encode(e *codecapi.Encoder, s *[1]int) {
-	c.slice_int_codec.encode(e, (*s)[:])
-}
-
-func (c *array_1_int_codec) Decode(d *codecapi.Decoder) interface{} {
-	var x [1]int
-	c.decode(d, &x)
-	return x
-}
-
-func (c *array_1_int_codec) decode(d *codecapi.Decoder, p *[1]int) {
-	n := d.StartList()
-	if n < 0 {
-		return
-	}
-	if n != 1 {
-		codecapi.Failf("array size mismatch: got %d, want 1", n)
-	}
-	for i := 0; i < n; i++ {
-		(*p)[i] = int(d.DecodeInt())
-	}
-}
-
-func init() {
-	codecapi.Register([1]int{}, func() codecapi.TypeCodec { return &array_1_int_codec{} })
-}
-
-var slice_structType_type = reflect.TypeOf((*[]structType)(nil)).Elem()
-
-type slice_structType_codec struct {
-	codecapi.NonStruct
-
-	structType_codec *structType_codec
-}
-
-func (c *slice_structType_codec) TypesUsed() []reflect.Type {
-	return []reflect.Type{structType_type}
-}
-
-func (c *slice_structType_codec) SetCodecs(tcs []codecapi.TypeCodec) {
-	c.structType_codec = tcs[0].(*structType_codec)
-}
-
-func (c *slice_structType_codec) Encode(e *codecapi.Encoder, x interface{}) {
-	c.encode(e, x.([]structType))
-}
-
-func (c *slice_structType_codec) encode(e *codecapi.Encoder, s []structType) {
-	if s == nil {
-		e.EncodeNil()
-		return
-	}
-	e.StartList(len(s))
-	for _, x := range s {
-		c.structType_codec.encode(e, &x)
-	}
-}
-
-func (c *slice_structType_codec) Decode(d *codecapi.Decoder) interface{} {
-	var x []structType
-	c.decode(d, &x)
-	return x
-}
-
-func (c *slice_structType_codec) decode(d *codecapi.Decoder, p *[]structType) {
-	n := d.StartList()
-	if n < 0 {
-		return
-	}
-	s := make([]structType, n)
-	for i := 0; i < n; i++ {
-		c.structType_codec.decode(d, &s[i])
-	}
-	*p = s
-}
-
-func init() {
-	codecapi.Register([]structType(nil), func() codecapi.TypeCodec { return &slice_structType_codec{} })
-}
-
-var slice_int_type = reflect.TypeOf((*[]int)(nil)).Elem()
-
-type slice_int_codec struct {
-	codecapi.NonStruct
-}
-
-func (c *slice_int_codec) TypesUsed() []reflect.Type      { return nil }
-func (c *slice_int_codec) SetCodecs([]codecapi.TypeCodec) {}
-
-func (c *slice_int_codec) Encode(e *codecapi.Encoder, x interface{}) { c.encode(e, x.([]int)) }
-
-func (c *slice_int_codec) encode(e *codecapi.Encoder, s []int) {
-	if s == nil {
-		e.EncodeNil()
-		return
-	}
-	e.StartList(len(s))
-	for _, x := range s {
-		e.EncodeInt(int64(x))
-	}
-}
-
-func (c *slice_int_codec) Decode(d *codecapi.Decoder) interface{} {
-	var x []int
-	c.decode(d, &x)
-	return x
-}
-
-func (c *slice_int_codec) decode(d *codecapi.Decoder, p *[]int) {
-	n := d.StartList()
-	if n < 0 {
-		return
-	}
-	s := make([]int, n)
-	for i := 0; i < n; i++ {
-		s[i] = int(d.DecodeInt())
-	}
-	*p = s
-}
-
-func init() {
-	codecapi.Register([]int(nil), func() codecapi.TypeCodec { return &slice_int_codec{} })
-}
-
-var definedArray_type = reflect.TypeOf((*definedArray)(nil)).Elem()
-
-type definedArray_codec struct {
-	codecapi.NonStruct
-	slice_int_codec *slice_int_codec
-}
-
-func (c *definedArray_codec) TypesUsed() []reflect.Type {
-	return []reflect.Type{
-
-		slice_int_type,
-	}
-}
-
-func (c *definedArray_codec) SetCodecs(tcs []codecapi.TypeCodec) {
-	c.slice_int_codec = tcs[0].(*slice_int_codec)
-}
-
-func (c *definedArray_codec) Encode(e *codecapi.Encoder, x interface{}) {
-	a := x.(definedArray)
-	c.encode(e, &a)
-}
-
-func (c *definedArray_codec) encode(e *codecapi.Encoder, s *definedArray) {
-	c.slice_int_codec.encode(e, (*s)[:])
-}
-
-func (c *definedArray_codec) Decode(d *codecapi.Decoder) interface{} {
-	var x definedArray
-	c.decode(d, &x)
-	return x
-}
-
-func (c *definedArray_codec) decode(d *codecapi.Decoder, p *definedArray) {
-	n := d.StartList()
-	if n < 0 {
-		return
-	}
-	if n != 1 {
-		codecapi.Failf("array size mismatch: got %d, want 1", n)
-	}
-	for i := 0; i < n; i++ {
-		(*p)[i] = int(d.DecodeInt())
-	}
-}
-
-func init() {
-	codecapi.Register(definedArray{}, func() codecapi.TypeCodec { return &definedArray_codec{} })
-}
-
-var definedMap_type = reflect.TypeOf((*definedMap)(nil)).Elem()
-
-type definedMap_codec struct {
-	codecapi.NonStruct
-}
-
-func (c *definedMap_codec) TypesUsed() []reflect.Type {
-	return []reflect.Type{}
-}
-
-func (c *definedMap_codec) SetCodecs(tcs []codecapi.TypeCodec) {
-}
-
-func (c *definedMap_codec) Encode(e *codecapi.Encoder, x interface{}) { c.encode(e, x.(definedMap)) }
-
-func (c *definedMap_codec) encode(e *codecapi.Encoder, m definedMap) {
-	if m == nil {
-		e.EncodeNil()
-		return
-	}
-	e.StartList(2 * len(m))
-	for k, v := range m {
-		e.EncodeString(k)
-		e.EncodeBool(v)
-	}
-}
-
-func (c *definedMap_codec) Decode(d *codecapi.Decoder) interface{} {
-	var x definedMap
-	c.decode(d, &x)
-	return x
-}
-
-func (c *definedMap_codec) decode(d *codecapi.Decoder, p *definedMap) {
-	n2 := d.StartList()
-	if n2 < 0 {
-		return
-	}
-	n := n2 / 2
-	m := make(definedMap, n)
-	var k string
-	var v bool
-	for i := 0; i < n; i++ {
-		k = d.DecodeString()
-		v = d.DecodeBool()
-		m[k] = v
-	}
-	*p = m
-}
-
-func init() {
-	codecapi.Register(definedMap(nil), func() codecapi.TypeCodec { return &definedMap_codec{} })
-}
-
-var definedSlice_type = reflect.TypeOf((*definedSlice)(nil)).Elem()
-
-type definedSlice_codec struct {
-	codecapi.NonStruct
-}
-
-func (c *definedSlice_codec) TypesUsed() []reflect.Type      { return nil }
-func (c *definedSlice_codec) SetCodecs([]codecapi.TypeCodec) {}
-
-func (c *definedSlice_codec) Encode(e *codecapi.Encoder, x interface{}) {
-	c.encode(e, x.(definedSlice))
-}
-
-func (c *definedSlice_codec) encode(e *codecapi.Encoder, s definedSlice) {
-	if s == nil {
-		e.EncodeNil()
-		return
-	}
-	e.StartList(len(s))
-	for _, x := range s {
-		e.EncodeInt(int64(x))
-	}
-}
-
-func (c *definedSlice_codec) Decode(d *codecapi.Decoder) interface{} {
-	var x definedSlice
-	c.decode(d, &x)
-	return x
-}
-
-func (c *definedSlice_codec) decode(d *codecapi.Decoder, p *definedSlice) {
-	n := d.StartList()
-	if n < 0 {
-		return
-	}
-	s := make([]int, n)
-	for i := 0; i < n; i++ {
-		s[i] = int(d.DecodeInt())
-	}
-	*p = s
-}
-
-func init() {
-	codecapi.Register(definedSlice(nil), func() codecapi.TypeCodec { return &definedSlice_codec{} })
-}
-
-var ptr_generatedTestTypes_type = reflect.TypeOf((*generatedTestTypes)(nil))
-
-type ptr_generatedTestTypes_codec struct {
-	codecapi.NonStruct
-	generatedTestTypes_codec *generatedTestTypes_codec
-}
-
-func (c ptr_generatedTestTypes_codec) TypesUsed() []reflect.Type {
-	return []reflect.Type{generatedTestTypes_type}
-}
-
-func (c *ptr_generatedTestTypes_codec) SetCodecs(tcs []codecapi.TypeCodec) {
-	c.generatedTestTypes_codec = tcs[0].(*generatedTestTypes_codec)
-}
-
-func (c ptr_generatedTestTypes_codec) Encode(e *codecapi.Encoder, x interface{}) {
-	c.encode(e, x.(*generatedTestTypes))
-}
-
-func (c ptr_generatedTestTypes_codec) encode(e *codecapi.Encoder, x *generatedTestTypes) {
-	if !e.StartPtr(x == nil, x) {
-		return
-	}
-	c.generatedTestTypes_codec.encode(e, x)
-}
-
-func (c ptr_generatedTestTypes_codec) Decode(d *codecapi.Decoder) interface{} {
-	var x *generatedTestTypes
-	c.decode(d, &x)
-	return x
-}
-
-func (c ptr_generatedTestTypes_codec) decode(d *codecapi.Decoder, p **generatedTestTypes) {
-	proceed, ref := d.StartPtr()
-	if !proceed {
-		return
-	}
-	if ref != nil {
-		*p = ref.(*generatedTestTypes)
-		return
-	}
-	var x generatedTestTypes
-	d.StoreRef(&x)
-	c.generatedTestTypes_codec.decode(d, &x)
-	*p = &x
-}
-
-var generatedTestTypes_type = ptr_generatedTestTypes_type.Elem()
-
-type generatedTestTypes_codec struct {
-	ptr_node_codec              *ptr_node_codec
-	array_1_structType_codec    *array_1_structType_codec
-	array_1_int_codec           *array_1_int_codec
-	slice_structType_codec      *slice_structType_codec
-	slice_int_codec             *slice_int_codec
-	definedArray_codec          *definedArray_codec
-	definedMap_codec            *definedMap_codec
-	definedSlice_codec          *definedSlice_codec
-	structType_codec            *structType_codec
-	foo_T_codec                 *foo_T_codec
-	map__1_int_structType_codec *map__1_int_structType_codec
-	map_string_bool_codec       *map_string_bool_codec
-	time_Time_codec             *time_Time_codec
-	fieldMap                    []int
-}
-
-func (c *generatedTestTypes_codec) Fields() []string {
-	return []string{"Node", "Slice", "Array", "Map", "Struct", "Time", "IP", "StructSlice", "StructArray", "StructMap", "DefSlice", "DefArray", "DefMap", "Pos", "T"}
-}
-
-func (c *generatedTestTypes_codec) SetFieldMap(fm []int) {
-	c.fieldMap = fm
-}
-
-func (c *generatedTestTypes_codec) TypesUsed() []reflect.Type {
-	return []reflect.Type{ptr_node_type, array_1_structType_type, array_1_int_type, slice_structType_type, slice_int_type, definedArray_type, definedMap_type, definedSlice_type, structType_type, foo_T_type, map__1_int_structType_type, map_string_bool_type, time_Time_type}
-}
-
-func (c *generatedTestTypes_codec) SetCodecs(tcs []codecapi.TypeCodec) {
-	c.ptr_node_codec = tcs[0].(*ptr_node_codec)
-	c.array_1_structType_codec = tcs[1].(*array_1_structType_codec)
-	c.array_1_int_codec = tcs[2].(*array_1_int_codec)
-	c.slice_structType_codec = tcs[3].(*slice_structType_codec)
-	c.slice_int_codec = tcs[4].(*slice_int_codec)
-	c.definedArray_codec = tcs[5].(*definedArray_codec)
-	c.definedMap_codec = tcs[6].(*definedMap_codec)
-	c.definedSlice_codec = tcs[7].(*definedSlice_codec)
-	c.structType_codec = tcs[8].(*structType_codec)
-	c.foo_T_codec = tcs[9].(*foo_T_codec)
-	c.map__1_int_structType_codec = tcs[10].(*map__1_int_structType_codec)
-	c.map_string_bool_codec = tcs[11].(*map_string_bool_codec)
-	c.time_Time_codec = tcs[12].(*time_Time_codec)
-}
-
-func (c *generatedTestTypes_codec) Encode(e *codecapi.Encoder, x interface{}) {
-	s := x.(generatedTestTypes)
-	c.encode(e, &s)
-}
-
-func (c *generatedTestTypes_codec) encode(e *codecapi.Encoder, x *generatedTestTypes) {
-	e.StartStruct()
-	if x.Node != nil {
-		e.EncodeUint(0)
-		c.ptr_node_codec.encode(e, x.Node)
-	}
-	if x.Slice != nil {
-		e.EncodeUint(1)
-		c.slice_int_codec.encode(e, x.Slice)
-	}
-
-	e.EncodeUint(2)
-	c.array_1_int_codec.encode(e, &x.Array)
-	if x.Map != nil {
-		e.EncodeUint(3)
-		c.map_string_bool_codec.encode(e, x.Map)
-	}
-
-	e.EncodeUint(4)
-	c.structType_codec.encode(e, &x.Struct)
-
-	e.EncodeUint(5)
-	c.time_Time_codec.encode(e, x.Time)
-	if x.IP != nil {
-		e.EncodeUint(6)
-		e.EncodeBytes([]uint8(x.IP))
-	}
-	if x.StructSlice != nil {
-		e.EncodeUint(7)
-		c.slice_structType_codec.encode(e, x.StructSlice)
-	}
-
-	e.EncodeUint(8)
-	c.array_1_structType_codec.encode(e, &x.StructArray)
-	if x.StructMap != nil {
-		e.EncodeUint(9)
-		c.map__1_int_structType_codec.encode(e, x.StructMap)
-	}
-	if x.DefSlice != nil {
-		e.EncodeUint(10)
-		c.definedSlice_codec.encode(e, definedSlice(x.DefSlice))
-	}
-
-	e.EncodeUint(11)
-	c.definedArray_codec.encode(e, &x.DefArray)
-	if x.DefMap != nil {
-		e.EncodeUint(12)
-		c.definedMap_codec.encode(e, definedMap(x.DefMap))
-	}
-	if x.Pos != 0 {
-		e.EncodeUint(13)
-		e.EncodeInt(int64(x.Pos))
-	}
-	if x.T != nil {
-		e.EncodeUint(14)
-		c.foo_T_codec.encode(e, foo.T(x.T))
-	}
-	e.EndStruct()
-}
-
-func (c *generatedTestTypes_codec) Decode(d *codecapi.Decoder) interface{} {
-	var x generatedTestTypes
-	c.decode(d, &x)
-	return x
-}
-
-func (c *generatedTestTypes_codec) decode(d *codecapi.Decoder, x *generatedTestTypes) {
-	d.StartStruct()
-	for {
-		n := d.NextStructField(c.fieldMap)
-		if n == -1 {
-			break
-		}
-		switch n {
-		case 0:
-			c.ptr_node_codec.decode(d, &x.Node)
-		case 1:
-			c.slice_int_codec.decode(d, &x.Slice)
-		case 2:
-			c.array_1_int_codec.decode(d, &x.Array)
-		case 3:
-			c.map_string_bool_codec.decode(d, &x.Map)
-		case 4:
-			c.structType_codec.decode(d, &x.Struct)
-		case 5:
-			c.time_Time_codec.decode(d, &x.Time)
-		case 6:
-			x.IP = net.IP(d.DecodeBytes())
-		case 7:
-			c.slice_structType_codec.decode(d, &x.StructSlice)
-		case 8:
-			c.array_1_structType_codec.decode(d, &x.StructArray)
-		case 9:
-			c.map__1_int_structType_codec.decode(d, &x.StructMap)
-		case 10:
-			c.definedSlice_codec.decode(d, &x.DefSlice)
-		case 11:
-			c.definedArray_codec.decode(d, &x.DefArray)
-		case 12:
-			c.definedMap_codec.decode(d, &x.DefMap)
-		case 13:
-			x.Pos = token.Pos(d.DecodeInt())
-		case 14:
-			c.foo_T_codec.decode(d, &x.T)
-		default:
-			d.UnknownField("generatedTestTypes", n)
-		}
-	}
-}
-
-func init() {
-	codecapi.Register(generatedTestTypes{}, func() codecapi.TypeCodec { return &generatedTestTypes_codec{} })
-	codecapi.Register(&generatedTestTypes{}, func() codecapi.TypeCodec { return &ptr_generatedTestTypes_codec{} })
-}
-
-var ptr_structType_type = reflect.TypeOf((*structType)(nil))
-
-type ptr_structType_codec struct {
-	codecapi.NonStruct
-	structType_codec *structType_codec
-}
-
-func (c ptr_structType_codec) TypesUsed() []reflect.Type { return []reflect.Type{structType_type} }
-
-func (c *ptr_structType_codec) SetCodecs(tcs []codecapi.TypeCodec) {
-	c.structType_codec = tcs[0].(*structType_codec)
-}
-
-func (c ptr_structType_codec) Encode(e *codecapi.Encoder, x interface{}) {
-	c.encode(e, x.(*structType))
-}
-
-func (c ptr_structType_codec) encode(e *codecapi.Encoder, x *structType) {
-	if !e.StartPtr(x == nil, x) {
-		return
-	}
-	c.structType_codec.encode(e, x)
-}
-
-func (c ptr_structType_codec) Decode(d *codecapi.Decoder) interface{} {
-	var x *structType
-	c.decode(d, &x)
-	return x
-}
-
-func (c ptr_structType_codec) decode(d *codecapi.Decoder, p **structType) {
-	proceed, ref := d.StartPtr()
-	if !proceed {
-		return
-	}
-	if ref != nil {
-		*p = ref.(*structType)
-		return
-	}
-	var x structType
-	d.StoreRef(&x)
-	c.structType_codec.decode(d, &x)
-	*p = &x
-}
-
-var structType_type = ptr_structType_type.Elem()
+var structType_type = reflect.TypeOf((*structType)(nil)).Elem()
 
 type structType_codec struct {
 	node_codec *node_codec
@@ -805,8 +1122,9 @@ func (c *structType_codec) decode(d *codecapi.Decoder, x *structType) {
 
 func init() {
 	codecapi.Register(structType{}, func() codecapi.TypeCodec { return &structType_codec{} })
-	codecapi.Register(&structType{}, func() codecapi.TypeCodec { return &ptr_structType_codec{} })
 }
+
+//// foo.T
 
 var foo_T_type = reflect.TypeOf((*foo.T)(nil)).Elem()
 
@@ -852,31 +1170,33 @@ func init() {
 	codecapi.Register(foo.T(nil), func() codecapi.TypeCodec { return &foo_T_codec{} })
 }
 
-var map__1_int_structType_type = reflect.TypeOf((*map[[1]int]structType)(nil)).Elem()
+//// map[[1]int]codec.structType
 
-type map__1_int_structType_codec struct {
+var map_array_1_int__structType_type = reflect.TypeOf((*map[[1]int]structType)(nil)).Elem()
+
+type map_array_1_int__structType_codec struct {
 	codecapi.NonStruct
 	array_1_int_codec *array_1_int_codec
 	structType_codec  *structType_codec
 }
 
-func (c *map__1_int_structType_codec) TypesUsed() []reflect.Type {
+func (c *map_array_1_int__structType_codec) TypesUsed() []reflect.Type {
 	return []reflect.Type{
 		array_1_int_type,
 		structType_type,
 	}
 }
 
-func (c *map__1_int_structType_codec) SetCodecs(tcs []codecapi.TypeCodec) {
+func (c *map_array_1_int__structType_codec) SetCodecs(tcs []codecapi.TypeCodec) {
 	c.array_1_int_codec = tcs[0].(*array_1_int_codec)
 	c.structType_codec = tcs[1].(*structType_codec)
 }
 
-func (c *map__1_int_structType_codec) Encode(e *codecapi.Encoder, x interface{}) {
+func (c *map_array_1_int__structType_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	c.encode(e, x.(map[[1]int]structType))
 }
 
-func (c *map__1_int_structType_codec) encode(e *codecapi.Encoder, m map[[1]int]structType) {
+func (c *map_array_1_int__structType_codec) encode(e *codecapi.Encoder, m map[[1]int]structType) {
 	if m == nil {
 		e.EncodeNil()
 		return
@@ -888,13 +1208,13 @@ func (c *map__1_int_structType_codec) encode(e *codecapi.Encoder, m map[[1]int]s
 	}
 }
 
-func (c *map__1_int_structType_codec) Decode(d *codecapi.Decoder) interface{} {
+func (c *map_array_1_int__structType_codec) Decode(d *codecapi.Decoder) interface{} {
 	var x map[[1]int]structType
 	c.decode(d, &x)
 	return x
 }
 
-func (c *map__1_int_structType_codec) decode(d *codecapi.Decoder, p *map[[1]int]structType) {
+func (c *map_array_1_int__structType_codec) decode(d *codecapi.Decoder, p *map[[1]int]structType) {
 	n2 := d.StartList()
 	if n2 < 0 {
 		return
@@ -912,27 +1232,85 @@ func (c *map__1_int_structType_codec) decode(d *codecapi.Decoder, p *map[[1]int]
 }
 
 func init() {
-	codecapi.Register(map[[1]int]structType(nil), func() codecapi.TypeCodec { return &map__1_int_structType_codec{} })
+	codecapi.Register(map[[1]int]structType(nil), func() codecapi.TypeCodec { return &map_array_1_int__structType_codec{} })
 }
 
-var map_string_bool_type = reflect.TypeOf((*map[string]bool)(nil)).Elem()
+//// map[int]int
 
-type map_string_bool_codec struct {
+var map_int__int_type = reflect.TypeOf((*map[int]int)(nil)).Elem()
+
+type map_int__int_codec struct {
 	codecapi.NonStruct
 }
 
-func (c *map_string_bool_codec) TypesUsed() []reflect.Type {
+func (c *map_int__int_codec) TypesUsed() []reflect.Type {
 	return []reflect.Type{}
 }
 
-func (c *map_string_bool_codec) SetCodecs(tcs []codecapi.TypeCodec) {
+func (c *map_int__int_codec) SetCodecs(tcs []codecapi.TypeCodec) {
 }
 
-func (c *map_string_bool_codec) Encode(e *codecapi.Encoder, x interface{}) {
+func (c *map_int__int_codec) Encode(e *codecapi.Encoder, x interface{}) { c.encode(e, x.(map[int]int)) }
+
+func (c *map_int__int_codec) encode(e *codecapi.Encoder, m map[int]int) {
+	if m == nil {
+		e.EncodeNil()
+		return
+	}
+	e.StartList(2 * len(m))
+	for k, v := range m {
+		e.EncodeInt(int64(k))
+		e.EncodeInt(int64(v))
+	}
+}
+
+func (c *map_int__int_codec) Decode(d *codecapi.Decoder) interface{} {
+	var x map[int]int
+	c.decode(d, &x)
+	return x
+}
+
+func (c *map_int__int_codec) decode(d *codecapi.Decoder, p *map[int]int) {
+	n2 := d.StartList()
+	if n2 < 0 {
+		return
+	}
+	n := n2 / 2
+	m := make(map[int]int, n)
+	var k int
+	var v int
+	for i := 0; i < n; i++ {
+		k = int(d.DecodeInt())
+		v = int(d.DecodeInt())
+		m[k] = v
+	}
+	*p = m
+}
+
+func init() {
+	codecapi.Register(map[int]int(nil), func() codecapi.TypeCodec { return &map_int__int_codec{} })
+}
+
+//// map[string]bool
+
+var map_string__bool_type = reflect.TypeOf((*map[string]bool)(nil)).Elem()
+
+type map_string__bool_codec struct {
+	codecapi.NonStruct
+}
+
+func (c *map_string__bool_codec) TypesUsed() []reflect.Type {
+	return []reflect.Type{}
+}
+
+func (c *map_string__bool_codec) SetCodecs(tcs []codecapi.TypeCodec) {
+}
+
+func (c *map_string__bool_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	c.encode(e, x.(map[string]bool))
 }
 
-func (c *map_string_bool_codec) encode(e *codecapi.Encoder, m map[string]bool) {
+func (c *map_string__bool_codec) encode(e *codecapi.Encoder, m map[string]bool) {
 	if m == nil {
 		e.EncodeNil()
 		return
@@ -944,13 +1322,13 @@ func (c *map_string_bool_codec) encode(e *codecapi.Encoder, m map[string]bool) {
 	}
 }
 
-func (c *map_string_bool_codec) Decode(d *codecapi.Decoder) interface{} {
+func (c *map_string__bool_codec) Decode(d *codecapi.Decoder) interface{} {
 	var x map[string]bool
 	c.decode(d, &x)
 	return x
 }
 
-func (c *map_string_bool_codec) decode(d *codecapi.Decoder, p *map[string]bool) {
+func (c *map_string__bool_codec) decode(d *codecapi.Decoder, p *map[string]bool) {
 	n2 := d.StartList()
 	if n2 < 0 {
 		return
@@ -968,8 +1346,10 @@ func (c *map_string_bool_codec) decode(d *codecapi.Decoder, p *map[string]bool) 
 }
 
 func init() {
-	codecapi.Register(map[string]bool(nil), func() codecapi.TypeCodec { return &map_string_bool_codec{} })
+	codecapi.Register(map[string]bool(nil), func() codecapi.TypeCodec { return &map_string__bool_codec{} })
 }
+
+//// net.IP
 
 var net_IP_type = reflect.TypeOf((*net.IP)(nil)).Elem()
 
@@ -1005,6 +1385,8 @@ func (c *net_IP_codec) decode(d *codecapi.Decoder, p *net.IP) {
 }
 
 func init() { codecapi.Register(*new(net.IP), func() codecapi.TypeCodec { return &net_IP_codec{} }) }
+
+//// time.Time
 
 var time_Time_type = reflect.TypeOf((*time.Time)(nil)).Elem()
 

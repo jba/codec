@@ -62,7 +62,7 @@ func generate(w io.Writer, packagePath string, fieldTag string, vs ...interface{
 		fieldTagKey: fieldTag,
 	}
 	funcs := template.FuncMap{
-		"typeID":     g.typeIdentifier,
+		"typeID":     g.typeID,
 		"goName":     g.goName,
 		"encodeStmt": g.encodeStmt,
 		"decodeStmt": g.decodeStmt,
@@ -78,6 +78,7 @@ func generate(w io.Writer, packagePath string, fieldTag string, vs ...interface{
 	g.sliceTemplate = newTemplate("slice", sliceBody)
 	g.arrayTemplate = newTemplate("array", arrayBody)
 	g.mapTemplate = newTemplate("map", mapBody)
+	g.ptrTemplate = newTemplate("ptr", ptrBody)
 	g.structTemplate = newTemplate("struct", structBody)
 	g.marshalTemplate = newTemplate("marshaler", marshalBody)
 
@@ -105,7 +106,7 @@ func generate(w io.Writer, packagePath string, fieldTag string, vs ...interface{
 		} else {
 			msg = fmt.Sprintf("wrote bad source to %s", filename)
 		}
-		return fmt.Errorf("format.Source: %v; %s", err, msg)
+		return fmt.Errorf("format.Source: %v;\n%s", err, msg)
 	}
 	_, err = w.Write(fsrc)
 	return err
@@ -132,6 +133,7 @@ type generator struct {
 	sliceTemplate   *template.Template
 	arrayTemplate   *template.Template
 	mapTemplate     *template.Template
+	ptrTemplate     *template.Template
 	structTemplate  *template.Template
 	marshalTemplate *template.Template
 }
@@ -157,16 +159,11 @@ func (g *generator) generate(typevals []interface{}) ([]byte, error) {
 				return nil, err
 			}
 			if piece != nil {
+				header := fmt.Sprintf("//// %s\n\n", t)
+				code = append(code, header...)
 				code = append(code, piece...)
 			}
-			// We use the same code for T and *T, so both are done.
-			// TODO: fix for non-structs
 			g.done[t] = true
-			if t.Kind() == reflect.Struct {
-				g.done[reflect.PtrTo(t)] = true
-			} else if t.Kind() == reflect.Ptr && t.Elem().Kind() == reflect.Struct {
-				g.done[t.Elem()] = true
-			}
 		}
 	}
 
@@ -353,12 +350,13 @@ func (g *generator) gen(t reflect.Type) ([]byte, error) {
 	case reflect.Struct:
 		return g.genStruct(t)
 	case reflect.Ptr:
-		return g.gen(t.Elem())
+		return g.genPtr(t)
 	}
 	return nil, nil
 }
 
 // willGenerate reports whether a codec will be generated for t.
+// TODO: handle XXXMarshalers
 func willGenerate(t reflect.Type) bool {
 	switch t.Kind() {
 	case reflect.Slice:
@@ -377,7 +375,7 @@ func (g *generator) genSlice(t reflect.Type) ([]byte, error) {
 		ElField      bool
 	}{
 		Type:    t,
-		ElType:  et,
+		ElType:  et, // TODO: remove; template can do .Type.Elem
 		ElField: willGenerate(et),
 	})
 }
@@ -420,6 +418,16 @@ func (g *generator) genMarshaler(t reflect.Type, kind string) ([]byte, error) {
 	}{
 		Type: t,
 		Kind: kind,
+	})
+}
+
+func (g *generator) genPtr(t reflect.Type) ([]byte, error) {
+	return execute(g.ptrTemplate, struct {
+		Type    reflect.Type
+		ElField bool
+	}{
+		Type:    t,
+		ElField: willGenerate(t.Elem()),
 	})
 }
 
@@ -511,6 +519,7 @@ func zeroValue(t reflect.Type) string {
 	}
 }
 
+// TODO: remove (unused)
 func (g *generator) tcIndex(t reflect.Type) string {
 	return fmt.Sprintf("tcs[reflect.TypeOf((*%s)(nil)).Elem()]", g.goName(t))
 }
@@ -539,7 +548,12 @@ func (g *generator) encodeStmt(t reflect.Type, arg string) string {
 	}
 	// If the encode function expects a pointer, take the address of the arg.
 	if encodePtrArg(t) {
-		arg = "&" + arg
+		if arg[0] == '*' {
+			// If the arg is a dereference, just remove the dereference.
+			arg = arg[1:]
+		} else {
+			arg = "&" + arg
+		}
 	}
 	if t.Name() != "" && t.Kind() != reflect.Struct && t.Kind() != reflect.Array {
 		arg = fmt.Sprintf("%s(%s)", g.goName(t), arg)
@@ -562,7 +576,7 @@ func (g *generator) encodeFunc(t reflect.Type) string {
 	if bn != "" {
 		typeName = "codecapi." + bn
 	} else {
-		typeName = g.typeIdentifier(t)
+		typeName = g.typeID(t)
 	}
 	return fmt.Sprintf("c.%s_codec.encode", typeName)
 }
@@ -590,7 +604,7 @@ func (g *generator) decodeStmt(t reflect.Type, arg string) string {
 	} else {
 		arg = "&" + arg
 	}
-	return fmt.Sprintf("c.%s_codec.decode(d, %s)", g.typeIdentifier(t), arg)
+	return fmt.Sprintf("c.%s_codec.decode(d, %s)", g.typeID(t), arg)
 }
 
 // builtinName returns the suffix to append to "encode" or "decode" to get the
@@ -628,21 +642,31 @@ func (g *generator) goName(t reflect.Type) string {
 	return codecapi.TypeString(t, map[string]string{g.pkgPath: ""})
 }
 
-var typeIdentifierReplacer = strings.NewReplacer(
+var typeIDReplacer = strings.NewReplacer(
 	"[]", "slice_",
 	"{}", "", // for empty interface
 	"[", "_", "]", "_", ".", "_",
 	"*", "ptr_",
 )
 
-// typeIdentifier returns a valid Go identifier for type t.
+// typeID returns a valid Go identifier for type t.
 // E.g. "ast.File" => "ast_File", "[]int" => "slice_int".
-func (g *generator) typeIdentifier(t reflect.Type) string {
-	n := typeIdentifierReplacer.Replace(g.goName(t))
-	if t.Kind() == reflect.Array && t.Name() == "" {
-		n = "array" + n
+func (g *generator) typeID(t reflect.Type) string {
+	if t.Name() != "" {
+		return strings.ReplaceAll(g.goName(t), ".", "_")
 	}
-	return n
+	switch t.Kind() {
+	case reflect.Slice:
+		return "slice_" + g.typeID(t.Elem())
+	case reflect.Array:
+		return fmt.Sprintf("array_%d_%s", t.Len(), g.typeID(t.Elem()))
+	case reflect.Map:
+		return fmt.Sprintf("map_%s__%s", g.typeID(t.Key()), g.typeID(t.Elem()))
+	case reflect.Ptr:
+		return "ptr_" + g.typeID(t.Elem())
+	default:
+		return typeIDReplacer.Replace(g.goName(t))
+	}
 }
 
 // parseTag extracts the sub-tag named by key, then parses it using the
@@ -773,7 +797,9 @@ type «$typeName» struct {
 
 func (c *«$typeName») TypesUsed() []reflect.Type {
 	return []reflect.Type{
-		«if .ElField» «$elTypeID»_type, «end»
+		«- if .ElField»
+			«$elTypeID»_type,
+		«end -»
 		«if not .IsBytes» «$sliceTypeID»_type, «end»
 	}
 }
@@ -948,60 +974,77 @@ func (c *«$typeName») decode(d *codecapi.Decoder, p *«$goName») {
 func init() { codecapi.Register(*new(«$goName»), func() codecapi.TypeCodec { return &«$typeName»{} }) }
 `
 
-// Template body for a (pointer to a) struct type.
-// A nil pointer is encoded as a zero. (This is done in Encoder.StartStruct.)
-// Otherwise, a struct is encoded as the start code, its exported fields, then
+// Template body for a pointer type.
+const ptrBody = `
+« $typeID := typeID .Type »
+« $typeName := print $typeID "_codec" »
+« $goName := goName .Type »
+« $elTypeID := typeID .Type.Elem »
+
+var «$typeID»_type = reflect.TypeOf((«$goName»)(nil))
+
+type «$typeName» struct {
+	codecapi.NonStruct
+	«if .ElField -»
+		«$elTypeID»_codec *«$elTypeID»_codec
+	«end -»
+}
+«if .ElField»
+	func (c *«$typeName») TypesUsed() []reflect.Type {
+		return []reflect.Type{«$elTypeID»_type}
+	}
+
+	func (c *«$typeName») SetCodecs(tcs []codecapi.TypeCodec) {
+		c.«$elTypeID»_codec = tcs[0].(*«$elTypeID»_codec)
+	}
+«else»
+	func (c *«$typeName») TypesUsed() []reflect.Type { return nil }
+	func (c *«$typeName») SetCodecs([]codecapi.TypeCodec) {}
+«end»
+
+
+func (c *«$typeName») Encode(e *codecapi.Encoder, x interface{}) { c.encode(e, x.(«$goName»)) }
+
+func (c *«$typeName») encode(e *codecapi.Encoder, x «$goName») {
+	if !e.StartPtr(x==nil, x) { return }
+	«encodeStmt .Type.Elem "*x"»
+}
+
+func (c *«$typeName») Decode(d *codecapi.Decoder) interface{} {
+	var x «$goName»
+	c.decode(d, &x)
+	return x
+}
+
+func (c *«$typeName») decode(d *codecapi.Decoder, p *«$goName») {
+	proceed, ref := d.StartPtr()
+	if !proceed { return }
+	if ref != nil {
+		*p = ref.(«$goName»)
+		return
+	}
+	var x «goName .Type.Elem»
+	d.StoreRef(&x)
+	«decodeStmt .Type.Elem "x"»
+	*p = &x
+}
+
+func init() {
+	codecapi.Register(new(«goName .Type.Elem»), func() codecapi.TypeCodec {return &«$typeName»{}})
+}
+`
+
+// Template body for a struct type.
+// A struct is encoded as the start code, its exported fields, then
 // the end code. Each non-zero field is encoded as its field number followed by
 // its value. A field that equals its zero value isn't encoded.
-//
-// The comment listing the field names is used when re-generating the file,
-// to make sure we don't alter the existing mapping from field names to numbers.
 const structBody = `
 « $typeID := typeID .Type »
 « $typeName := print $typeID "_codec" »
 « $ptrTypeName := print "ptr_" $typeName »
 « $goName := goName .Type »
 
-var ptr_«$typeID»_type = reflect.TypeOf((*«$goName»)(nil))
-
-type «$ptrTypeName» struct {
-	codecapi.NonStruct
-	«$typeName» *«$typeName»
-}
-
-func (c «$ptrTypeName») TypesUsed() []reflect.Type { return []reflect.Type{«$typeID»_type} }
-
-func (c *«$ptrTypeName») SetCodecs(tcs []codecapi.TypeCodec) {
-	c.«$typeName» = tcs[0].(*«$typeName»)
-}
-
-func (c «$ptrTypeName») Encode(e *codecapi.Encoder, x interface{}) { c.encode(e, x.(*«$goName»)) }
-
-func (c «$ptrTypeName») encode(e *codecapi.Encoder, x *«$goName») {
-	if !e.StartPtr(x==nil, x) { return }
-	c.«$typeName».encode(e, x)
-}
-
-func (c «$ptrTypeName») Decode(d *codecapi.Decoder) interface{} {
-	var x *«$goName»
-	c.decode(d, &x)
-	return x
-}
-
-func (c «$ptrTypeName») decode(d *codecapi.Decoder, p **«$goName») {
-	proceed, ref := d.StartPtr()
-	if !proceed { return }
-	if ref != nil {
-		*p = ref.(*«$goName»)
-		return
-	}
-	var x «$goName»
-	d.StoreRef(&x)
-	c.«$typeName».decode(d, &x)
-	*p = &x
-}
-
-var «$typeID»_type = ptr_«$typeID»_type.Elem()
+var «$typeID»_type = reflect.TypeOf((*«$goName»)(nil)).Elem()
 
 type «$typeName» struct{
 	«range .FieldTypes»
@@ -1078,6 +1121,5 @@ func (c *«$typeName») decode(d *codecapi.Decoder, x *«$goName») {
 
 func init() {
 	codecapi.Register(«$goName»{}, func() codecapi.TypeCodec { return &«$typeName»{} })
-	codecapi.Register(&«$goName»{}, func() codecapi.TypeCodec {return &«$ptrTypeName»{}})
 }
 `

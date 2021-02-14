@@ -37,7 +37,7 @@ var (
 // Otherwise, pkgPaths is used to determine what to emit for a fully-qualified
 // package path. If the path is not found in the map, then its last component is
 // used. In this mode, TypeString generates valid Go type expressions, provided
-// the path mapping corresponds to the context of the generated code: that is,
+// the path mapping corresponds to the context of the generated code; that is,
 // the current package's path is mapped to the empty string, and other packages
 // are mapped to their import identifiers in the file.
 func TypeString(t reflect.Type, pkgPaths map[string]string) string {

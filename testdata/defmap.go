@@ -8,6 +8,8 @@ import (
 	"github.com/jba/codec/codecapi"
 )
 
+//// codec.definedMap
+
 var definedMap_type = reflect.TypeOf((*definedMap)(nil)).Elem()
 
 type definedMap_codec struct {

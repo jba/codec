@@ -9,6 +9,8 @@ import (
 	"github.com/jba/codec/codecapi"
 )
 
+//// time.Time
+
 var time_Time_type = reflect.TypeOf((*time.Time)(nil)).Elem()
 
 type time_Time_codec struct {

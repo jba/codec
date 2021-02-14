@@ -8,6 +8,8 @@ import (
 	"github.com/jba/codec/codecapi"
 )
 
+//// codec.definedSlice
+
 var definedSlice_type = reflect.TypeOf((*definedSlice)(nil)).Elem()
 
 type definedSlice_codec struct {

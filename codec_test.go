@@ -13,6 +13,7 @@ import (
 	"math"
 	"net"
 	"os"
+	"reflect"
 	"strings"
 	"testing"
 	"time"
@@ -36,9 +37,10 @@ type generatedTestTypes struct {
 	Node        *node
 	Slice       []int
 	Array       [1]int
+	ByteSlice   []byte // should not generate a codec
+	ByteArray   [2]byte
 	Map         map[string]bool
 	Struct      structType
-	Time        time.Time
 	IP          net.IP
 	StructSlice []structType
 	StructArray [1]structType
@@ -48,7 +50,11 @@ type generatedTestTypes struct {
 	DefMap      definedMap
 	Pos         token.Pos
 	T           foo.T
-	//Skip     Skip // add this to re-generate code for TestSkip; see skip_code_test.go
+	PtrSlice    *[]int
+	PtrArray    *[1]int
+	PtrMap      *map[int]int
+	PtrTime     *time.Time
+	SlicePtrInt []*int
 }
 
 // for testing sharing and cycles
@@ -114,6 +120,16 @@ func testEncodeDecode(t *testing.T, opts EncodeOptions) {
 		definedSlice{1, 2, 3},
 		definedArray{-7},
 		definedMap{"true": true},
+		[]byte{1, 2, 3},
+		[2]byte{4, 5},
+		func() *int { x := 6; return &x }(),
+		&[]int{7, 8},
+		&[1]int{9},
+		&map[int]int{10: 11},
+		func() *time.Time {
+			x := time.Date(2020, time.March, 20, 0, 0, 0, 0, time.UTC)
+			return &x
+		}(),
 	}
 	var buf bytes.Buffer
 	e := NewEncoder(&buf, &opts)
@@ -138,19 +154,38 @@ func testEncodeDecode(t *testing.T, opts EncodeOptions) {
 func TestSharing(t *testing.T) {
 	n := &node{Value: 99, Next: &node{Value: 111}}
 	n.Next.Next = n // create a cycle
+	var g *node
+	roundTripSharing(t, n, &g)
+	if g.Value != 99 || g.Next.Value != 111 {
+		t.Fatal("bad values")
+	}
+	if g.Next.Next != g {
+		t.Error("did not preserve cycle")
+	}
 
+	two := 2
+	seven := 7
+	s := []*int{&two, &seven, &seven, &two, &two}
+	var h []*int
+	roundTripSharing(t, s, &h)
+	if h[0] != h[3] || h[0] != h[4] || h[1] != h[2] {
+		t.Error("did not preserve sharing")
+	}
+}
+
+func roundTripSharing(t *testing.T, in, out interface{}) {
+	t.Helper()
 	var buf bytes.Buffer
-	err := NewEncoder(&buf, &EncodeOptions{TrackPointers: true}).Encode(n)
-	if err != nil {
+	e := NewEncoder(&buf, &EncodeOptions{TrackPointers: true})
+	if err := e.Encode(in); err != nil {
 		t.Fatal(err)
 	}
 	d := NewDecoder(bytes.NewReader(buf.Bytes()), nil)
-	var g *node
-	if err := d.Decode(&g); err != nil {
+	if err := d.Decode(out); err != nil {
 		t.Fatal(err)
 	}
-	if !cmp.Equal(g, n) {
-		t.Error("did not preserve cycle")
+	if !cmp.Equal(in, reflect.ValueOf(out).Elem().Interface()) {
+		t.Error("unequal")
 	}
 }
 

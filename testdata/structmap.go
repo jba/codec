@@ -8,6 +8,8 @@ import (
 	"github.com/jba/codec/codecapi"
 )
 
+//// [1]int
+
 var array_1_int_type = reflect.TypeOf((*[1]int)(nil)).Elem()
 
 type array_1_int_codec struct {
@@ -16,10 +18,7 @@ type array_1_int_codec struct {
 }
 
 func (c *array_1_int_codec) TypesUsed() []reflect.Type {
-	return []reflect.Type{
-
-		slice_int_type,
-	}
+	return []reflect.Type{slice_int_type}
 }
 
 func (c *array_1_int_codec) SetCodecs(tcs []codecapi.TypeCodec) {
@@ -57,6 +56,8 @@ func (c *array_1_int_codec) decode(d *codecapi.Decoder, p *[1]int) {
 func init() {
 	codecapi.Register([1]int{}, func() codecapi.TypeCodec { return &array_1_int_codec{} })
 }
+
+//// []int
 
 var slice_int_type = reflect.TypeOf((*[]int)(nil)).Elem()
 
@@ -102,52 +103,9 @@ func init() {
 	codecapi.Register([]int(nil), func() codecapi.TypeCodec { return &slice_int_codec{} })
 }
 
-var ptr_smallStruct_type = reflect.TypeOf((*smallStruct)(nil))
+//// codec.smallStruct
 
-type ptr_smallStruct_codec struct {
-	codecapi.NonStruct
-	smallStruct_codec *smallStruct_codec
-}
-
-func (c ptr_smallStruct_codec) TypesUsed() []reflect.Type { return []reflect.Type{smallStruct_type} }
-
-func (c *ptr_smallStruct_codec) SetCodecs(tcs []codecapi.TypeCodec) {
-	c.smallStruct_codec = tcs[0].(*smallStruct_codec)
-}
-
-func (c ptr_smallStruct_codec) Encode(e *codecapi.Encoder, x interface{}) {
-	c.encode(e, x.(*smallStruct))
-}
-
-func (c ptr_smallStruct_codec) encode(e *codecapi.Encoder, x *smallStruct) {
-	if !e.StartPtr(x == nil, x) {
-		return
-	}
-	c.smallStruct_codec.encode(e, x)
-}
-
-func (c ptr_smallStruct_codec) Decode(d *codecapi.Decoder) interface{} {
-	var x *smallStruct
-	c.decode(d, &x)
-	return x
-}
-
-func (c ptr_smallStruct_codec) decode(d *codecapi.Decoder, p **smallStruct) {
-	proceed, ref := d.StartPtr()
-	if !proceed {
-		return
-	}
-	if ref != nil {
-		*p = ref.(*smallStruct)
-		return
-	}
-	var x smallStruct
-	d.StoreRef(&x)
-	c.smallStruct_codec.decode(d, &x)
-	*p = &x
-}
-
-var smallStruct_type = ptr_smallStruct_type.Elem()
+var smallStruct_type = reflect.TypeOf((*smallStruct)(nil)).Elem()
 
 type smallStruct_codec struct {
 	fieldMap []int
@@ -206,34 +164,35 @@ func (c *smallStruct_codec) decode(d *codecapi.Decoder, x *smallStruct) {
 
 func init() {
 	codecapi.Register(smallStruct{}, func() codecapi.TypeCodec { return &smallStruct_codec{} })
-	codecapi.Register(&smallStruct{}, func() codecapi.TypeCodec { return &ptr_smallStruct_codec{} })
 }
 
-var map__1_int_smallStruct_type = reflect.TypeOf((*map[[1]int]smallStruct)(nil)).Elem()
+//// map[[1]int]codec.smallStruct
 
-type map__1_int_smallStruct_codec struct {
+var map_array_1_int__smallStruct_type = reflect.TypeOf((*map[[1]int]smallStruct)(nil)).Elem()
+
+type map_array_1_int__smallStruct_codec struct {
 	codecapi.NonStruct
 	array_1_int_codec *array_1_int_codec
 	smallStruct_codec *smallStruct_codec
 }
 
-func (c *map__1_int_smallStruct_codec) TypesUsed() []reflect.Type {
+func (c *map_array_1_int__smallStruct_codec) TypesUsed() []reflect.Type {
 	return []reflect.Type{
 		array_1_int_type,
 		smallStruct_type,
 	}
 }
 
-func (c *map__1_int_smallStruct_codec) SetCodecs(tcs []codecapi.TypeCodec) {
+func (c *map_array_1_int__smallStruct_codec) SetCodecs(tcs []codecapi.TypeCodec) {
 	c.array_1_int_codec = tcs[0].(*array_1_int_codec)
 	c.smallStruct_codec = tcs[1].(*smallStruct_codec)
 }
 
-func (c *map__1_int_smallStruct_codec) Encode(e *codecapi.Encoder, x interface{}) {
+func (c *map_array_1_int__smallStruct_codec) Encode(e *codecapi.Encoder, x interface{}) {
 	c.encode(e, x.(map[[1]int]smallStruct))
 }
 
-func (c *map__1_int_smallStruct_codec) encode(e *codecapi.Encoder, m map[[1]int]smallStruct) {
+func (c *map_array_1_int__smallStruct_codec) encode(e *codecapi.Encoder, m map[[1]int]smallStruct) {
 	if m == nil {
 		e.EncodeNil()
 		return
@@ -245,13 +204,13 @@ func (c *map__1_int_smallStruct_codec) encode(e *codecapi.Encoder, m map[[1]int]
 	}
 }
 
-func (c *map__1_int_smallStruct_codec) Decode(d *codecapi.Decoder) interface{} {
+func (c *map_array_1_int__smallStruct_codec) Decode(d *codecapi.Decoder) interface{} {
 	var x map[[1]int]smallStruct
 	c.decode(d, &x)
 	return x
 }
 
-func (c *map__1_int_smallStruct_codec) decode(d *codecapi.Decoder, p *map[[1]int]smallStruct) {
+func (c *map_array_1_int__smallStruct_codec) decode(d *codecapi.Decoder, p *map[[1]int]smallStruct) {
 	n2 := d.StartList()
 	if n2 < 0 {
 		return
@@ -269,5 +228,5 @@ func (c *map__1_int_smallStruct_codec) decode(d *codecapi.Decoder, p *map[[1]int
 }
 
 func init() {
-	codecapi.Register(map[[1]int]smallStruct(nil), func() codecapi.TypeCodec { return &map__1_int_smallStruct_codec{} })
+	codecapi.Register(map[[1]int]smallStruct(nil), func() codecapi.TypeCodec { return &map_array_1_int__smallStruct_codec{} })
 }

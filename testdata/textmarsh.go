@@ -9,6 +9,8 @@ import (
 	"github.com/jba/codec/codecapi"
 )
 
+//// net.IP
+
 var net_IP_type = reflect.TypeOf((*net.IP)(nil)).Elem()
 
 type net_IP_codec struct {
