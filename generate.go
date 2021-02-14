@@ -67,7 +67,6 @@ func generate(w io.Writer, packagePath string, fieldTag string, vs ...interface{
 		"encodeStmt": g.encodeStmt,
 		"decodeStmt": g.decodeStmt,
 		"encodeFunc": g.encodeFunc,
-		"tcIndex":    g.tcIndex,
 	}
 
 	newTemplate := func(name, body string) *template.Template {
@@ -513,11 +512,6 @@ func zeroValue(t reflect.Type) string {
 	default:
 		return ""
 	}
-}
-
-// TODO: remove (unused)
-func (g *generator) tcIndex(t reflect.Type) string {
-	return fmt.Sprintf("tcs[reflect.TypeOf((*%s)(nil)).Elem()]", g.goName(t))
 }
 
 func execute(tmpl *template.Template, data interface{}) ([]byte, error) {
