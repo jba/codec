@@ -32,31 +32,6 @@ type (
 	definedMap   map[string]bool
 )
 
-func TestGoName(t *testing.T) {
-	var r io.Reader
-	g := &generator{pkgPath: "github.com/jba/codec"}
-	for _, test := range []struct {
-		v    interface{}
-		want string
-	}{
-		{0, "int"},
-		{uint(0), "uint"},
-		{token.Pos(0), "token.Pos"},
-		{Encoder{}, "Encoder"},
-		{[][]Encoder{}, "[][]Encoder"},
-		{bytes.Buffer{}, "bytes.Buffer"},
-		{&r, "*io.Reader"},
-		{[]int(nil), "[]int"},
-		{[1]int{0}, "[1]int"},
-		{map[*Decoder][]io.Writer{}, "map[*Decoder][]io.Writer"},
-	} {
-		got := g.goName(reflect.TypeOf(test.v))
-		if got != test.want {
-			t.Errorf("%T: got %q, want %q", test.v, got, test.want)
-		}
-	}
-}
-
 type genStruct struct {
 	S string
 	B bool
@@ -234,10 +209,38 @@ func TestParseTag(t *testing.T) {
 }
 
 var (
-	cmpType      = reflect.TypeOf(new(cmp.Option)).Elem()
-	othercmpType = reflect.TypeOf(new(othercmp.Option)).Elem()
+	cmpType      = reflect.TypeOf(cmp.Indirect{})
+	othercmpType = reflect.TypeOf(othercmp.Indirect{})
 	fooType      = reflect.TypeOf(foo.T(nil))
 )
+
+func TestGoName(t *testing.T) {
+	var r io.Reader
+	g := &generator{pkgPath: "github.com/jba/codec"}
+	g.buildImportMap([]reflect.Type{cmpType, othercmpType})
+	for _, test := range []struct {
+		v    interface{}
+		want string
+	}{
+		{0, "int"},
+		{uint(0), "uint"},
+		{token.Pos(0), "token.Pos"},
+		{Encoder{}, "Encoder"},
+		{[][]Encoder{}, "[][]Encoder"},
+		{bytes.Buffer{}, "bytes.Buffer"},
+		{&r, "*io.Reader"},
+		{[]int(nil), "[]int"},
+		{[1]int{0}, "[1]int"},
+		{map[*Decoder][]io.Writer{}, "map[*Decoder][]io.Writer"},
+		{cmp.Indirect{}, "cmp.Indirect"},
+		{othercmp.Indirect{}, "cmp1.Indirect"},
+	} {
+		got := g.goName(reflect.TypeOf(test.v))
+		if got != test.want {
+			t.Errorf("%T: got %q, want %q", test.v, got, test.want)
+		}
+	}
+}
 
 func TestPackageName(t *testing.T) {
 	for _, test := range []struct {
@@ -257,18 +260,32 @@ func TestPackageName(t *testing.T) {
 	}
 }
 
-func TestPopulateImportMap(t *testing.T) {
-	got := map[string]string{}
+func TestBuildImportMap(t *testing.T) {
+	g := &generator{pkgPath: "github.com/jba/codec"}
 	types := []reflect.Type{reflect.TypeOf(0), cmpType, othercmpType, fooType, reflect.TypeOf(Decoder{})}
-	populateImportMap(types, "github.com/jba/codec", got)
+	g.buildImportMap(types)
 	want := map[string]string{
+		"reflect":                               "",
+		"github.com/jba/codec/codecapi":         "",
 		"github.com/google/go-cmp/cmp":          "",
 		"github.com/jba/codec/internal/cmp":     "cmp1",
 		"github.com/jba/codec/internal/testpkg": "foo",
 	}
-	if diff := cmp.Diff(want, got); diff != "" {
+	if diff := cmp.Diff(want, g.importMap); diff != "" {
 		t.Errorf("diff (-want, +got):\n%s", diff)
 	}
+	want = map[string]string{
+		"reflect":                               "reflect",
+		"github.com/jba/codec/codecapi":         "codecapi",
+		"github.com/jba/codec":                  "",
+		"github.com/google/go-cmp/cmp":          "cmp",
+		"github.com/jba/codec/internal/cmp":     "cmp1",
+		"github.com/jba/codec/internal/testpkg": "foo",
+	}
+	if diff := cmp.Diff(want, g.pkgPathMap); diff != "" {
+		t.Errorf("diff (-want, +got):\n%s", diff)
+	}
+
 }
 
 func TestReferencedTypeList(t *testing.T) {
@@ -276,6 +293,7 @@ func TestReferencedTypeList(t *testing.T) {
 		pkgPath:     "github.com/jba/codec",
 		fieldTagKey: "codec",
 	}
+	cmpType := reflect.TypeOf(new(cmp.Option)).Elem()
 	got := g.referencedTypeList([]interface{}{0, []*cmp.Option{}, genStruct{}, token.Pos(0), net.IP{}})
 	wantvals := []interface{}{
 		new(cmp.Option), []*cmp.Option{}, cmpType, genStruct{},

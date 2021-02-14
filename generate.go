@@ -117,6 +117,7 @@ type generator struct {
 	pkgPath         string
 	fieldTagKey     string
 	importMap       map[string]string // import path to import identifier
+	pkgPathMap      map[string]string //package path to qualifying identifier
 	initialTemplate *template.Template
 	sliceTemplate   *template.Template
 	arrayTemplate   *template.Template
@@ -132,13 +133,7 @@ type importSpec struct {
 
 func (g *generator) generate(typevals []interface{}) ([]byte, error) {
 	todo := g.referencedTypeList(typevals)
-	// Construct the full import map.
-	g.importMap = map[string]string{
-		"reflect":                       "",
-		"github.com/jba/codec/codecapi": "",
-	}
-	populateImportMap(todo, g.pkgPath, g.importMap)
-
+	g.buildImportMap(todo)
 	var code []byte
 	for _, t := range todo {
 		piece, err := g.gen(t)
@@ -154,6 +149,9 @@ func (g *generator) generate(typevals []interface{}) ([]byte, error) {
 
 	var stdImports, otherImports []importSpec
 	for path, id := range g.importMap {
+		if path == g.pkgPath {
+			continue
+		}
 		spec := importSpec{path, id}
 		if strings.ContainsRune(path, '.') {
 			otherImports = append(otherImports, spec)
@@ -260,12 +258,16 @@ func (g *generator) ignoreField(structType reflect.Type, f reflect.StructField) 
 	return omit
 }
 
-func populateImportMap(types []reflect.Type, pkgPath string, importMap map[string]string) {
+func (g *generator) buildImportMap(types []reflect.Type) {
+	g.importMap = map[string]string{
+		"reflect":                       "",
+		"github.com/jba/codec/codecapi": "",
+	}
 	// Collect the prefixes in use so far.
 	// For these, assume that the package names are the last components of the
 	// import paths.
 	prefixes := map[string]bool{}
-	for ppath, id := range importMap {
+	for ppath, id := range g.importMap {
 		if id == "" {
 			prefixes[path.Base(ppath)] = true
 		} else {
@@ -277,10 +279,10 @@ func populateImportMap(types []reflect.Type, pkgPath string, importMap map[strin
 		if ppath == "" {
 			continue
 		}
-		if ppath == pkgPath {
+		if ppath == g.pkgPath {
 			continue
 		}
-		if _, ok := importMap[ppath]; ok {
+		if _, ok := g.importMap[ppath]; ok {
 			continue
 		}
 		// Determine an import identifier for the path.
@@ -305,7 +307,19 @@ func populateImportMap(types []reflect.Type, pkgPath string, importMap map[strin
 			id = prefix
 		}
 		prefixes[prefix] = true
-		importMap[ppath] = id
+		g.importMap[ppath] = id
+	}
+	// The package path map is used to generate Go names for types. It is close
+	// to the import map, but not the same: first, it includes g.pkgPath.
+	// Second, a package mapping to an empty string in the import map,
+	// indicating no import identifier, will map to its last component in the
+	// path map.
+	g.pkgPathMap = map[string]string{g.pkgPath: ""}
+	for k, v := range g.importMap {
+		if v == "" {
+			v = path.Base(k)
+		}
+		g.pkgPathMap[k] = v
 	}
 }
 
@@ -628,7 +642,7 @@ func builtinName(t reflect.Type) (suffix string, native reflect.Type) {
 // goName returns the name of t as it should appear in a Go program.
 // E.g. "go/ast.File" => ast.File
 func (g *generator) goName(t reflect.Type) string {
-	return codecapi.TypeString(t, map[string]string{g.pkgPath: ""})
+	return codecapi.TypeString(t, g.pkgPathMap)
 }
 
 var typeIDReplacer = strings.NewReplacer(

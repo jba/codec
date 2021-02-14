@@ -11,3 +11,7 @@ func FuncOptionSlice() interface{} {
 	type Option int
 	return []Option{}
 }
+
+type Indirect struct {
+	X int
+}
