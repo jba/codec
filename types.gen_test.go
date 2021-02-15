@@ -763,6 +763,71 @@ func init() {
 	codecapi.Register(definedSlice_type, func() codecapi.TypeCodec { return &definedSlice_codec{} })
 }
 
+//// codec.embed
+
+var embed_type = reflect.TypeOf((*embed)(nil)).Elem()
+
+type embed_codec struct {
+	fieldMap []int
+}
+
+func (c *embed_codec) Fields() []string {
+	return []string{"E"}
+}
+
+func (c *embed_codec) SetFieldMap(fm []int) {
+	c.fieldMap = fm
+}
+
+func (c *embed_codec) TypesUsed() []reflect.Type {
+	return []reflect.Type{}
+}
+
+func (c *embed_codec) SetCodecs(tcs []codecapi.TypeCodec) {
+}
+
+func (c *embed_codec) Encode(e *codecapi.Encoder, x interface{}) {
+	s := x.(embed)
+	c.encode(e, &s)
+}
+
+func (c *embed_codec) encode(e *codecapi.Encoder, x *embed) {
+	e.StartStruct()
+	if x.E != 0 {
+		e.EncodeUint(0)
+		e.EncodeInt(int64(x.E))
+	}
+	e.EndStruct()
+}
+
+func (c *embed_codec) Decode(d *codecapi.Decoder) interface{} {
+	var x embed
+	c.decode(d, &x)
+	return x
+}
+
+func (c *embed_codec) decode(d *codecapi.Decoder, x *embed) {
+	d.StartStruct()
+loop:
+	for {
+		n := d.NextStructField(c.fieldMap)
+		switch n {
+		case 0:
+			x.E = int(d.DecodeInt())
+		case -1:
+			break loop
+		case -2:
+			d.UnknownField("embed", n)
+		default:
+			codecapi.Failf("bad struct field value: %d", n)
+		}
+	}
+}
+
+func init() {
+	codecapi.Register(embed_type, func() codecapi.TypeCodec { return &embed_codec{} })
+}
+
 //// codec.generatedTestTypes
 
 var generatedTestTypes_type = reflect.TypeOf((*generatedTestTypes)(nil)).Elem()
@@ -921,11 +986,9 @@ func (c *generatedTestTypes_codec) Decode(d *codecapi.Decoder) interface{} {
 
 func (c *generatedTestTypes_codec) decode(d *codecapi.Decoder, x *generatedTestTypes) {
 	d.StartStruct()
+loop:
 	for {
 		n := d.NextStructField(c.fieldMap)
-		if n == -1 {
-			break
-		}
 		switch n {
 		case 0:
 			c.ptr_node_codec.decode(d, &x.Node)
@@ -969,8 +1032,12 @@ func (c *generatedTestTypes_codec) decode(d *codecapi.Decoder, x *generatedTestT
 			c.ptr_time_Time_codec.decode(d, &x.PtrTime)
 		case 20:
 			c.slice_ptr_int_codec.decode(d, &x.SlicePtrInt)
-		default:
+		case -1:
+			break loop
+		case -2:
 			d.UnknownField("generatedTestTypes", n)
+		default:
+			codecapi.Failf("bad struct field value: %d", n)
 		}
 	}
 }
@@ -1030,18 +1097,20 @@ func (c *node_codec) Decode(d *codecapi.Decoder) interface{} {
 
 func (c *node_codec) decode(d *codecapi.Decoder, x *node) {
 	d.StartStruct()
+loop:
 	for {
 		n := d.NextStructField(c.fieldMap)
-		if n == -1 {
-			break
-		}
 		switch n {
 		case 0:
 			x.Value = int(d.DecodeInt())
 		case 1:
 			c.ptr_node_codec.decode(d, &x.Next)
-		default:
+		case -1:
+			break loop
+		case -2:
 			d.UnknownField("node", n)
+		default:
+			codecapi.Failf("bad struct field value: %d", n)
 		}
 	}
 }
@@ -1055,12 +1124,13 @@ func init() {
 var structType_type = reflect.TypeOf((*structType)(nil)).Elem()
 
 type structType_codec struct {
-	node_codec *node_codec
-	fieldMap   []int
+	embed_codec *embed_codec
+	node_codec  *node_codec
+	fieldMap    []int
 }
 
 func (c *structType_codec) Fields() []string {
-	return []string{"N", "B", "unexported"}
+	return []string{"N", "B", "unexported", "embed"}
 }
 
 func (c *structType_codec) SetFieldMap(fm []int) {
@@ -1068,11 +1138,12 @@ func (c *structType_codec) SetFieldMap(fm []int) {
 }
 
 func (c *structType_codec) TypesUsed() []reflect.Type {
-	return []reflect.Type{node_type}
+	return []reflect.Type{embed_type, node_type}
 }
 
 func (c *structType_codec) SetCodecs(tcs []codecapi.TypeCodec) {
-	c.node_codec = tcs[0].(*node_codec)
+	c.embed_codec = tcs[0].(*embed_codec)
+	c.node_codec = tcs[1].(*node_codec)
 }
 
 func (c *structType_codec) Encode(e *codecapi.Encoder, x interface{}) {
@@ -1093,6 +1164,9 @@ func (c *structType_codec) encode(e *codecapi.Encoder, x *structType) {
 		e.EncodeUint(2)
 		e.EncodeInt(int64(x.unexported))
 	}
+
+	e.EncodeUint(3)
+	c.embed_codec.encode(e, &x.embed)
 	e.EndStruct()
 }
 
@@ -1104,11 +1178,9 @@ func (c *structType_codec) Decode(d *codecapi.Decoder) interface{} {
 
 func (c *structType_codec) decode(d *codecapi.Decoder, x *structType) {
 	d.StartStruct()
+loop:
 	for {
 		n := d.NextStructField(c.fieldMap)
-		if n == -1 {
-			break
-		}
 		switch n {
 		case 0:
 			c.node_codec.decode(d, &x.N)
@@ -1116,8 +1188,14 @@ func (c *structType_codec) decode(d *codecapi.Decoder, x *structType) {
 			x.B = d.DecodeByte()
 		case 2:
 			x.unexported = int(d.DecodeInt())
-		default:
+		case 3:
+			c.embed_codec.decode(d, &x.embed)
+		case -1:
+			break loop
+		case -2:
 			d.UnknownField("structType", n)
+		default:
+			codecapi.Failf("bad struct field value: %d", n)
 		}
 	}
 }

@@ -67,6 +67,11 @@ type structType struct {
 	N          node
 	B          byte
 	unexported int
+	embed
+}
+
+type embed struct {
+	E int
 }
 
 func TestMain(m *testing.M) {
@@ -111,6 +116,7 @@ func testEncodeDecode(t *testing.T, opts EncodeOptions) {
 		[]int{1, 2, -3, -4},
 		[]int{1, 2, -3, -4, 5, 6},
 		[]int(nil),
+		structType{B: 5, embed: embed{E: 6}},
 		[]structType{{B: 3}},
 		[1]structType{{B: 4}},
 		map[string]bool{"a": true, "b": false},
