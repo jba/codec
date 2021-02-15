@@ -76,18 +76,21 @@ func (c *«$typeName») Decode(d *codecapi.Decoder) interface{} {
 
 func (c *«$typeName») decode(d *codecapi.Decoder, x *«$goName») {
 	d.StartStruct()
-	for {
+	loop: for {
 		n := d.NextStructField(c.fieldMap)
-		if n == -1 { break }
 		switch n {
 		«range $i, $f := .Fields -»
 			«- if $f.Type -»
-				case «$i»:
-		        «decodeStmt $f.Type (print "x." $f.Name)»
+			   case «$i»:
+				«decodeStmt $f.Type (print "x." $f.Name)»
 			«end -»
 		«end -»
-		default:
+		case -1:
+			break loop
+		case -2:
 			d.UnknownField("«$goName»", n)
+		default:
+			codecapi.Failf("bad struct field value: %d", n)
 		}
 	}
 }

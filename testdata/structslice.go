@@ -108,16 +108,18 @@ func (c *smallStruct_codec) Decode(d *codecapi.Decoder) interface{} {
 
 func (c *smallStruct_codec) decode(d *codecapi.Decoder, x *smallStruct) {
 	d.StartStruct()
+loop:
 	for {
 		n := d.NextStructField(c.fieldMap)
-		if n == -1 {
-			break
-		}
 		switch n {
 		case 0:
 			x.X = int(d.DecodeInt())
-		default:
+		case -1:
+			break loop
+		case -2:
 			d.UnknownField("smallStruct", n)
+		default:
+			codecapi.Failf("bad struct field value: %d", n)
 		}
 	}
 }

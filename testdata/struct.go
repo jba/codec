@@ -124,11 +124,9 @@ func (c *genStruct_codec) Decode(d *codecapi.Decoder) interface{} {
 
 func (c *genStruct_codec) decode(d *codecapi.Decoder, x *genStruct) {
 	d.StartStruct()
+loop:
 	for {
 		n := d.NextStructField(c.fieldMap)
-		if n == -1 {
-			break
-		}
 		switch n {
 		case 0:
 			x.S = d.DecodeString()
@@ -166,8 +164,12 @@ func (c *genStruct_codec) decode(d *codecapi.Decoder, x *genStruct) {
 			c.foo_T_codec.decode(d, &x.T)
 		case 17:
 			x.unexported = int(d.DecodeInt())
-		default:
+		case -1:
+			break loop
+		case -2:
 			d.UnknownField("genStruct", n)
+		default:
+			codecapi.Failf("bad struct field value: %d", n)
 		}
 	}
 }

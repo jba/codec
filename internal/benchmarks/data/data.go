@@ -68,7 +68,7 @@ func Generate(words []string) error {
 		switch w {
 		case "code":
 			err = codec.GenerateFile("types.gen.go", thisPkgPath, nil,
-				LicenseData{}, submittedData{}, []*StockData(nil), []Score(nil))
+				&LicenseData{}, submittedData{}, []*StockData(nil), []Score(nil))
 			if err == nil {
 				err = codec.GenerateFile("ast_types.gen.go", thisPkgPath, nil,
 					append(astTypes, map[string]*ast.File{})...)
