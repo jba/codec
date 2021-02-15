@@ -96,19 +96,67 @@ p := &i
 is `ptr 3`. If pointer tracking is enabled and the pointer is encountered again,
 then it is encoded with `ref` and the `ptr` code is backpatched to `refPtr`.
 
+Interface values are encoded as a pair of a type number and the value. The
+type numbers are assigned during encoding and stored at the beginning of the
+output, so the decoder can set up the mapping before it begins.
+
 To encode structs, the generator assigns a unique number to each field. An
 encoded struct begins with the `start` code and ends with `end`. Each non-zero
 field is encoded as its number followed by its value.
 
-If a struct's fields are changed, the numbers can change. To avoid this, the
-generator reads the previously assigned numbers from the generated file and
-maintains them in the new file. The advantage of this scheme is that it results
-in a simpler encoder and decoder. The disadvantage is that the existing
-generated files must be kept around to preserve the numbering. This isn't
-typically a problem, because the generated files will be checked in to the
-source code control repository with the rest of the code and travel with the
-repository.
+If a struct's fields are changed, the numbers can change. The encoder saves the
+numbers assigned to to each field name in the encoded data, and the decoder maps
+those numbers to the numbers assigned by the generated code. For example, if `F`
+is the second field of a struct, it will be assigned 1. A struct value is
+encoded, along with the association of "F" to 1. Then the struct is re-arranged
+and `F` becomes the third field, where it is assigned 2. When the encoded data
+is decoded, the decoder will map an encoded field value of 1 to 2.
 
-Interface values are encoded as a pair of a type number and the value. The
-type numbers are assigned during encoding and stored at the beginning of the
-output, so the decoder can set up the mapping before it begins.
+The encoder recognizes types that implement encoding.BinaryMarshaler and
+encoding.TextMarshaler, and uses those methods.
+
+## Comparison with Other Encoders
+
+This encoder uses code generation instead of reflection, so it is usually faster
+than reflection-based encoders like encoding/gob and encoding/json. It is also
+faster than github.com/ugorji/go/codec, even when that uses code generation. See
+internal/benchmarks for comparison with gob and ugorji's code on a suite of
+benchmarks.
+
+Those benchmarks turn off this codec's ability to handle pointer sharing.
+Turning on that feature slows it down noticeably. But the other encoders can't
+handle sharing at all.
+
+The gvisor project has their own encoder, which does handle sharing. See
+https://pkg.go.dev/gvisor.dev/gvisor/pkg/state. I haven't benchmarked it.
+From reading the code:
+
+- It does have some features this encoder lacks, like some custom hooks.
+
+- It doesn't seem to provide for skipping unknown struct fields.
+
+- It seems that only types under programmer control can be encoded, because they
+  have to implement certain methods.
+
+- It appears that values must be converted to and from a set of types used by the wire
+  protocol (in state/wire). For example, a `[]float64` must be first transformed
+  into a `wire.Slice` that holds a `[]wire.Float64` before encoding, and the
+  reverse must happen on decoding. It seems this is done cheaply with some
+  unsafe code (pkg/state/encode_unsafe.go). But it's not clear why the extra
+  level of abstraction is necessary.
+
+- It handles more forms of sharing than this encoder. For example, consider
+  a pointer to a struct field like
+  ```
+  type S struct { X int }
+  s := &S{X: 1}
+  p := &s.X
+  x := []interface{}{s, p}
+  ```
+  Encoding `x` with gvisor.dev/gvisor/pkg/state will maintain the relationship
+  between `p` and `s.X`. This encoder will not; it only recognizes sharing when
+  the pointers are explicit, like
+  ```
+  s := &S{X: 1}
+  p := s
+  ```
