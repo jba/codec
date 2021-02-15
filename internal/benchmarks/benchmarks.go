@@ -2,16 +2,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-/* TODO
-
-Maybe generate more stuff for the hyperledger benchmark. A lot of types and
-fields are unused?
-
-
-Other possible benchmarks:
-- https://github.com/robertkrimen/otto/blob/15f95af6e78dcd2030d8195a138bd88d4f403546/script.go
-- https://github.com/gocolly/colly/blob/1cd684083cf9bf9a8e33b5dfd6414d8516ae63af/http_backend.go#L161
-*/
+// Other possible benchmarks:
+// - https://github.com/robertkrimen/otto/blob/15f95af6e78dcd2030d8195a138bd88d4f403546/script.go
+// - https://github.com/gocolly/colly/blob/1cd684083cf9bf9a8e33b5dfd6414d8516ae63af/http_backend.go#L161
 
 //go:generate go generate ./data
 

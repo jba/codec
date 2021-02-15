@@ -46,13 +46,9 @@ func TypeString(t reflect.Type, pkgPaths map[string]string) string {
 		if pkgPaths != nil {
 			if p, ok := pkgPaths[prefix]; ok {
 				prefix = p
-			} else {
-				// TODO: use the code below once the generator constructs the right path map.
-				return t.String()
+			} else if i := strings.LastIndexByte(prefix, '/'); i >= 0 {
+				prefix = prefix[i+1:]
 			}
-			// } else if i := strings.LastIndexByte(prefix, '/'); i >= 0 {
-			// 	prefix = prefix[i+1:]
-			// }
 		}
 		if prefix == "" {
 			return n

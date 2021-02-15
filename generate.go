@@ -351,7 +351,6 @@ func (g *generator) gen(t reflect.Type) ([]byte, error) {
 }
 
 // willGenerate reports whether a codec will be generated for t.
-// TODO: handle XXXMarshalers
 func willGenerate(t reflect.Type) bool {
 	if implementsMarshaler(t) != "" {
 		return true
@@ -455,10 +454,11 @@ func (g *generator) genStruct(t reflect.Type) ([]byte, error) {
 	for t := range fieldTypesSet {
 		fieldTypes = append(fieldTypes, t)
 	}
-	// Sort for determinism.
+	// Sort so the list is deterministic, for testing. The strings returned by
+	// reflect.Type.String aren't unique (e.g. []pkg.Foo where there are two
+	// packages with name "pkg"), but that doesn't matter as long as no tests
+	// trigger the problem.
 	sort.Slice(fieldTypes, func(i, j int) bool {
-		// TODO: strings aren't unique (e.g. []pkg.Foo where there are two
-		// packages with name "pkg"). See typeName in codecapi.
 		return fieldTypes[i].String() < fieldTypes[j].String()
 	})
 	return execute(g.structTemplate, struct {
