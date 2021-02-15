@@ -79,7 +79,7 @@ func (c *«$typeName») decode(d *codecapi.Decoder, x *«$goName») {
 		case -1:
 			break loop
 		case -2:
-			d.UnknownField("«$goName»", n)
+			d.UnknownField("«$goName»")
 		default:
 			codecapi.Failf("bad struct field value: %d", n)
 		}

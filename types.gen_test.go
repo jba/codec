@@ -817,7 +817,7 @@ loop:
 		case -1:
 			break loop
 		case -2:
-			d.UnknownField("embed", n)
+			d.UnknownField("embed")
 		default:
 			codecapi.Failf("bad struct field value: %d", n)
 		}
@@ -1035,7 +1035,7 @@ loop:
 		case -1:
 			break loop
 		case -2:
-			d.UnknownField("generatedTestTypes", n)
+			d.UnknownField("generatedTestTypes")
 		default:
 			codecapi.Failf("bad struct field value: %d", n)
 		}
@@ -1108,7 +1108,7 @@ loop:
 		case -1:
 			break loop
 		case -2:
-			d.UnknownField("node", n)
+			d.UnknownField("node")
 		default:
 			codecapi.Failf("bad struct field value: %d", n)
 		}
@@ -1193,7 +1193,7 @@ loop:
 		case -1:
 			break loop
 		case -2:
-			d.UnknownField("structType", n)
+			d.UnknownField("structType")
 		default:
 			codecapi.Failf("bad struct field value: %d", n)
 		}

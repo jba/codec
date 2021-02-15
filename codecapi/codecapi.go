@@ -551,9 +551,9 @@ func (d *Decoder) NextStructField(fieldMap []int) int {
 
 // UnknownField should be called by a struct decoder
 // when it sees a field number that it doesn't know.
-func (d *Decoder) UnknownField(typeName string, num int) {
+func (d *Decoder) UnknownField(typeName string) {
 	if d.opts.DisallowUnknownFields {
-		Failf("unknown field number %d for type %s", num, typeName)
+		Failf("unknown field number for type %s", typeName)
 	} else {
 		d.skip()
 	}

@@ -117,7 +117,7 @@ loop:
 		case -1:
 			break loop
 		case -2:
-			d.UnknownField("smallStruct", n)
+			d.UnknownField("smallStruct")
 		default:
 			codecapi.Failf("bad struct field value: %d", n)
 		}
