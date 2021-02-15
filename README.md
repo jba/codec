@@ -120,7 +120,7 @@ encoding.TextMarshaler, and uses those methods.
 This encoder uses code generation instead of reflection, so it is usually faster
 than reflection-based encoders like encoding/gob and encoding/json. It is also
 faster than github.com/ugorji/go/codec, even when that uses code generation. See
-internal/benchmarks for comparison with gob and ugorji's code on a suite of
+internal/benchmarks for comparison with the gob and ugorji codecs on a suite of
 benchmarks.
 
 Those benchmarks turn off this codec's ability to handle pointer sharing.
